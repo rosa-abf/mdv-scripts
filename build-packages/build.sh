@@ -1,30 +1,20 @@
 #!/bin/sh
 
-echo 'rpm-build-script'
+echo 'rpm-build-script: mdv.sh'
 
-git_project_address="$GIT_PROJECT_ADDRESS"
-commit_hash="$COMMIT_HASH"
-uname="$UNAME"
-email="$EMAIL"
 # mdv example:
 # git_project_address="https://abf.rosalinux.ru/import/plasma-applet-stackfolder.git"
 # commit_hash="bfe6d68cc607238011a6108014bdcfe86c69456a"
+git_project_address="$GIT_PROJECT_ADDRESS"
+commit_hash="$COMMIT_HASH"
 
-# rhel example:
-# git_project_address="https://abf.rosalinux.ru/server/gnome-settings-daemon.git"
-# commit_hash="fbb2549e44d97226fea6748a4f95d1d82ffb8726"
-
-# repo="http://mirror.rosalinux.com/rosa/rosa2012.1/repository/x86_64/"
-# distrib_type="rosa2012.1"
-distrib_type="$DISTRIB_TYPE"
+uname="$UNAME"
+email="$EMAIL"
 platform_name="$PLATFORM_NAME"
 platform_arch="$ARCH"
-# distrib_type="mdv"
-# arch="x86_64"
 
 echo $git_project_address | awk '{ gsub(/\:\/\/.*\:\@/, "://[FILTERED]@"); print }'
 echo $commit_hash
-echo $distrib_type
 echo $uname
 echo $email
 
@@ -34,15 +24,6 @@ tmpfs_path="/home/vagrant/tmpfs"
 project_path="$tmpfs_path/project"
 rpm_build_script_path=`pwd`
 
-# urpmi.addmedia $distrib_type --distrib $repo
-# sudo urpmi git-core --auto
-# sudo urpmi python-lxml --auto
-# sudo urpmi python-rpm --auto
-# sudo urpmi mock-urpm --auto
-# sudo urpmi mock --auto
-# sudo urpmi rpm-build --auto
-# sudo urpmi python-gitpython --auto
-# sudo urpmi ruby --auto
 rm -rf $archives_path $results_path $tmpfs_path $project_path
 mkdir  $archives_path $results_path $tmpfs_path $project_path
 
@@ -59,11 +40,11 @@ git checkout $commit_hash
 
 # TODO: build changelog
 
+# Downloads extra files by .abf.yml
 ruby $rpm_build_script_path/abf_yml.rb -p $project_path
 
 # Remove .git folder
 rm -rf $project_path/.git
-
 
 # create SPECS folder and move *.spec
 mkdir $tmpfs_path/SPECS
@@ -95,79 +76,43 @@ rpm_path=$archives_path/RPM
 mkdir $rpm_path
 
 
-mock_command="mock"
-config_dir=/etc/mock/
-config_name="$distrib_type-$platform_arch.cfg"
-if [ "$distrib_type" == 'mdv' ] ; then
-  echo "'mock-urpm' will be used..."
-  mock_command="mock-urpm"
-  config_dir=/etc/mock-urpm/
-  # Change output format for mock-urpm
-  sed '17c/format: %(message)s' $config_dir/logging.ini > ~/logging.ini
-  sudo mv -f ~/logging.ini $config_dir/logging.ini
-  if [[ "$platform_name" =~ .*lts$ ]] ; then
-    config_name="$distrib_type-lts-$platform_arch.cfg"
-  fi
+config_name="mdv-$platform_arch.cfg"
+config_dir=/etc/mock-urpm/
+# Change output format for mock-urpm
+sed '17c/format: %(message)s' $config_dir/logging.ini > ~/logging.ini
+sudo mv -f ~/logging.ini $config_dir/logging.ini
+if [[ "$platform_name" =~ .*lts$ ]] ; then
+  config_name="mdv-lts-$platform_arch.cfg"
 fi
 
 # Init config file
 default_cfg=$rpm_build_script_path/configs/default.cfg
 cp $rpm_build_script_path/configs/$config_name $default_cfg
 media_list=/home/vagrant/container/media.list
-if [ "$distrib_type" == 'mdv' ] ; then
-  echo 'config_opts["urpmi_media"] = {' >> $default_cfg
-  first='1'
-  while read CMD; do
-    name=`echo $CMD | awk '{ print $1 }'`
-    url=`echo $CMD | awk '{ print $2 }'`
-    if [ "$first" == '1' ] ; then
-      echo "\"$name\": \"$url\"" >> $default_cfg
-      first=0
-    else
-      echo ", \"$name\": \"$url\"" >> $default_cfg
-    fi
-  done < $media_list
-  echo '}' >> $default_cfg
-else
-  echo '
-config_opts["yum.conf"] = """
-[main]
-cachedir=/var/cache/yum
-debuglevel=1
-reposdir=/dev/null
-logfile=/var/log/yum.log
-retries=20
-obsoletes=1
-gpgcheck=0
-assumeyes=1
-syslog_ident=mock
-syslog_device=
 
-# repos
-  ' >> $default_cfg
-  while read CMD; do
-    name=`echo $CMD | awk '{ print $1 }'`
-    url=`echo $CMD | awk '{ print $2 }'`
-    echo "
-[$name]
-name=$name
-enabled=1
-baseurl=$url
-failovermethod=priority
+echo 'config_opts["urpmi_media"] = {' >> $default_cfg
+first='1'
+while read CMD; do
+  name=`echo $CMD | awk '{ print $1 }'`
+  url=`echo $CMD | awk '{ print $2 }'`
+  if [ "$first" == '1' ] ; then
+    echo "\"$name\": \"$url\"" >> $default_cfg
+    first=0
+  else
+    echo ", \"$name\": \"$url\"" >> $default_cfg
+  fi
+done < $media_list
+echo '}' >> $default_cfg
 
-    " >> $default_cfg
-  done < $media_list
-  echo '"""' >> $default_cfg
-fi
 
 sudo rm -rf $config_dir/default.cfg
 sudo ln -s $default_cfg $config_dir/default.cfg
-$mock_command --define="packager $uname $email"
+mock-urpm --define="packager $uname $email"
 
 
 # Build src.rpm
 echo '--> Build src.rpm'
-$mock_command --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after
+mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after
 # Save exit code
 rc=$?
 echo '--> Done.'
@@ -196,7 +141,7 @@ fi
 cd $src_rpm_path
 src_rpm_name=`ls -1 | grep 'src.rpm$'`
 echo '--> Building rpm...'
-$mock_command $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean
+mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean
 # Save exit code
 rc=$?
 echo '--> Done.'
@@ -230,24 +175,18 @@ test_code=0
 rpm -qa --queryformat "%{name}-%{version}-%{release}.%{arch}.%{disttag}%{distepoch}\n" --root $chroot_path >> $results_path/rpm-qa.log
 if [ $rc == 0 ] ; then
   ls -la $rpm_path/ >> $test_log
-  if [ "$distrib_type" == 'mdv' ] ; then
-    mkdir $test_root
-    sudo urpmi -v --debug --no-verify --no-suggests --test $rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
-  else
-    sudo yum -v --installroot=$chroot_path install -y $rpm_path/*.rpm >> $test_log 2>&1
-  fi
+  mkdir $test_root
+  sudo urpmi -v --debug --no-verify --no-suggests --test $rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
   test_code=$?
   rm -rf $test_root
 fi
 
 if [ $rc == 0 ] && [ $test_code == 0 ] ; then
   ls -la $src_rpm_path/ >> $test_log
-  if [ "$distrib_type" == 'mdv' ] ; then
-    mkdir $test_root
-    sudo urpmi -v --debug --no-verify --test --buildrequires $src_rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
-    test_code=$?
-    rm -rf $test_root
-  fi
+  mkdir $test_root
+  sudo urpmi -v --debug --no-verify --test --buildrequires $src_rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
+  test_code=$?
+  rm -rf $test_root
 fi
 
 if [ $rc != 0 ] || [ $test_code != 0 ] ; then
