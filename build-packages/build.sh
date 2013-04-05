@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo 'rpm-build-script: mdv.sh'
+echo '--> mdv-scripts/build-packages: build.sh'
 
 # mdv example:
 # git_project_address="https://abf.rosalinux.ru/import/plasma-applet-stackfolder.git"

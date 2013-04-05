@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo '--> publish-script-mdv: rollback.sh'
+echo '--> mdv-scripts/publish-packages: rollback.sh'
 
 usermod -a -G vboxsf vagrant
 

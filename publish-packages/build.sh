@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo '--> publish-script-mdv: build.sh'
+echo '--> mdv-scripts/publish-packages: build.sh'
 
 # Some configurations
 usermod -a -G vboxsf vagrant
@@ -20,8 +20,8 @@ echo "RELEASED = $released"
 echo "REPOSITORY_NAME = $rep_name"
 
 # Current path:
-# - /home/vagrant/publish-build-list-script
-script_path=/home/vagrant/publish-build-list-script
+# - /home/vagrant/scripts/publish-packages
+script_path=`pwd`
 
 # Container path:
 # - /home/vagrant/container
@@ -151,6 +151,7 @@ done
 
 # Check exit code after build and rollback
 if [ $rc != 0 ] ; then
+  cd $script_path/
   RELEASED=$released REPOSITORY_NAME=$rep_name USE_FILE_STORE=false /bin/bash $script_path/rollback.sh
 else
   for arch in SRPMS i586 x86_64 ; do

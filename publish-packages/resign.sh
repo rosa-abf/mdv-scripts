@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo '--> publish-script-mdv: resign.sh'
+echo '--> mdv-scripts/publish-packages: resign.sh'
 
 usermod -a -G vboxsf vagrant
 
@@ -13,7 +13,7 @@ repository_path=/home/vagrant/share_folder
 
 # Current path:
 # - /home/vagrant/publish-build-list-script
-script_path=/home/vagrant/publish-build-list-script
+script_path=`pwd`
 
 gnupg_path=/home/vagrant/.gnupg
 if [ ! -d "$gnupg_path" ]; then
