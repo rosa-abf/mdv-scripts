@@ -2,8 +2,6 @@
 
 echo '--> mdv-scripts/publish-packages: resign.sh'
 
-usermod -a -G vboxsf vagrant
-
 released="$RELEASED"
 rep_name="$REPOSITORY_NAME"
 

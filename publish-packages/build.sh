@@ -2,9 +2,6 @@
 
 echo '--> mdv-scripts/publish-packages: build.sh'
 
-# Some configurations
-usermod -a -G vboxsf vagrant
-
 # Update genhdlist2
 sudo urpmi.update -a
 sudo urpmi --auto genhdlist2
