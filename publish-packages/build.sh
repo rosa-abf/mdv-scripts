@@ -86,7 +86,7 @@ for arch in $arches ; do
             echo "--> Package '$fullname' has not been signed successfully!!!"
           fi
         fi
-        # chmod 0644 $rpm_new/$fullname
+        chmod 0644 $rpm_new/$fullname
       else
         echo "--> Package with sha1 '$sha1' does not exist!!!"
       fi
