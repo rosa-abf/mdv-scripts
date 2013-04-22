@@ -74,7 +74,6 @@ for arch in $arches ; do
         curl -O -L "$file_store_url/$sha1"
         mv $sha1 $fullname
         echo $fullname >> "$new_packages.downloaded"
-        chown root:root $fullname
         # Add signature to RPM
         if [ $sign_rpm != 0 ] ; then
           chmod 0666 $fullname
@@ -128,6 +127,7 @@ for arch in $arches ; do
   # Build repo
   echo "--> [`LANG=en_US.UTF-8  date -u`] Generating repository..."
   cd $script_path/
+  chown -R root:root $main_folder/$status
   if [ "$regenerate_metadata" != 'true' ] ; then
     echo "/usr/bin/genhdlist2 -v --nolock --allow-empty-media --xml-info $main_folder/$status"
     /usr/bin/genhdlist2 -v --nolock --allow-empty-media --xml-info "$main_folder/$status"
