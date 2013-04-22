@@ -95,8 +95,6 @@ for arch in $arches ; do
   fi
   echo "--> [`LANG=en_US.UTF-8  date -u`] Done."
 
-  sudo chmod 666 -R $main_folder/$status
-  sudo chmod +X -R $main_folder/$status
   # Creates backup
   echo "--> [`LANG=en_US.UTF-8  date -u`] Creating backup..."
   old_packages="$container_path/old.$arch.list"
@@ -105,7 +103,7 @@ for arch in $arches ; do
       package=$main_folder/$status/$fullname
       if [ -f "$package" ]; then
         echo "mv $package $rpm_backup/"
-        sudo mv $package $rpm_backup/
+        mv $package $rpm_backup/
       fi
     done
     update_repo=1
@@ -113,13 +111,13 @@ for arch in $arches ; do
   echo "--> [`LANG=en_US.UTF-8  date -u`] Done."
 
   if [ -f "$new_packages" ]; then
-    sudo mv $rpm_new/* $main_folder/$status/
+    mv $rpm_new/* $main_folder/$status/
   fi
   rm -rf $rpm_new
 
   if [ $update_repo != 1 ] ; then
     if [ "$is_container" == 'true' ] ; then
-      sudo rm -rf $repository_path/$arch
+      rm -rf $repository_path/$arch
     fi
     if [ "$regenerate_metadata" != 'true' ] ; then
       continue
@@ -131,10 +129,10 @@ for arch in $arches ; do
   cd $script_path/
   if [ "$regenerate_metadata" != 'true' ] ; then
     echo "/usr/bin/genhdlist2 -v --nolock --allow-empty-media --xml-info $main_folder/$status"
-    sudo /usr/bin/genhdlist2 -v --nolock --allow-empty-media --xml-info "$main_folder/$status"
+    /usr/bin/genhdlist2 -v --nolock --allow-empty-media --xml-info "$main_folder/$status"
   else
     echo "/usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --xml-info $main_folder/$status"
-    sudo /usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --xml-info "$main_folder/$status"
+    /usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --xml-info "$main_folder/$status"
   fi
   # Save exit code
   rc=$?
