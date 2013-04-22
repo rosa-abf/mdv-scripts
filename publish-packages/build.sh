@@ -148,7 +148,7 @@ done
 # Check exit code after build and rollback
 if [ $rc != 0 ] ; then
   cd $script_path/
-  RELEASED=$released REPOSITORY_NAME=$rep_name USE_FILE_STORE=false sudo /bin/bash $script_path/rollback.sh
+  sudo RELEASED=$released REPOSITORY_NAME=$rep_name USE_FILE_STORE=false /bin/bash $script_path/rollback.sh
 else
   for arch in SRPMS i586 x86_64 ; do
     main_folder=$repository_path/$arch/$rep_name
