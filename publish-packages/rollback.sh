@@ -19,6 +19,10 @@ if [ "$released" == 'true' ] ; then
   status='updates'
 fi
 
+# Update genhdlist2
+sudo urpmi.update -a
+sudo urpmi --auto genhdlist2
+
 for arch in SRPMS i586 x86_64 ; do
   main_folder=$repository_path/$arch/$rep_name
   rpm_backup="$main_folder/$status-rpm-backup"
