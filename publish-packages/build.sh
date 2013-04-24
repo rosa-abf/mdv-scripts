@@ -2,9 +2,6 @@
 
 echo '--> mdv-scripts/publish-packages: build.sh'
 
-# Some configurations
-usermod -a -G vboxsf vagrant
-
 # Update genhdlist2
 sudo urpmi.update -a
 sudo urpmi --auto genhdlist2
@@ -52,6 +49,25 @@ else
   /bin/bash $script_path/init_rpmmacros.sh
 fi
 
+
+function build_repo {
+  path=$1
+  arch=$2
+  regenerate=$3
+  # Build repo
+  echo "--> [`LANG=en_US.UTF-8  date -u`] Generating repository..."
+  cd $script_path/
+  if [ "$regenerate" != 'true' ] ; then
+    echo "/usr/bin/genhdlist2 -v --nolock --allow-empty-media --xml-info $path"
+    /usr/bin/genhdlist2 -v --nolock --allow-empty-media --xml-info "$path"
+  else
+    echo "/usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --xml-info $path"
+    /usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --xml-info "$path"
+  fi
+  # Save exit code
+  echo $? > "$container_path/$arch.exit-code"
+  echo "--> [`LANG=en_US.UTF-8  date -u`] Done."
+}
 
 rx=0
 arches="SRPMS i586 x86_64"
@@ -128,24 +144,22 @@ for arch in $arches ; do
     fi
   fi
 
-  # Build repo
-  echo "--> [`LANG=en_US.UTF-8  date -u`] Generating repository..."
-  cd $script_path/
-  if [ "$regenerate_metadata" != 'true' ] ; then
-    echo "/usr/bin/genhdlist2 -v --nolock --allow-empty-media --xml-info $main_folder/$status"
-    /usr/bin/genhdlist2 -v --nolock --allow-empty-media --xml-info "$main_folder/$status"
-  else
-    echo "/usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --xml-info $main_folder/$status"
-    /usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --xml-info "$main_folder/$status"
-  fi
-  # Save exit code
-  rc=$?
-  echo "--> [`LANG=en_US.UTF-8  date -u`] Done."
+  build_repo "$main_folder/$status" "$arch" "$regenerate_metadata" &
+done
 
-  # Check exit code
-  if [ $rc != 0 ] ; then
-    rpm -qa | grep genhdlist2
-    break
+# Waiting for genhdlist2...
+wait
+
+rc=0
+# Check exit codes
+for arch in SRPMS i586 x86_64 ; do
+  path="$container_path/$arch.exit-code"
+  if [ -f "$path" ] ; then
+    rc=`cat $path`
+    if [ $rc != 0 ] ; then
+      rpm -qa | grep genhdlist2
+      break
+    fi
   fi
 done
 
