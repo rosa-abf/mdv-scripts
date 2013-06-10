@@ -179,6 +179,7 @@ if [ $rc == 0 ] ; then
   mkdir $test_root
   sudo urpmi -v --debug --no-verify --no-suggests --test $rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
   test_code=$?
+  echo 'Test code output: ' $test_code
   rm -rf $test_root
 fi
 
@@ -187,6 +188,7 @@ if [ $rc == 0 ] && [ $test_code == 0 ] ; then
   mkdir $test_root
   sudo urpmi -v --debug --no-verify --test --buildrequires $src_rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
   test_code=$?
+  echo 'Test code output: ' $test_code
   rm -rf $test_root
 fi
 
