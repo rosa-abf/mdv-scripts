@@ -1,5 +1,10 @@
 #!/bin/sh
 
+sudo urpmi.update -a
+for p in urpmi mock-urpm perl-URPM genhdlist2 tree ; do
+sudo urpmi --auto $p
+done
+
 echo '--> mdv-scripts/build-packages: build.sh'
 
 # mdv example:
