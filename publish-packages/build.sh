@@ -10,7 +10,10 @@ released="$RELEASED"
 rep_name="$REPOSITORY_NAME"
 is_container="$IS_CONTAINER"
 id="$ID"
-platform_name="$PLATFORM_NAME"
+# save_to_platform - main or personal platform
+save_to_platform="$SAVE_TO_PLATFORM"
+# build_for_platform - only main platform
+build_for_platform="$BUILD_FOR_PLATFORM"
 regenerate_metadata="$REGENERATE_METADATA"
 
 echo "RELEASED = $released"
