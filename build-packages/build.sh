@@ -53,7 +53,7 @@ ruby $rpm_build_script_path/abf_yml.rb -p $project_path
 rm -rf $project_path/.git
 
 if [[ "$platform_name" == "cooker" && ("$platform_arch" == "armv7l" || "$platform_arch" == "armv7hl" )]]; then
-  /bin/bash $rpm_build_script_path/openmandriva-arm.sh
+uname="$UNAME" email="$EMAIL" platform_name="$PLATFORM_NAME" platform_arch="$ARCH" /bin/bash $rpm_build_script_path/openmandriva-arm.sh
   # Save exit code
   rc=$?
   exit $rc
