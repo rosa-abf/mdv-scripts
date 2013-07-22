@@ -1,10 +1,5 @@
 #!/bin/sh
 
-sudo urpmi.update -a
-for p in urpmi mock-urpm perl-URPM genhdlist2 tree ; do
-sudo urpmi --auto $p
-done
-
 echo '--> mdv-scripts/build-packages: build.sh'
 
 # mdv example:
@@ -18,8 +13,6 @@ email="$EMAIL"
 #available arches armv7hl armv7l
 platform_name="$PLATFORM_NAME"
 platform_arch="$ARCH"
-
-
 
 echo $git_project_address | awk '{ gsub(/\:\/\/.*\:\@/, "://[FILTERED]@"); print }'
 echo 'comit hash'
