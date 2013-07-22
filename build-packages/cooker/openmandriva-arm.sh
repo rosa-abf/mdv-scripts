@@ -1,10 +1,5 @@
 #!/bin/sh
 
-sudo urpmi.update -a
-for p in urpmi mock-urpm perl-URPM genhdlist2 tree ; do
-sudo urpmi --auto $p
-done
-
 echo '--> mdv-scripts/build-packages: build.sh'
 
 # mdv example:
@@ -15,6 +10,7 @@ commit_hash="$COMMIT_HASH"
 
 uname="$UNAME"
 email="$EMAIL"
+#available arches armv7hl armv7l
 platform_name="$PLATFORM_NAME"
 platform_arch="$ARCH"
 
@@ -29,35 +25,10 @@ tmpfs_path="/home/vagrant/tmpfs"
 project_path="$tmpfs_path/project"
 rpm_build_script_path=`pwd`
 
-rm -rf $archives_path $results_path $tmpfs_path $project_path
-mkdir  $archives_path $results_path $tmpfs_path $project_path
-
-# Mount tmpfs
-sudo mount -t tmpfs tmpfs -o size=30000M,nr_inodes=10M $tmpfs_path
-
-# Download project
-# Fix for: 'fatal: index-pack failed'
-git config --global core.compression -1
-git clone $git_project_address $project_path
-cd $project_path
-git submodule update --init
-git remote rm origin
-git checkout $commit_hash
+#fix bug server certificate verification failed
+export GIT_SSL_NO_VERIFY=1
 
 # TODO: build changelog
-
-# Downloads extra files by .abf.yml
-ruby $rpm_build_script_path/abf_yml.rb -p $project_path
-
-# Remove .git folder
-rm -rf $project_path/.git
-
-if [[ "$platform_name" == "cooker" && ("$platform_arch" == "armv7l" || "$platform_arch" == "armv7hl" )]]; then
-UNAME="$UNAME" EMAIL="$EMAIL" PLATFORM_NAME="$PLATFORM_NAME" PLATFORM_ARCH="$ARCH" /bin/bash $rpm_build_script_path/cooker/openmandriva-arm.sh
-  # Save exit code
-  rc=$?
-  exit $rc
-fi
 
 # create SPECS folder and move *.spec
 mkdir $tmpfs_path/SPECS
@@ -76,9 +47,13 @@ else
   fi
 fi
 
+# create SPECS folder and move *.spec
+sudo mkdir -p  $tmpfs_path/rootfs/root/rpmbuild/SPECS
+sudo mv $project_path/*.spec $tmpfs_path/rootfs/root/rpmbuild/SPECS/
+
 #create SOURCES folder and move src
-mkdir $tmpfs_path/SOURCES
-mv $project_path/* $tmpfs_path/SOURCES/
+sudo mkdir -p $tmpfs_path/rootfs/root/rpmbuild/SOURCES/
+sudo mv $project_path/* $tmpfs_path/rootfs/root/rpmbuild/SOURCES/
 
 # Init folders for building src.rpm
 cd $archives_path
@@ -89,14 +64,10 @@ rpm_path=$archives_path/RPM
 mkdir $rpm_path
 
 
-config_name="mdv-$platform_arch.cfg"
+config_name="openmandriva-$platform_arch.cfg"
 config_dir=/etc/mock-urpm/
-# Change output format for mock-urpm
-sed '17c/format: %(message)s' $config_dir/logging.ini > ~/logging.ini
-sudo mv -f ~/logging.ini $config_dir/logging.ini
-if [[ "$platform_name" =~ .*lts$ ]] ; then
-  config_name="mdv-lts-$platform_arch.cfg"
-fi
+sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+sudo sh -c "echo echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-wrapper:' > /proc/sys/fs/binfmt_misc/register"
 
 # Init config file
 default_cfg=$rpm_build_script_path/configs/default.cfg
@@ -123,11 +94,24 @@ echo '}' >> $default_cfg
 sudo rm -rf $config_dir/default.cfg
 sudo ln -s $default_cfg $config_dir/default.cfg
 
-# Build src.rpm
-echo '--> Build src.rpm'
-mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after
-# Save exit code
+#Build src.rpm in cross chroot
+echo "--> Create chroot"
+sudo /usr/sbin/urpmi.addmedia --urpmi-root /home/vagrant/$tmpfs_path main http://abf-downloads.rosalinux.ru/$platform_name/repository/$platform_arch/main/release/ && sudo /usr/sbin/urpmi --noscripts --no-suggests --no-verify-rpm --ignorearch --root /home/vagrant/$tmpfs_path --urpmi-root /home/vagrant/$tmpfs_path --auto basesystem-minimal rpm-build make urpmi
+sudo cp /home/vagrant/mdv-qemu-scripts/cooker/qemu* /home/vagrant/$tmpfs_path/usr/bin/
+sudo cp /etc/resolv.conf /home/vagrant/$tmpfs_path/etc/resolv.conf
+sudo mount -obind /dev/ /home/vagrant/$tmpfs_path/dev
+sudo mount -obind /proc/ /home/vagrant/$tmpfs_path/proc
+sudo mount -obind /sys/ /home/vagrant/$tmpfs_path/sys
+echo "-->> Chroot is done"
+sudo chmod -R 777 $tmpfs_path/rootfs/root/rpmbuild
+sudo chown -R root:root $tmpfs_path/rootfs/root/rpmbuild
+sudo chroot $tmpfs_path/rootfs/ /bin/bash --init-file /etc/bashrc -i  -c "/usr/bin/rpmbuild -bs -v --nodeps  /root/rpmbuild/SPECS/$spec_name && exit"
 rc=$?
+
+
+#sudo  build.py  -s $spec_name --sources $tmpfs_path/SOURCES/ --o $src_rpm_path 
+# Save exit code
+
 echo '--> Done.'
 
 # Move all logs into the results dir.
@@ -142,7 +126,6 @@ function move_logs {
   done
 }
 
-move_logs $src_rpm_path 'src-rpm'
 
 # Check exit code after build
 if [ $rc != 0 ] ; then
@@ -151,13 +134,29 @@ if [ $rc != 0 ] ; then
 fi
 
 # Build rpm
-cd $src_rpm_path
-src_rpm_name=`ls -1 | grep 'src.rpm$'`
+src_rpm_name=`sudo ls $tmpfs_path/rootfs/root/rpmbuild/SRPMS/ -1 | grep 'src.rpm'`
+echo $src_rpm_name
 echo '--> Building rpm...'
-mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean
+export_list="gl_cv_func_printf_enomem=yes FORCE_UNSAFE_CONFIGURE=1 ac_cv_path_MSGMERGE=/usr/bin/msgmerge ac_cv_javac_supports_enums=yes"
+sudo chroot $tmpfs_path/rootfs/ /bin/bash --init-file /etc/bashrc -i -c "urpmi --buildrequires --ignorearch --auto --no-verify-rpm /root/rpmbuild/SPECS/$spec_name && exit"
+sudo chroot $tmpfs_path/rootfs/ /bin/bash --init-file /etc/bashrc -i -c " export $export_list;/usr/bin/rpmbuild --without check --target=$platform_arch -ba -v /root/rpmbuild/SPECS/$spec_name"
+
+
+#mock $src_rpm_name --resultdir $rpm_path -v --no-cleanup
 # Save exit code
 rc=$?
 echo '--> Done.'
+
+echo '--> Get result.'
+sudo sh -c "mv  $tmpfs_path/rootfs/root/rpmbuild/RPMS/$platform_arch/*.rpm /home/vagrant/rpms/"
+sudo sh -c "mv  $tmpfs_path/rootfs/root/rpmbuild/RPMS/noarch/*.rpm /home/vagrant/rpms/"
+sudo sh -c "mv  $tmpfs_path/rootfs/root/rpmbuild/SRPMS/*.rpm $results_path/"
+
+echo '--> Done.'
+sudo umount /home/vagrant/$tmpfs_path/dev
+sudo umount /home/vagrant/$tmpfs_path/proc
+sudo umount /home/vagrant/$tmpfs_path/sys
+sudo rm -f /etc/rpm/platform
 
 # Save results
 # mv $tmpfs_path/SPECS $archives_path/
@@ -213,9 +212,9 @@ fi
 cd /
 sudo umount $tmpfs_path
 rm -rf $tmpfs_path
+sudo rm -rf /home/vagrant/$tmpfs_path/
 
-
-move_logs $rpm_path 'rpm'
+#move_logs $rpm_path 'rpm'
 
 # Check exit code after build
 if [ $rc != 0 ] ; then
@@ -224,9 +223,10 @@ if [ $rc != 0 ] ; then
 fi
 
 # Generate data for container
+sudo apt-get install -qq -y rpm
 c_data=$results_path/container_data.json
 echo '[' > $c_data
-for rpm in $rpm_path/*.rpm $src_rpm_path/*.src.rpm ; do
+for rpm in $results_path/*.rpm $results_path/*.src.rpm ; do
   name=`rpm -qp --queryformat %{NAME} $rpm`
   if [ "$name" != '' ] ; then
     fullname=`basename $rpm`
@@ -246,6 +246,7 @@ done
 # Add '{}'' because ',' before
 echo '{}' >> $c_data
 echo ']' >> $c_data
+ls -l $results_path/
 
 # Move all rpms into results folder
 echo "--> mv $rpm_path/*.rpm $results_path/"
