@@ -30,9 +30,6 @@ export GIT_SSL_NO_VERIFY=1
 
 # TODO: build changelog
 
-# Remove .git folder
-rm -rf $project_path/.git
-
 # create SPECS folder and move *.spec
 mkdir $tmpfs_path/SPECS
 mv $project_path/*.spec $tmpfs_path/SPECS/
