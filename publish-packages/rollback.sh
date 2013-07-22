@@ -23,7 +23,7 @@ fi
 sudo urpmi.update -a
 sudo urpmi --auto genhdlist2
 
-for arch in SRPMS i586 x86_64 ; do
+for arch in SRPMS i586 x86_64 armv7l armv7hl ; do
   main_folder=$repository_path/$arch/$rep_name
   rpm_backup="$main_folder/$status-rpm-backup"
   m_info_backup="$main_folder/$status-media_info-backup"

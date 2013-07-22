@@ -36,20 +36,7 @@ sudo mount -t tmpfs tmpfs -o size=30000M,nr_inodes=10M $tmpfs_path
 #fix bug server certificate verification failed
 export GIT_SSL_NO_VERIFY=1
 
-# Download project
-# Fix for: 'fatal: index-pack failed'
-git config --global core.compression -1
-git clone $git_project_address $project_path
-cd $project_path
-git submodule update --init
-git remote rm origin
-git checkout $commit_hash
-
-
 # TODO: build changelog
-
-# Downloads extra files by .abf.yml
-ruby $rpm_build_script_path/abf_yml.rb -p $project_path
 
 # Remove .git folder
 rm -rf $project_path/.git

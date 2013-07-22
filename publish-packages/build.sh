@@ -41,7 +41,7 @@ if [ "$released" == 'true' ] ; then
 fi
 
 # Checks that 'repository' directory exist
-mkdir -p $repository_path/{SRPMS,i586,x86_64}/$rep_name/$status/media_info
+mkdir -p $repository_path/{SRPMS,i586,x86_64,armv7l,armv7hl}/$rep_name/$status/media_info
 
 sign_rpm=0
 gnupg_path=/home/vagrant/.gnupg
@@ -73,7 +73,7 @@ function build_repo {
 }
 
 rx=0
-arches="SRPMS i586 x86_64"
+arches="SRPMS i586 x86_64 armv7l armv7hl"
 file_store_url='http://file-store.rosalinux.ru/api/v1/file_stores'
 for arch in $arches ; do
   update_repo=0
@@ -155,7 +155,7 @@ wait
 
 rc=0
 # Check exit codes
-for arch in SRPMS i586 x86_64 ; do
+for arch in SRPMS i586 x86_64 armv7l armv7hl ; do
   path="$container_path/$arch.exit-code"
   if [ -f "$path" ] ; then
     rc=`cat $path`
@@ -171,7 +171,7 @@ if [ $rc != 0 ] ; then
   cd $script_path/
   RELEASED=$released REPOSITORY_NAME=$rep_name USE_FILE_STORE=false /bin/bash $script_path/rollback.sh
 else
-  for arch in SRPMS i586 x86_64 ; do
+  for arch in SRPMS i586 x86_64 armv7l armv7hl ; do
     main_folder=$repository_path/$arch/$rep_name
     rpm_backup="$main_folder/$status-rpm-backup"
     rpm_new="$main_folder/$status-rpm-new"
