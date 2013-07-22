@@ -15,7 +15,6 @@ platform_name="$PLATFORM_NAME"
 platform_arch="$ARCH"
 
 echo $git_project_address | awk '{ gsub(/\:\/\/.*\:\@/, "://[FILTERED]@"); print }'
-echo 'comit hash'
 echo $commit_hash
 echo $uname
 echo $email
@@ -24,14 +23,7 @@ archives_path="/home/vagrant/archives"
 results_path="/home/vagrant/results"
 tmpfs_path="/home/vagrant/tmpfs"
 project_path="$tmpfs_path/project"
-cross_chroot="/home/vagrant/cross/"
 rpm_build_script_path=`pwd`
-
-rm -rf $archives_path $results_path $tmpfs_path $project_path
-mkdir  $archives_path $results_path $tmpfs_path $project_path
-
-# Mount tmpfs
-sudo mount -t tmpfs tmpfs -o size=30000M,nr_inodes=10M $tmpfs_path
 
 #fix bug server certificate verification failed
 export GIT_SSL_NO_VERIFY=1
@@ -59,12 +51,12 @@ else
 fi
 
 # create SPECS folder and move *.spec
-sudo mkdir -p  $cross_chroot/rootfs/root/rpmbuild/SPECS
-sudo mv $project_path/*.spec $cross_chroot/rootfs/root/rpmbuild/SPECS/
+sudo mkdir -p  $tmpfs_path/rootfs/root/rpmbuild/SPECS
+sudo mv $project_path/*.spec $tmpfs_path/rootfs/root/rpmbuild/SPECS/
 
 #create SOURCES folder and move src
-sudo mkdir -p $cross_chroot/rootfs/root/rpmbuild/SOURCES/
-sudo mv $project_path/* $cross_chroot/rootfs/root/rpmbuild/SOURCES/
+sudo mkdir -p $tmpfs_path/rootfs/root/rpmbuild/SOURCES/
+sudo mv $project_path/* $tmpfs_path/rootfs/root/rpmbuild/SOURCES/
 
 # Init folders for building src.rpm
 cd $archives_path
@@ -107,16 +99,16 @@ sudo ln -s $default_cfg $config_dir/default.cfg
 
 #Build src.rpm in cross chroot
 echo "--> Create chroot"
-sudo /usr/sbin/urpmi.addmedia --urpmi-root /home/vagrant/cross/rootfs/ local-arm http://192.168.0.206/ && sudo /usr/sbin/urpmi --noscripts --no-suggests --no-verify-rpm --ignorearch --root /home/vagrant/cross/rootfs/ --urpmi-root /home/vagrant/cross/rootfs/ --auto basesystem-minimal rpm-build make urpmi
-sudo cp /home/vagrant/mdv-qemu-scripts/qemu* /home/vagrant/cross/rootfs/usr/bin/
-sudo cp /etc/resolv.conf /home/vagrant/cross/rootfs/etc/resolv.conf
-sudo mount -obind /dev/ /home/vagrant/cross/rootfs/dev
-sudo mount -obind /proc/ /home/vagrant/cross/rootfs/proc
-sudo mount -obind /sys/ /home/vagrant/cross/rootfs/sys
+sudo /usr/sbin/urpmi.addmedia --urpmi-root /home/vagrant/$tmpfs_path main http://abf-downloads.rosalinux.ru/$platform_name/repository/$platform_arch/main/release/ && sudo /usr/sbin/urpmi --noscripts --no-suggests --no-verify-rpm --ignorearch --root /home/vagrant/$tmpfs_path --urpmi-root /home/vagrant/$tmpfs_path --auto basesystem-minimal rpm-build make urpmi
+sudo cp /home/vagrant/mdv-qemu-scripts/qemu* /home/vagrant/$tmpfs_path/usr/bin/
+sudo cp /etc/resolv.conf /home/vagrant/$tmpfs_path/etc/resolv.conf
+sudo mount -obind /dev/ /home/vagrant/$tmpfs_path/dev
+sudo mount -obind /proc/ /home/vagrant/$tmpfs_path/proc
+sudo mount -obind /sys/ /home/vagrant/$tmpfs_path/sys
 echo "-->> Chroot is done"
-sudo chmod -R 777 $cross_chroot/rootfs/root/rpmbuild
-sudo chown -R root:root $cross_chroot/rootfs/root/rpmbuild
-sudo chroot $cross_chroot/rootfs/ /bin/bash --init-file /etc/bashrc -i  -c "/usr/bin/rpmbuild -bs -v --nodeps  /root/rpmbuild/SPECS/$spec_name && exit"
+sudo chmod -R 777 $tmpfs_path/rootfs/root/rpmbuild
+sudo chown -R root:root $tmpfs_path/rootfs/root/rpmbuild
+sudo chroot $tmpfs_path/rootfs/ /bin/bash --init-file /etc/bashrc -i  -c "/usr/bin/rpmbuild -bs -v --nodeps  /root/rpmbuild/SPECS/$spec_name && exit"
 rc=$?
 
 
@@ -145,12 +137,12 @@ if [ $rc != 0 ] ; then
 fi
 
 # Build rpm
-src_rpm_name=`sudo ls $cross_chroot/rootfs/root/rpmbuild/SRPMS/ -1 | grep 'src.rpm'`
+src_rpm_name=`sudo ls $tmpfs_path/rootfs/root/rpmbuild/SRPMS/ -1 | grep 'src.rpm'`
 echo $src_rpm_name
 echo '--> Building rpm...'
 export_list="gl_cv_func_printf_enomem=yes FORCE_UNSAFE_CONFIGURE=1 ac_cv_path_MSGMERGE=/usr/bin/msgmerge ac_cv_javac_supports_enums=yes"
-sudo chroot $cross_chroot/rootfs/ /bin/bash --init-file /etc/bashrc -i -c "urpmi --buildrequires --ignorearch --auto --no-verify-rpm /root/rpmbuild/SPECS/$spec_name && exit"
-sudo chroot $cross_chroot/rootfs/ /bin/bash --init-file /etc/bashrc -i -c " export $export_list;/usr/bin/rpmbuild --without check --target=$platform_arch -ba -v /root/rpmbuild/SPECS/$spec_name"
+sudo chroot $tmpfs_path/rootfs/ /bin/bash --init-file /etc/bashrc -i -c "urpmi --buildrequires --ignorearch --auto --no-verify-rpm /root/rpmbuild/SPECS/$spec_name && exit"
+sudo chroot $tmpfs_path/rootfs/ /bin/bash --init-file /etc/bashrc -i -c " export $export_list;/usr/bin/rpmbuild --without check --target=$platform_arch -ba -v /root/rpmbuild/SPECS/$spec_name"
 
 
 #mock $src_rpm_name --resultdir $rpm_path -v --no-cleanup
@@ -159,14 +151,14 @@ rc=$?
 echo '--> Done.'
 
 echo '--> Get result.'
-sudo sh -c "mv  $cross_chroot/rootfs/root/rpmbuild/RPMS/$platform_arch/*.rpm /home/vagrant/rpms/"
-sudo sh -c "mv  $cross_chroot/rootfs/root/rpmbuild/RPMS/noarch/*.rpm /home/vagrant/rpms/"
-sudo sh -c "mv  $cross_chroot/rootfs/root/rpmbuild/SRPMS/*.rpm $results_path/"
+sudo sh -c "mv  $tmpfs_path/rootfs/root/rpmbuild/RPMS/$platform_arch/*.rpm /home/vagrant/rpms/"
+sudo sh -c "mv  $tmpfs_path/rootfs/root/rpmbuild/RPMS/noarch/*.rpm /home/vagrant/rpms/"
+sudo sh -c "mv  $tmpfs_path/rootfs/root/rpmbuild/SRPMS/*.rpm $results_path/"
 
 echo '--> Done.'
-sudo umount /home/vagrant/cross/rootfs/dev
-sudo umount /home/vagrant/cross/rootfs/proc
-sudo umount /home/vagrant/cross/rootfs/sys
+sudo umount /home/vagrant/$tmpfs_path/dev
+sudo umount /home/vagrant/$tmpfs_path/proc
+sudo umount /home/vagrant/$tmpfs_path/sys
 sudo rm -f /etc/rpm/platform
 
 # Save results
@@ -223,7 +215,7 @@ fi
 cd /
 sudo umount $tmpfs_path
 rm -rf $tmpfs_path
-sudo rm -rf /home/vagrant/cross/rootfs/
+sudo rm -rf /home/vagrant/$tmpfs_path/
 
 #move_logs $rpm_path 'rpm'
 
