@@ -97,7 +97,7 @@ sudo ln -s $default_cfg $config_dir/default.cfg
 #Build src.rpm in cross chroot
 echo "--> Create chroot"
 sudo /usr/sbin/urpmi.addmedia --urpmi-root /home/vagrant/$tmpfs_path main http://abf-downloads.rosalinux.ru/$platform_name/repository/$platform_arch/main/release/ && sudo /usr/sbin/urpmi --noscripts --no-suggests --no-verify-rpm --ignorearch --root /home/vagrant/$tmpfs_path --urpmi-root /home/vagrant/$tmpfs_path --auto basesystem-minimal rpm-build make urpmi
-sudo cp /home/vagrant/mdv-qemu-scripts/qemu* /home/vagrant/$tmpfs_path/usr/bin/
+sudo cp /home/vagrant/mdv-qemu-scripts/cooker/qemu* /home/vagrant/$tmpfs_path/usr/bin/
 sudo cp /etc/resolv.conf /home/vagrant/$tmpfs_path/etc/resolv.conf
 sudo mount -obind /dev/ /home/vagrant/$tmpfs_path/dev
 sudo mount -obind /proc/ /home/vagrant/$tmpfs_path/proc
