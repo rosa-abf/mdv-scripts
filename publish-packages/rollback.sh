@@ -12,7 +12,7 @@ echo "REPOSITORY_NAME = $rep_name"
 # Container path:
 # - /home/vagrant/container
 container_path=/home/vagrant/container
-
+script_path=`pwd`
 repository_path=/home/vagrant/share_folder
 status='release'
 if [ "$released" == 'true' ] ; then
