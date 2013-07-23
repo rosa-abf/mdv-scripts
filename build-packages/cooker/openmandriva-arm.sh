@@ -219,10 +219,9 @@ if [ $rc != 0 ] ; then
 fi
 
 # Generate data for container
-sudo apt-get install -qq -y rpm
 c_data=$results_path/container_data.json
 echo '[' > $c_data
-for rpm in $results_path/*.rpm $results_path/*.src.rpm ; do
+for rpm in $rpm_path/*.rpm $src_rpm_path/*.src.rpm ; do
   name=`rpm -qp --queryformat %{NAME} $rpm`
   if [ "$name" != '' ] ; then
     fullname=`basename $rpm`
@@ -242,7 +241,6 @@ done
 # Add '{}'' because ',' before
 echo '{}' >> $c_data
 echo ']' >> $c_data
-ls -l $results_path/
 
 # Move all rpms into results folder
 echo "--> mv $rpm_path/*.rpm $results_path/"
