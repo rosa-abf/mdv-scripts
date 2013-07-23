@@ -173,9 +173,12 @@ r=`head -1 $config_dir/default.cfg |
   sed -e "s/=//g" |
   sed -e "s/'//g"|
   sed -e "s/ //g"`
-chroot_path=$tmpfs_path/$r/root
+chroot_path=$tmpfs_path/
+
 echo '--> Checking internet connection...'
-sudo chroot $chroot_path ping -c 1 google.com
+echo '--> We cannot check internet connection'
+echo '--> because in qemu this function not implemented'
+#sudo chroot $chroot_path ping -c 1 google.com
 
 # Tests
 test_log=$results_path/tests.log
