@@ -145,9 +145,9 @@ rc=$?
 echo '--> Done.'
 
 echo '--> Get result.'
-sudo sh -c "mv  $tmpfs_path/root/rpmbuild/RPMS/$platform_arch/*.rpm /home/vagrant/rpms/"
-sudo sh -c "mv  $tmpfs_path/root/rpmbuild/RPMS/noarch/*.rpm /home/vagrant/rpms/"
-sudo sh -c "mv  $tmpfs_path/root/rpmbuild/SRPMS/*.rpm $results_path/"
+sudo sh -c "mv  $tmpfs_path/root/rpmbuild/RPMS/$platform_arch/*.rpm $rpm_path/"
+sudo sh -c "mv  $tmpfs_path/root/rpmbuild/RPMS/noarch/*.rpm $rpm_path/"
+sudo sh -c "mv  $tmpfs_path/root/rpmbuild/SRPMS/*.src.rpm $src_rpm_path/"
 
 echo '--> Done.'
 sudo umount $tmpfs_path/dev
