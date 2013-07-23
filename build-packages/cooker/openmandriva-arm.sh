@@ -31,10 +31,13 @@ export GIT_SSL_NO_VERIFY=1
 # TODO: build changelog
 
 # create SPECS folder and move *.spec
+sudo mkdir -p  $tmpfs_path/root/rpmbuild/SPECS
+sudo mv $project_path/*.spec $tmpfs_path/root/rpmbuild/SPECS/
+# create SPECS folder and move *.spec
 mkdir $tmpfs_path/SPECS
 mv $project_path/*.spec $tmpfs_path/SPECS/
 # Check count of *.spec files (should be one)
-cd $tmpfs_path/SPECS
+cd $project_path/SPECS
 x=`ls -1 | grep '.spec$' | wc -l | sed 's/^ *//' | sed 's/ *$//'`
 spec_name=`ls -1 | grep '.spec$'`
 if [ $x -eq '0' ] ; then
@@ -47,9 +50,6 @@ else
   fi
 fi
 
-# create SPECS folder and move *.spec
-sudo mkdir -p  $tmpfs_path/root/rpmbuild/SPECS
-sudo mv $project_path/*.spec $tmpfs_path/root/rpmbuild/SPECS/
 
 #create SOURCES folder and move src
 sudo mkdir -p $tmpfs_path/root/rpmbuild/SOURCES/
