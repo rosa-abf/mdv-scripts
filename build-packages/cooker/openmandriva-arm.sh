@@ -186,7 +186,7 @@ if [ $rc == 0 ] ; then
   ls -la $rpm_path/ >> $test_log
   mkdir $test_root
   rpm -q --queryformat "%{name}-%{version}-%{release}.%{arch}.%{disttag}%{distepoch}\n" urpmi
-  sudo urpmi -v --debug --no-verify --no-suggests --test $rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
+  sudo urpmi -v --debug --no-verify --no-suggests --test --ignorearch --noscripts $rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
   test_code=$?
   echo 'Test code output: ' $test_code >> $test_log 2>&1
   rm -rf $test_root
