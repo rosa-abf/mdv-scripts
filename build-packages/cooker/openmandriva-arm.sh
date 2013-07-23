@@ -48,12 +48,12 @@ else
 fi
 
 # create SPECS folder and move *.spec
-sudo mkdir -p  $tmpfs_path/rootfs/root/rpmbuild/SPECS
-sudo mv $project_path/*.spec $tmpfs_path/rootfs/root/rpmbuild/SPECS/
+sudo mkdir -p  $tmpfs_path/root/rpmbuild/SPECS
+sudo mv $project_path/*.spec $tmpfs_path/root/rpmbuild/SPECS/
 
 #create SOURCES folder and move src
-sudo mkdir -p $tmpfs_path/rootfs/root/rpmbuild/SOURCES/
-sudo mv $project_path/* $tmpfs_path/rootfs/root/rpmbuild/SOURCES/
+sudo mkdir -p $tmpfs_path/root/rpmbuild/SOURCES/
+sudo mv $project_path/* $tmpfs_path/root/rpmbuild/SOURCES/
 
 # Init folders for building src.rpm
 cd $archives_path
@@ -103,9 +103,9 @@ sudo mount -obind /dev/ $tmpfs_path/dev
 sudo mount -obind /proc/ $tmpfs_path/proc
 sudo mount -obind /sys/ $tmpfs_path/sys
 echo "-->> Chroot is done"
-sudo chmod -R 777 $tmpfs_path/rootfs/root/rpmbuild
-sudo chown -R root:root $tmpfs_path/rootfs/root/rpmbuild
-sudo chroot $tmpfs_path/rootfs/ /bin/bash --init-file /etc/bashrc -i  -c "/usr/bin/rpmbuild -bs -v --nodeps  /root/rpmbuild/SPECS/$spec_name && exit"
+sudo chmod -R 777 $tmpfs_path/root/rpmbuild
+sudo chown -R root:root $tmpfs_path/root/rpmbuild
+sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i  -c "/usr/bin/rpmbuild -bs -v --nodeps  /root/rpmbuild/SPECS/$spec_name && exit"
 rc=$?
 
 
@@ -134,12 +134,12 @@ if [ $rc != 0 ] ; then
 fi
 
 # Build rpm
-src_rpm_name=`sudo ls $tmpfs_path/rootfs/root/rpmbuild/SRPMS/ -1 | grep 'src.rpm'`
+src_rpm_name=`sudo ls $tmpfs_path/root/rpmbuild/SRPMS/ -1 | grep 'src.rpm'`
 echo $src_rpm_name
 echo '--> Building rpm...'
 export_list="gl_cv_func_printf_enomem=yes FORCE_UNSAFE_CONFIGURE=1 ac_cv_path_MSGMERGE=/usr/bin/msgmerge ac_cv_javac_supports_enums=yes"
-sudo chroot $tmpfs_path/rootfs/ /bin/bash --init-file /etc/bashrc -i -c "urpmi --buildrequires --ignorearch --auto --no-verify-rpm /root/rpmbuild/SPECS/$spec_name && exit"
-sudo chroot $tmpfs_path/rootfs/ /bin/bash --init-file /etc/bashrc -i -c " export $export_list;/usr/bin/rpmbuild --without check --target=$platform_arch -ba -v /root/rpmbuild/SPECS/$spec_name"
+sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i -c "urpmi --buildrequires --ignorearch --auto --no-verify-rpm /root/rpmbuild/SPECS/$spec_name && exit"
+sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i -c " export $export_list;/usr/bin/rpmbuild --without check --target=$platform_arch -ba -v /root/rpmbuild/SPECS/$spec_name"
 
 
 #mock $src_rpm_name --resultdir $rpm_path -v --no-cleanup
@@ -148,9 +148,9 @@ rc=$?
 echo '--> Done.'
 
 echo '--> Get result.'
-sudo sh -c "mv  $tmpfs_path/rootfs/root/rpmbuild/RPMS/$platform_arch/*.rpm /home/vagrant/rpms/"
-sudo sh -c "mv  $tmpfs_path/rootfs/root/rpmbuild/RPMS/noarch/*.rpm /home/vagrant/rpms/"
-sudo sh -c "mv  $tmpfs_path/rootfs/root/rpmbuild/SRPMS/*.rpm $results_path/"
+sudo sh -c "mv  $tmpfs_path/root/rpmbuild/RPMS/$platform_arch/*.rpm /home/vagrant/rpms/"
+sudo sh -c "mv  $tmpfs_path/root/rpmbuild/RPMS/noarch/*.rpm /home/vagrant/rpms/"
+sudo sh -c "mv  $tmpfs_path/root/rpmbuild/SRPMS/*.rpm $results_path/"
 
 echo '--> Done.'
 sudo umount $tmpfs_path/dev
