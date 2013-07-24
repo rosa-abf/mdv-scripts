@@ -65,6 +65,7 @@ function build_repo {
     /usr/bin/genhdlist2 -v --nolock --allow-empty-media --xml-info "$path"
   else
     echo "/usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --xml-info $path"
+    rm -f $path/synthesis.hdlist.cz
     /usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --xml-info "$path"
   fi
   # Save exit code
