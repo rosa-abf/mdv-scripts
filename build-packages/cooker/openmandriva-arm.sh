@@ -139,7 +139,8 @@ echo $src_rpm_name
 echo '--> Building rpm...'
 export_list="gl_cv_func_printf_enomem=yes FORCE_UNSAFE_CONFIGURE=1 ac_cv_path_MSGMERGE=/usr/bin/msgmerge ac_cv_javac_supports_enums=yes"
 sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i -c "urpmi --buildrequires --ignorearch --auto --no-verify-rpm /home/$user/rpmbuild/SPECS/$spec_name && exit"
-sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i -c "su - -c 'export $export_list;/usr/bin/rpmbuild --target=$platform_arch -ba -v /home/$user/rpmbuild/SPECS/$spec_name' $user"
+# --without check enabled to fix few segfaults that cant be used with qemu 
+sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i -c "su - -c 'export $export_list;/usr/bin/rpmbuild --target=$platform_arch --without check -ba -v /home/$user/rpmbuild/SPECS/$spec_name' $user"
 
 
 #mock $src_rpm_name --resultdir $rpm_path -v --no-cleanup
