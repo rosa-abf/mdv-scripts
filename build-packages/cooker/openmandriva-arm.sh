@@ -13,6 +13,7 @@ email="$EMAIL"
 #available arches armv7hl armv7l
 platform_name="$PLATFORM_NAME"
 platform_arch="$ARCH"
+user="$UNAME"
 
 echo $git_project_address | awk '{ gsub(/\:\/\/.*\:\@/, "://[FILTERED]@"); print }'
 echo $commit_hash
@@ -45,12 +46,13 @@ else
 fi
 
 # create SPECS folder and move *.spec
-sudo mkdir -p  $tmpfs_path/root/rpmbuild/SPECS
-sudo mv $project_path/*.spec $tmpfs_path/root/rpmbuild/SPECS/
+sudo mkdir -p  $tmpfs_path/home/$user/rpmbuild/SPECS
+sudo mv $project_path/*.spec $tmpfs_path/home/$user/rpmbuild/SPECS/
 
 #create SOURCES folder and move src
-sudo mkdir -p $tmpfs_path/root/rpmbuild/SOURCES/
-sudo mv $project_path/* $tmpfs_path/root/rpmbuild/SOURCES/
+sudo mkdir -p $tmpfs_path/home/$user/rpmbuild/SOURCES/
+sudo mkdir -p $tmpfs_path/home/$user/rpmbuild/BUILD/
+sudo mv $project_path/* $tmpfs_path/home/$user/rpmbuild/SOURCES/
 
 # Init folders for building src.rpm
 cd $archives_path
@@ -100,10 +102,11 @@ sudo mount -obind /dev/ $tmpfs_path/dev
 sudo mount -obind /proc/ $tmpfs_path/proc
 sudo mount -obind /sys/ $tmpfs_path/sys
 echo "-->> Chroot is done"
-sudo chmod -R 777 $tmpfs_path/root/rpmbuild
-sudo chown -R root:root $tmpfs_path/root/rpmbuild
-sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i  -c "/usr/bin/rpmbuild -bs -v --nodeps  /root/rpmbuild/SPECS/$spec_name && exit"
+sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i  -c "adduser $user && exit"
+sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i  -c "chown -R $user:$user /home/$user/ && exit"
+sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i  -c "su - -c '/usr/bin/rpmbuild -bs -v --nodeps  /home/$user/rpmbuild/SPECS/$spec_name' $user && exit"
 rc=$?
+
 
 
 #sudo  build.py  -s $spec_name --sources $tmpfs_path/SOURCES/ --o $src_rpm_path
@@ -135,8 +138,8 @@ src_rpm_name=`sudo ls $tmpfs_path/root/rpmbuild/SRPMS/ -1 | grep 'src.rpm'`
 echo $src_rpm_name
 echo '--> Building rpm...'
 export_list="gl_cv_func_printf_enomem=yes FORCE_UNSAFE_CONFIGURE=1 ac_cv_path_MSGMERGE=/usr/bin/msgmerge ac_cv_javac_supports_enums=yes"
-sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i -c "urpmi --buildrequires --ignorearch --auto --no-verify-rpm /root/rpmbuild/SPECS/$spec_name && exit"
-sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i -c " export $export_list;/usr/bin/rpmbuild --target=$platform_arch --without check -ba -v /root/rpmbuild/SPECS/$spec_name"
+sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i -c "urpmi --buildrequires --ignorearch --auto --no-verify-rpm /home/$user/rpmbuild/SPECS/$spec_name && exit"
+sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i -c "su - -c 'export $export_list;/usr/bin/rpmbuild --target=$platform_arch -ba -v /home/$user/rpmbuild/SPECS/$spec_name' $user"
 
 
 #mock $src_rpm_name --resultdir $rpm_path -v --no-cleanup
@@ -145,9 +148,9 @@ rc=$?
 echo '--> Done.'
 
 echo '--> Get result.'
-sudo sh -c "mv  $tmpfs_path/root/rpmbuild/RPMS/$platform_arch/*.rpm $rpm_path/"
-sudo sh -c "mv  $tmpfs_path/root/rpmbuild/RPMS/noarch/*.rpm $rpm_path/"
-sudo sh -c "mv  $tmpfs_path/root/rpmbuild/SRPMS/*.src.rpm $src_rpm_path/"
+sudo sh -c "mv  $tmpfs_path/home/$user/rpmbuild/RPMS/$platform_arch/*.rpm $rpm_path/"
+sudo sh -c "mv  $tmpfs_path/home/$user/rpmbuild/RPMS/noarch/*.rpm $rpm_path/"
+sudo sh -c "mv  $tmpfs_path/home/$user/rpmbuild/SRPMS/*.src.rpm $src_rpm_path/"
 
 echo '--> Done.'
 sudo umount $tmpfs_path/dev
