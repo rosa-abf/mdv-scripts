@@ -13,7 +13,7 @@ email="$EMAIL"
 #available arches armv7hl armv7l
 platform_name="$PLATFORM_NAME"
 platform_arch="$ARCH"
-user="boo"
+user="$UNAME"
 
 echo $git_project_address | awk '{ gsub(/\:\/\/.*\:\@/, "://[FILTERED]@"); print }'
 echo $commit_hash
