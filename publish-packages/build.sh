@@ -74,6 +74,29 @@ function build_repo {
 
 rx=0
 arches="SRPMS i586 x86_64 armv7l armv7hl"
+
+# Checks sync status of repository
+rep_locked=0
+for arch in $arches ; do
+  main_folder=$repository_path/$arch/$rep_name
+  if [ -f "$main_folder/.repo.lock" ]; then
+    rep_locked=1
+    break
+  else
+    touch $main_folder/.publish.lock
+  fi
+done
+
+# Fails publishing if mirror is currently synchronising the repository state
+if [ $rep_locked != 0 ] ; then
+  # Unlocks repository for sync
+  for arch in $arches ; do
+    rm -f $repository_path/$arch/$rep_name/.publish.lock
+  done
+  echo "--> [`LANG=en_US.UTF-8  date -u`] ERROR: Mirror is currently synchronising the repository state."
+  exit 1
+fi
+
 file_store_url='http://file-store.rosalinux.ru/api/v1/file_stores'
 for arch in $arches ; do
   update_repo=0
@@ -155,7 +178,7 @@ wait
 
 rc=0
 # Check exit codes
-for arch in SRPMS i586 x86_64 armv7l armv7hl ; do
+for arch in $arches ; do
   path="$container_path/$arch.exit-code"
   if [ -f "$path" ] ; then
     rc=`cat $path`
@@ -166,17 +189,20 @@ for arch in SRPMS i586 x86_64 armv7l armv7hl ; do
   fi
 done
 
+
 # Check exit code after build and rollback
 if [ $rc != 0 ] ; then
   cd $script_path/
   RELEASED=$released REPOSITORY_NAME=$rep_name USE_FILE_STORE=false /bin/bash $script_path/rollback.sh
 else
-  for arch in SRPMS i586 x86_64 armv7l armv7hl ; do
+  for arch in $arches ; do
     main_folder=$repository_path/$arch/$rep_name
     rpm_backup="$main_folder/$status-rpm-backup"
     rpm_new="$main_folder/$status-rpm-new"
     m_info_backup="$main_folder/$status-media_info-backup"
     rm -rf $rpm_backup $rpm_new $m_info_backup
+    # Unlocks repository for sync
+    rm -f $main_folder/.publish.lock
   done
 fi
 
