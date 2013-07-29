@@ -74,7 +74,6 @@ function build_repo {
 
 rx=0
 arches="SRPMS i586 x86_64 armv7l armv7hl"
-file_store_url='http://file-store.rosalinux.ru/api/v1/file_stores'
 
 # Checks sync status of repository
 rep_locked=0
@@ -98,6 +97,7 @@ if [ $rep_locked != 0 ] ; then
   exit 1
 fi
 
+file_store_url='http://file-store.rosalinux.ru/api/v1/file_stores'
 for arch in $arches ; do
   update_repo=0
   main_folder=$repository_path/$arch/$rep_name
