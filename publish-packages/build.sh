@@ -94,6 +94,7 @@ if [ $rep_locked != 0 ] ; then
   for arch in $arches ; do
     rm -f $repository_path/$arch/$rep_name/.publish.lock
   done
+  echo "--> [`LANG=en_US.UTF-8  date -u`] ERROR: Mirror is currently synchronising the repository state."
   exit 1
 fi
 
