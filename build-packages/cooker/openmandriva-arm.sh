@@ -86,7 +86,7 @@ done < $media_list
 #Build src.rpm in cross chroot
 echo "--> Create chroot"
 sudo cp $rpm_build_script_path/cooker/qemu* $tmpfs_path/usr/bin/
-sudp cp $pkgr_macro $tmpfs_path/home/$user/.rpmmacros
+sudo cp $pkgr_macro $tmpfs_path/home/$user/.rpmmacros
 sudo cp /etc/resolv.conf $tmpfs_path/etc/resolv.conf
 sudo mount -obind /dev/ $tmpfs_path/dev
 sudo mount -obind /proc/ $tmpfs_path/proc
