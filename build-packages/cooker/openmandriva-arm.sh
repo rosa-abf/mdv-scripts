@@ -70,8 +70,11 @@ sudo sh -c "echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x0
 
 # Init config file
 default_cfg=$rpm_build_script_path/configs/default.cfg
+pkgr_macro=$rpm_build_script_path/configs/rpmmacros
 cp $rpm_build_script_path/configs/$config_name $default_cfg
 media_list=/home/vagrant/container/media.list
+
+echo "%packager $uname <$email>" >> $pkgr_macro
 
 while read CMD; do
   name=`echo $CMD | awk '{ print $1 }'`
@@ -83,6 +86,7 @@ done < $media_list
 #Build src.rpm in cross chroot
 echo "--> Create chroot"
 sudo cp $rpm_build_script_path/cooker/qemu* $tmpfs_path/usr/bin/
+sudp cp $pkgr_macro $tmpfs_path/home/$user/.rpmmacros
 sudo cp /etc/resolv.conf $tmpfs_path/etc/resolv.conf
 sudo mount -obind /dev/ $tmpfs_path/dev
 sudo mount -obind /proc/ $tmpfs_path/proc
