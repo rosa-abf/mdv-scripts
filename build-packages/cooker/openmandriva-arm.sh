@@ -73,29 +73,15 @@ default_cfg=$rpm_build_script_path/configs/default.cfg
 cp $rpm_build_script_path/configs/$config_name $default_cfg
 media_list=/home/vagrant/container/media.list
 
-echo "config_opts['macros']['%packager'] = '$uname <$email>'" >> $default_cfg
-
-echo 'config_opts["urpmi_media"] = {' >> $default_cfg
-first='1'
 while read CMD; do
   name=`echo $CMD | awk '{ print $1 }'`
   url=`echo $CMD | awk '{ print $2 }'`
-  if [ "$first" == '1' ] ; then
-    echo "\"$name\": \"$url\"" >> $default_cfg
-    first=0
-  else
-    echo ", \"$name\": \"$url\"" >> $default_cfg
-  fi
+  sudo /usr/sbin/urpmi.addmedia --urpmi-root $tmpfs_path $name $url && sudo /usr/sbin/urpmi --noscripts --no-suggests --no-verify-rpm --ignorearch --root $tmpfs_path --urpmi-root $tmpfs_path --auto basesystem-minimal rpm-build make urpmi
+
 done < $media_list
-echo '}' >> $default_cfg
-
-
-sudo rm -rf $config_dir/default.cfg
-sudo ln -s $default_cfg $config_dir/default.cfg
 
 #Build src.rpm in cross chroot
 echo "--> Create chroot"
-sudo /usr/sbin/urpmi.addmedia --urpmi-root $tmpfs_path main http://abf-downloads.rosalinux.ru/$platform_name/repository/$platform_arch/main/release/ && sudo /usr/sbin/urpmi --noscripts --no-suggests --no-verify-rpm --ignorearch --root $tmpfs_path --urpmi-root $tmpfs_path --auto basesystem-minimal rpm-build make urpmi
 sudo cp $rpm_build_script_path/cooker/qemu* $tmpfs_path/usr/bin/
 sudo cp /etc/resolv.conf $tmpfs_path/etc/resolv.conf
 sudo mount -obind /dev/ $tmpfs_path/dev
