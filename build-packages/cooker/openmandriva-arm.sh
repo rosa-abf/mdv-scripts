@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo '--> mdv-scripts/build-packages/cooker: openmandriva-arm.sh'
+
 # mdv example:
 # git_project_address="https://abf.rosalinux.ru/import/plasma-applet-stackfolder.git"
 # commit_hash="bfe6d68cc607238011a6108014bdcfe86c69456a"
