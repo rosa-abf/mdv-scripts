@@ -1,7 +1,5 @@
 #!/bin/sh
 
-echo '--> mdv-scripts/build-packages: build.sh'
-
 # mdv example:
 # git_project_address="https://abf.rosalinux.ru/import/plasma-applet-stackfolder.git"
 # commit_hash="bfe6d68cc607238011a6108014bdcfe86c69456a"
@@ -10,10 +8,8 @@ commit_hash="$COMMIT_HASH"
 
 uname="$UNAME"
 email="$EMAIL"
-#available arches armv7hl armv7l
 platform_name="$PLATFORM_NAME"
 platform_arch="$ARCH"
-user="$UNAME"
 
 echo $git_project_address | awk '{ gsub(/\:\/\/.*\:\@/, "://[FILTERED]@"); print }'
 echo $commit_hash
@@ -26,13 +22,11 @@ tmpfs_path="/home/vagrant/tmpfs"
 project_path="$tmpfs_path/project"
 rpm_build_script_path=`pwd`
 
-#fix bug server certificate verification failed
-export GIT_SSL_NO_VERIFY=1
-
-# TODO: build changelog
-
+# create SPECS folder and move *.spec
+mkdir $tmpfs_path/SPECS
+mv $project_path/*.spec $tmpfs_path/SPECS/
 # Check count of *.spec files (should be one)
-cd $project_path/
+cd $tmpfs_path/SPECS
 x=`ls -1 | grep '.spec$' | wc -l | sed 's/^ *//' | sed 's/ *$//'`
 spec_name=`ls -1 | grep '.spec$'`
 if [ $x -eq '0' ] ; then
@@ -45,14 +39,9 @@ else
   fi
 fi
 
-# create SPECS folder and move *.spec
-sudo mkdir -p  $tmpfs_path/home/$user/rpmbuild/SPECS
-sudo mv $project_path/*.spec $tmpfs_path/home/$user/rpmbuild/SPECS/
-
 #create SOURCES folder and move src
-sudo mkdir -p $tmpfs_path/home/$user/rpmbuild/SOURCES/
-sudo mkdir -p $tmpfs_path/home/$user/rpmbuild/BUILD/
-sudo mv $project_path/* $tmpfs_path/home/$user/rpmbuild/SOURCES/
+mkdir $tmpfs_path/SOURCES
+mv $project_path/* $tmpfs_path/SOURCES/
 
 # Init folders for building src.rpm
 cd $archives_path
@@ -62,46 +51,54 @@ mkdir $src_rpm_path
 rpm_path=$archives_path/RPM
 mkdir $rpm_path
 
-
 config_name="openmandriva-$platform_arch.cfg"
 config_dir=/etc/mock-urpm/
-sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
-sudo sh -c "echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-wrapper:' > /proc/sys/fs/binfmt_misc/register"
+# Change output format for mock-urpm
+sed '17c/format: %(message)s' $config_dir/logging.ini > ~/logging.ini
+sudo mv -f ~/logging.ini $config_dir/logging.ini
+if [[ "$platform_name" =~ .*lts$ ]] ; then
+  config_name="mdv-lts-$platform_arch.cfg"
+fi
 
 # Init config file
 default_cfg=$rpm_build_script_path/configs/default.cfg
-pkgr_macro=$rpm_build_script_path/configs/rpmmacros
 cp $rpm_build_script_path/configs/$config_name $default_cfg
 media_list=/home/vagrant/container/media.list
 
-echo "%packager $uname <$email>" >> $pkgr_macro
+echo "config_opts['macros']['%packager'] = '$uname <$email>'" >> $default_cfg
 
+echo 'config_opts["urpmi_media"] = {' >> $default_cfg
+first='1'
 while read CMD; do
   name=`echo $CMD | awk '{ print $1 }'`
   url=`echo $CMD | awk '{ print $2 }'`
-  sudo /usr/sbin/urpmi.addmedia --urpmi-root $tmpfs_path $name $url && sudo /usr/sbin/urpmi --noscripts --no-suggests --no-verify-rpm --ignorearch --root $tmpfs_path --urpmi-root $tmpfs_path --auto basesystem-minimal rpm-build make urpmi
-
+  if [ "$first" == '1' ] ; then
+    echo "\"$name\": \"$url\"" >> $default_cfg
+    first=0
+  else
+    echo ", \"$name\": \"$url\"" >> $default_cfg
+  fi
 done < $media_list
+echo '}' >> $default_cfg
 
-#Build src.rpm in cross chroot
-echo "--> Create chroot"
+
+sudo rm -rf $config_dir/default.cfg
+sudo ln -s $default_cfg $config_dir/default.cfg
+
+# prepare ARM stuff
+echo '--> install ARM-related env'
+sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+sudo sh -c "echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-wrapper:' > /proc/sys/fs/binfmt_misc/register"
+
+# copy qemu binaries
+echo '--> Copy qemu binaries'
 sudo cp $rpm_build_script_path/cooker/qemu* $tmpfs_path/usr/bin/
-sudo cp $pkgr_macro $tmpfs_path/home/$user/.rpmmacros
-sudo cp /etc/resolv.conf $tmpfs_path/etc/resolv.conf
-sudo mount -obind /dev/ $tmpfs_path/dev
-sudo mount -obind /proc/ $tmpfs_path/proc
-sudo mount -obind /sys/ $tmpfs_path/sys
-echo "-->> Chroot is done"
-sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i  -c "adduser $user && exit"
-sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i  -c "chown -R $user:$user /home/$user/ && exit"
-sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i  -c "su - -c '/usr/bin/rpmbuild -bs -v --nodeps  /home/$user/rpmbuild/SPECS/$spec_name' $user && exit"
-rc=$?
 
-
-
-#sudo  build.py  -s $spec_name --sources $tmpfs_path/SOURCES/ --o $src_rpm_path
+# Build src.rpm
+echo '--> Build src.rpm'
+mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after
 # Save exit code
-
+rc=$?
 echo '--> Done.'
 
 # Move all logs into the results dir.
@@ -116,6 +113,7 @@ function move_logs {
   done
 }
 
+move_logs $src_rpm_path 'src-rpm'
 
 # Check exit code after build
 if [ $rc != 0 ] ; then
@@ -124,30 +122,13 @@ if [ $rc != 0 ] ; then
 fi
 
 # Build rpm
-src_rpm_name=`sudo ls $tmpfs_path/root/rpmbuild/SRPMS/ -1 | grep 'src.rpm'`
-echo $src_rpm_name
+cd $src_rpm_path
+src_rpm_name=`ls -1 | grep 'src.rpm$'`
 echo '--> Building rpm...'
-export_list="gl_cv_func_printf_enomem=yes FORCE_UNSAFE_CONFIGURE=1 ac_cv_path_MSGMERGE=/usr/bin/msgmerge ac_cv_javac_supports_enums=yes"
-sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i -c "urpmi --buildrequires --ignorearch --auto --no-verify-rpm /home/$user/rpmbuild/SPECS/$spec_name && exit"
-# --without check enabled to fix few segfaults that cant be used with qemu 
-sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i -c "su - -c 'export $export_list;/usr/bin/rpmbuild --target=$platform_arch --without check -ba -v /home/$user/rpmbuild/SPECS/$spec_name' $user"
-
-
-#mock $src_rpm_name --resultdir $rpm_path -v --no-cleanup
+mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean
 # Save exit code
 rc=$?
 echo '--> Done.'
-
-echo '--> Get result.'
-sudo sh -c "mv  $tmpfs_path/home/$user/rpmbuild/RPMS/$platform_arch/*.rpm $rpm_path/"
-sudo sh -c "mv  $tmpfs_path/home/$user/rpmbuild/RPMS/noarch/*.rpm $rpm_path/"
-sudo sh -c "mv  $tmpfs_path/home/$user/rpmbuild/SRPMS/*.src.rpm $src_rpm_path/"
-
-echo '--> Done.'
-sudo umount $tmpfs_path/dev
-sudo umount $tmpfs_path/proc
-sudo umount $tmpfs_path/sys
-sudo rm -f /etc/rpm/platform
 
 # Save results
 # mv $tmpfs_path/SPECS $archives_path/
@@ -167,8 +148,7 @@ r=`head -1 $config_dir/default.cfg |
   sed -e "s/=//g" |
   sed -e "s/'//g"|
   sed -e "s/ //g"`
-chroot_path=$tmpfs_path/
-
+chroot_path=$tmpfs_path/$r/root
 echo '--> Checking internet connection...'
 echo '--> We cannot check internet connection'
 echo '--> because in qemu this function not implemented'
@@ -183,22 +163,18 @@ if [ $rc == 0 ] ; then
   ls -la $rpm_path/ >> $test_log
   mkdir $test_root
   rpm -q --queryformat "%{name}-%{version}-%{release}.%{arch}.%{disttag}%{distepoch}\n" urpmi
-  sudo mount -obind $rpm_path/ $tmpfs_path/tmp/
-  sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i -c "urpmi -v --debug --no-verify --no-suggests --test --ignorearch --noscripts /tmp/*.rpm --auto && exit" >> $test_log 2>&1
+  sudo urpmi -v --debug --no-verify --no-suggests --test $rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
   test_code=$?
   echo 'Test code output: ' $test_code >> $test_log 2>&1
-  sudo umount $tmpfs_path/tmp/
   rm -rf $test_root
 fi
 
 if [ $rc == 0 ] && [ $test_code == 0 ] ; then
   ls -la $src_rpm_path/ >> $test_log
   mkdir $test_root
-  sudo mount -obind $src_rpm_path/ $tmpfs_path/tmp/
-  sudo chroot $tmpfs_path/ /bin/bash --init-file /etc/bashrc -i -c "urpmi -v --debug --no-verify --test --buildrequires /tmp/*.src.rpm && exit" >> $test_log 2>&1
+  sudo urpmi -v --debug --no-verify --test --buildrequires $src_rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
   test_code=$?
   echo 'Test code output: ' $test_code >> $test_log 2>&1
-  sudo umount  $tmpfs_path/tmp/
   rm -rf $test_root
 fi
 
@@ -209,9 +185,10 @@ fi
 # Umount tmpfs
 cd /
 sudo umount $tmpfs_path
-sudo rm -rf $tmpfs_path
+rm -rf $tmpfs_path
 
-#move_logs $rpm_path 'rpm'
+
+move_logs $rpm_path 'rpm'
 
 # Check exit code after build
 if [ $rc != 0 ] ; then
