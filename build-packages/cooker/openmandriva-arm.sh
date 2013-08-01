@@ -162,8 +162,8 @@ if [ $rc == 0 ] ; then
   ls -la $rpm_path/ >> $test_log
   mkdir $test_root
   rpm -q --queryformat "%{name}-%{version}-%{release}.%{arch}.%{disttag}%{distepoch}\n" urpmi
-  sudo mount -obind $rpm_path/ $tmpfs_path/openmandriva-2013.0-$platform_arch/tmp/
-  sudo chroot $tmpfs_path/openmandriva-2013.0-$platform_arch/tmp/ /bin/bash --init-file /etc/bashrc -i -c "urpmi -v --debug --no-verify --no-suggests --test --ignorearch --noscripts /tmp/*.rpm --auto && exit" >> $test_log 2>&1
+  sudo mount -obind $rpm_path/ $tmpfs_path/openmandriva-2013.0-$platform_arch/root/tmp/
+  sudo chroot $tmpfs_path/openmandriva-2013.0-$platform_arch/root/ /bin/bash --init-file /etc/bashrc -i -c "urpmi -v --debug --no-verify --no-suggests --test --ignorearch --noscripts /tmp/*.rpm --auto && exit" >> $test_log 2>&1
   test_code=$?
   echo 'Test code output: ' $test_code >> $test_log 2>&1
   sudo umount $tmpfs_path/openmandriva-2013.0-$platform_arch/tmp/
@@ -173,11 +173,11 @@ fi
 if [ $rc == 0 ] && [ $test_code == 0 ] ; then
   ls -la $src_rpm_path/ >> $test_log
   mkdir $test_root
-  sudo mount -obind $src_rpm_path/  $tmpfs_path/openmandriva-2013.0-$platform_arch/tmp/
-  sudo chroot $tmpfs_path/openmandriva-2013.0-$platform_arch/tmp/ /bin/bash --init-file /etc/bashrc -i -c "urpmi -v --debug --no-verify --test --buildrequires /tmp/*.src.rpm && exit" >> $test_log 2>&1
+  sudo mount -obind $src_rpm_path/  $tmpfs_path/openmandriva-2013.0-$platform_arch/root/tmp/
+  sudo chroot $tmpfs_path/openmandriva-2013.0-$platform_arch/root/ /bin/bash --init-file /etc/bashrc -i -c "urpmi -v --debug --no-verify --test --buildrequires /tmp/*.src.rpm && exit" >> $test_log 2>&1
   test_code=$?
   echo 'Test code output: ' $test_code >> $test_log 2>&1
-  sudo umount $tmpfs_path/openmandriva-2013.0-$platform_arch/tmp/
+  sudo umount $tmpfs_path/openmandriva-2013.0-$platform_arch/root/tmp/
   rm -rf $test_root
 fi
 
