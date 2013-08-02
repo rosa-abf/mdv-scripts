@@ -44,8 +44,6 @@ git submodule update --init
 git remote rm origin
 git checkout $commit_hash
 
-# TODO: build changelog
-
 # Downloads extra files by .abf.yml
 ruby $rpm_build_script_path/abf_yml.rb -p $project_path
 
@@ -76,6 +74,11 @@ else
     exit 1
   fi
 fi
+
+# build changelog (limited to ~10 for reasonable changelog size)
+sed -i '/%changelog/,$d' $tmpfs_path/SPECS/$spec_name
+echo '%changelog' >> $tmpfs_path/SPECS/$spec_name
+python $rpm_build_script_path/build-changelog.py -b 10 >> $tmpfs_path/SPECS/$spec_name
 
 #create SOURCES folder and move src
 mkdir $tmpfs_path/SOURCES
