@@ -108,9 +108,8 @@ echo '--> Build src.rpm'
 mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after
 # Save exit code
 rc=$?
-echo '--> Done.'
-
 kill $subshellpid
+echo '--> Done.'
 
 # Move all logs into the results dir.
 function move_logs {
