@@ -97,7 +97,7 @@ sudo sh -c "echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x0
 # it is big ugly hack
 # but i do now know another proper way
 # experiments with setup.spec was not successful
-sleep 25 && sudo cp $rpm_build_script_path/cooker/qemu*  $tmpfs_path/openmandriva-2013.0-$platform_arch/root/usr/bin/ &
+sleep 40 && sudo cp $rpm_build_script_path/cooker/qemu*  $tmpfs_path/openmandriva-2013.0-$platform_arch/root/usr/bin/ &
 # Build src.rpm
 echo '--> Build src.rpm'
 mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after
