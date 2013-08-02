@@ -97,9 +97,11 @@ sudo sh -c "echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x0
 # it is big ugly hack
 # but i do now know another proper way
 # experiments with setup.spec was not successful
-(for i in $(seq 60);do [ -e  $tmpfs_path/openmandriva-2013.0-$platform_arch/root/usr/bin/ ] && break ;
-  sleep 1;done
+
+(while [ ! -e  $tmpfs_path/openmandriva-2013.0-$platform_arch/root/usr/bin/ ]
+  do sleep 1;done
   sudo cp $rpm_build_script_path/cooker/qemu*  $tmpfs_path/openmandriva-2013.0-$platform_arch/root/usr/bin/) &
+  subshellpid=$!
 
 # Build src.rpm
 echo '--> Build src.rpm'
@@ -107,6 +109,8 @@ mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/
 # Save exit code
 rc=$?
 echo '--> Done.'
+
+kill $subshellpid
 
 # Move all logs into the results dir.
 function move_logs {
