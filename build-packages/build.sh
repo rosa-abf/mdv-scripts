@@ -47,6 +47,24 @@ git checkout $commit_hash
 # Downloads extra files by .abf.yml
 ruby $rpm_build_script_path/abf_yml.rb -p $project_path
 
+# Check count of *.spec files (should be one)
+x=`ls -1 | grep '.spec$' | wc -l | sed 's/^ *//' | sed 's/ *$//'`
+spec_name=`ls -1 | grep '.spec$'`
+if [ $x -eq '0' ] ; then
+  echo '--> There are no spec files in repository.'
+  exit 1
+else
+  if [ $x -ne '1' ] ; then
+    echo '--> There are more than one spec file in repository.'
+    exit 1
+  fi
+fi
+
+# build changelog (limited to ~10 for reasonable changelog size)
+sed -i '/%changelog/,$d' $spec_name
+echo '%changelog' >> $spec_name
+python $rpm_build_script_path/build-changelog.py -b 10 >> $spec_name
+
 # Remove .git folder
 rm -rf $project_path/.git
 
@@ -61,24 +79,6 @@ fi
 # create SPECS folder and move *.spec
 mkdir $tmpfs_path/SPECS
 mv $project_path/*.spec $tmpfs_path/SPECS/
-# Check count of *.spec files (should be one)
-cd $tmpfs_path/SPECS
-x=`ls -1 | grep '.spec$' | wc -l | sed 's/^ *//' | sed 's/ *$//'`
-spec_name=`ls -1 | grep '.spec$'`
-if [ $x -eq '0' ] ; then
-  echo '--> There are no spec files in repository.'
-  exit 1
-else
-  if [ $x -ne '1' ] ; then
-    echo '--> There are more than one spec file in repository.'
-    exit 1
-  fi
-fi
-
-# build changelog (limited to ~10 for reasonable changelog size)
-sed -i '/%changelog/,$d' $tmpfs_path/SPECS/$spec_name
-echo '%changelog' >> $tmpfs_path/SPECS/$spec_name
-python $rpm_build_script_path/build-changelog.py -b 10 >> $tmpfs_path/SPECS/$spec_name
 
 #create SOURCES folder and move src
 mkdir $tmpfs_path/SOURCES
