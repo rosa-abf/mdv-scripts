@@ -58,13 +58,13 @@ class ChangeLog:
 
     def getLog(self):
         if self.options.bk is not None:
-            range = "HEAD~%s..HEAD" % (self.options.bk)
+            range = "%s~%s..%s" % (self.options.head, self.options.bk, self.options.head)
 	elif self.options.tag is not None:
-            range = "%s..HEAD" % (self.options.tag)
+            range = "%s..%s" % (self.options.tag, self.options.head)
         elif self.options.fr is not None:
-            range = "%s..HEAD" % (self.options.fr)
+            range = "%s..%s" % (self.options.fr, self.options.head)
         else:
-            range = "HEAD"
+            range = self.options.head
         proc = subprocess.Popen(['git', 'log', '--pretty=oneline', range],
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE).communicate()
@@ -123,8 +123,13 @@ def main():
     parser.add_option("-f", "--from", dest="fr",
                       help="From this commit onwards [overrides --tag and --back]")
     parser.add_option("-b", "--back", dest="bk",
-                      help="Back x number of commits from HEAD [overrides --from and --tag]")
+                      help="Back x number of commits from the topmost commit [overrides --from and --tag]")
+    parser.add_option("-h", "--head", dest="head",
+                      help="Specify the topmost commit (default HEAD)")
     (options, args) = parser.parse_args()
+
+    if options.head is None:
+        options.head = "HEAD"
 
     cl = ChangeLog(options)
     print cl.formatLog()
