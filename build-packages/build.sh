@@ -17,7 +17,6 @@ uname="$UNAME"
 email="$EMAIL"
 platform_name="$PLATFORM_NAME"
 platform_arch="$ARCH"
-bootstrap="$BOOTSTRAP"
 
 echo $git_project_address | awk '{ gsub(/\:\/\/.*\:\@/, "://[FILTERED]@"); print }'
 echo $commit_hash
@@ -53,15 +52,9 @@ ruby $rpm_build_script_path/abf_yml.rb -p $project_path
 # Remove .git folder
 rm -rf $project_path/.git
 
-# fix of https://abf.rosalinux.ru/abf/abf-ideas/issues/76
-# fix of https://abf.rosalinux.ru/abf/abf-ideas/issues/56
-if [[ "$bootstrap" = "enable" ]] ; then
-  bootstrap_option="--with bootstrap"
-fi
-
 if [[ "$platform_name" == "cooker" && ("$platform_arch" == "armv7l" || "$platform_arch" == "armv7hl" )]]; then
 cd $rpm_build_script_path
-UNAME="$UNAME" EMAIL="$EMAIL" PLATFORM_NAME="$PLATFORM_NAME" PLATFORM_ARCH="$ARCH" BOOTSTRAP="$BOOTSTRAP" /bin/bash $rpm_build_script_path/cooker/openmandriva-arm.sh
+UNAME="$UNAME" EMAIL="$EMAIL" PLATFORM_NAME="$PLATFORM_NAME" PLATFORM_ARCH="$ARCH" /bin/bash $rpm_build_script_path/cooker/openmandriva-arm.sh
   # Save exit code
   rc=$?
   exit $rc
@@ -106,7 +99,6 @@ if [[ "$platform_name" =~ .*lts$ ]] ; then
   config_name="mdv-lts-$platform_arch.cfg"
 fi
 
-
 # Init config file
 default_cfg=$rpm_build_script_path/configs/default.cfg
 cp $rpm_build_script_path/configs/$config_name $default_cfg
@@ -134,7 +126,7 @@ sudo ln -s $default_cfg $config_dir/default.cfg
 
 # Build src.rpm
 echo '--> Build src.rpm'
-mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after $bootstrap_option
+mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after
 # Save exit code
 rc=$?
 echo '--> Done.'
@@ -163,7 +155,7 @@ fi
 cd $src_rpm_path
 src_rpm_name=`ls -1 | grep 'src.rpm$'`
 echo '--> Building rpm...'
-mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean $bootstrap_option
+mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean
 # Save exit code
 rc=$?
 echo '--> Done.'
