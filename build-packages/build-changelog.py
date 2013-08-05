@@ -58,7 +58,7 @@ class ChangeLog:
 
     def getLog(self):
         if self.options.bk is not None:
-            range = "%s~%s..%s" % (self.options.head, self.options.bk, self.options.head)
+            range = "%s~%s..%s" % (self.options.head, self.options.bk + 25, self.options.head)
 	elif self.options.tag is not None:
             range = "%s..%s" % (self.options.tag, self.options.head)
         elif self.options.fr is not None:
@@ -79,8 +79,10 @@ class ChangeLog:
             for commit in self.ignore.split(','):
                 lines = filter(lambda x: not x.startswith(commit), lines)
 
+        goodcommits = 0
         log = []
         for line in lines:
+            goodcommits += 1
             fields = line.split(' ')
             commit = fields[0]
 
@@ -99,6 +101,9 @@ class ChangeLog:
             else:
                 log.append(("- %s" % body.strip()))
             log.append("")
+
+            if goodcommits is self.options.bk:
+                break
 
 
         return log
