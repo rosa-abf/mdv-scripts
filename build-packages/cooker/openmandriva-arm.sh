@@ -12,6 +12,7 @@ uname="$UNAME"
 email="$EMAIL"
 platform_name="$PLATFORM_NAME"
 platform_arch="$ARCH"
+bootstrap="$BOOTSTRAP"
 
 echo $git_project_address | awk '{ gsub(/\:\/\/.*\:\@/, "://[FILTERED]@"); print }'
 echo $commit_hash
@@ -23,6 +24,12 @@ results_path="/home/vagrant/results"
 tmpfs_path="/home/vagrant/tmpfs"
 project_path="$tmpfs_path/project"
 rpm_build_script_path=`pwd`
+
+# fix of https://abf.rosalinux.ru/abf/abf-ideas/issues/76
+# fix of https://abf.rosalinux.ru/abf/abf-ideas/issues/56
+if [[ "$bootstrap" = "enable" ]] ; then
+  bootstrap_option="--with bootstrap"
+fi
 
 # create SPECS folder and move *.spec
 mkdir $tmpfs_path/SPECS
@@ -105,7 +112,7 @@ sudo sh -c "echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x0
 
 # Build src.rpm
 echo '--> Build src.rpm'
-mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after
+mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after $bootstrap_option
 # Save exit code
 rc=$?
 kill $subshellpid
@@ -135,7 +142,7 @@ fi
 cd $src_rpm_path
 src_rpm_name=`ls -1 | grep 'src.rpm$'`
 echo '--> Building rpm...'
-mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean
+mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean $bootstrap_option
 # Save exit code
 rc=$?
 echo '--> Done.'
