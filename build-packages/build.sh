@@ -33,7 +33,7 @@ rm -rf $archives_path $results_path $tmpfs_path $project_path
 mkdir  $archives_path $results_path $tmpfs_path $project_path
 
 # Mount tmpfs
-sudo mount -t tmpfs tmpfs -o size=30000M,nr_inodes=10M $tmpfs_path
+sudo mount -t tmpfs tmpfs -o size=40000M,nr_inodes=10M $tmpfs_path
 
 # Download project
 # Fix for: 'fatal: index-pack failed'
