@@ -34,6 +34,7 @@ for arch in $arches ; do
     fi
   done
 
+  echo "perl $script_path/dump_gui_apps $paths"
   perl $script_path/dump_gui_apps $paths
   # Save exit code
   rc=$?
