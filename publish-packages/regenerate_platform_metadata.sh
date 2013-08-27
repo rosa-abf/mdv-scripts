@@ -26,7 +26,13 @@ mkdir -p $repository_path/{i586,x86_64}/media/media_info
 curl -LO https://abf.rosalinux.ru/abf/SC-metadata-generator/archive/SC-metadata-generator-master.tar.gz
 tar -xzf SC-metadata-generator-master.tar.gz
 rm -f SC-metadata-generator-master.tar.gz
-cd SC-metadata-generator-master
+
+project_path=$script_path/SC-metadata-generator-master
+
+# Downloads extra files by .abf.yml
+ruby $script_path/../build-packages/abf_yml.rb -p $project_path
+
+cd $project_path
 
 
 for arch in $arches ; do
