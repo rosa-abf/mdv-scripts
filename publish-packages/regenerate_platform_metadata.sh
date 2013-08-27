@@ -30,7 +30,7 @@ rm -f SC-metadata-generator-master.tar.gz
 project_path=$script_path/SC-metadata-generator-master
 
 # Downloads extra files by .abf.yml
-ruby $script_path/../build-packages/abf_yml.rb -p $project_path
+sudo ruby $script_path/../build-packages/abf_yml.rb -p $project_path
 
 cd $project_path
 
