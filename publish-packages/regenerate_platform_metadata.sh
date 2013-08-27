@@ -28,13 +28,7 @@ tar -xzf SC-metadata-generator-master.tar.gz
 rm -f SC-metadata-generator-master.tar.gz
 
 project_path=$script_path/SC-metadata-generator-master
-
-# Downloads extra files by .abf.yml
-sudo ruby $script_path/../build-packages/abf_yml.rb -p $project_path
-
 cd $project_path
-ls -la
-
 
 for arch in $arches ; do
   # Build repo
@@ -46,6 +40,10 @@ for arch in $arches ; do
       paths+="$repository_path/$arch/$name/updates/media_info "
     fi
   done
+
+  # Downloads extra files by .abf.yml
+  # dump_gui_apps removes files after each run
+  sudo ruby $script_path/../abf_yml.rb -p $project_path
 
   echo "perl dump_gui_apps $paths"
   perl dump_gui_apps $paths

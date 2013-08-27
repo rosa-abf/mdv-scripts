@@ -47,7 +47,7 @@ git checkout $commit_hash
 # TODO: build changelog
 
 # Downloads extra files by .abf.yml
-ruby $rpm_build_script_path/abf_yml.rb -p $project_path
+ruby $rpm_build_script_path/../abf_yml.rb -p $project_path
 
 # Remove .git folder
 rm -rf $project_path/.git
