@@ -3,6 +3,8 @@
 # See: https://abf.rosalinux.ru/abf/abf-ideas/issues/91
 echo '--> mdv-scripts/publish-packages: regenerate_platform_metadata.sh'
 
+sudo urpmi --auto perl-YAML-Syck
+
 released="$RELEASED"
 
 # main,media,contrib,...
@@ -21,7 +23,11 @@ arches="i586 x86_64"
 # distribution's main media_info folder
 mkdir -p $repository_path/{i586,x86_64}/media/media_info
 
-curl -LO https://abf.rosalinux.ru/abf/SC-metadata-generator/raw/master/dump_gui_apps
+curl -LO https://abf.rosalinux.ru/abf/SC-metadata-generator/archive/SC-metadata-generator-master.tar.gz
+tar -xzf SC-metadata-generator-master.tar.gz
+rm -f SC-metadata-generator-master.tar.gz
+cd SC-metadata-generator-master
+
 
 for arch in $arches ; do
   # Build repo
@@ -34,8 +40,8 @@ for arch in $arches ; do
     fi
   done
 
-  echo "perl $script_path/dump_gui_apps $paths"
-  perl $script_path/dump_gui_apps $paths
+  echo "perl dump_gui_apps $paths"
+  perl dump_gui_apps $paths
   # Save exit code
   rc=$?
   if [ $rc != 0 ] ; then
