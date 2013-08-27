@@ -33,6 +33,7 @@ project_path=$script_path/SC-metadata-generator-master
 sudo ruby $script_path/../build-packages/abf_yml.rb -p $project_path
 
 cd $project_path
+ls -la
 
 
 for arch in $arches ; do
