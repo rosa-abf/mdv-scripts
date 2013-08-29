@@ -104,6 +104,12 @@ default_cfg=$rpm_build_script_path/configs/default.cfg
 cp $rpm_build_script_path/configs/$config_name $default_cfg
 media_list=/home/vagrant/container/media.list
 
+# TODO: Remove later, added temporally
+if [ "$platform_name" == "red3" ]; then
+  echo "rosa2012.1_main_release http://abf-downloads.rosalinux.ru/rosa2012.1/repository/$platform_arch/main/release" >> $media_list
+  echo "rosa2012.1_main_updates http://abf-downloads.rosalinux.ru/rosa2012.1/repository/$platform_arch/main/updates" >> $media_list
+fi
+
 echo "config_opts['macros']['%packager'] = '$uname <$email>'" >> $default_cfg
 
 echo 'config_opts["urpmi_media"] = {' >> $default_cfg
