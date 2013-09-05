@@ -54,7 +54,7 @@ for arch in $arches ; do
   fi
 
   mv -f gui_pkgs.yml.xz $repository_path/$arch/media/media_info/
-  mv -f sc_alternatives.yml.gz $repository_path/$arch/media/media_info/
+  mv -f sc_alternatives.yml.xz $repository_path/$arch/media/media_info/
 
   echo "--> [`LANG=en_US.UTF-8  date -u`] Done."
 done
