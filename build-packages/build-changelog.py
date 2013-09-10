@@ -129,7 +129,7 @@ def main():
                       help="From this commit onwards [overrides --tag and --back]")
     parser.add_option("-b", "--back", dest="bk",
                       help="Back x number of commits from the topmost commit [overrides --from and --tag]")
-    parser.add_option("-h", "--head", dest="head",
+    parser.add_option("-e", "--head", dest="head",
                       help="Specify the topmost commit (default HEAD)")
     (options, args) = parser.parse_args()
 
