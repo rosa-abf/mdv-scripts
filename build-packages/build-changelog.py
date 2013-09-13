@@ -58,14 +58,14 @@ class ChangeLog:
 
     def getLog(self):
         if self.options.bk is not None:
-            range = "%s~%s..%s" % (self.options.head, self.options.bk + 25, self.options.head)
-	elif self.options.tag is not None:
-            range = "%s..%s" % (self.options.tag, self.options.head)
+            tree = "%s~%s..%s" % (self.options.head, int(self.options.bk) + 25, self.options.head)
+        elif self.options.tag is not None:
+            tree = "%s..%s" % (self.options.tag, self.options.head)
         elif self.options.fr is not None:
-            range = "%s..%s" % (self.options.fr, self.options.head)
+            tree = "%s..%s" % (self.options.fr, self.options.head)
         else:
-            range = self.options.head
-        proc = subprocess.Popen(['git', 'log', '--pretty=oneline', range],
+            tree = self.options.head
+        proc = subprocess.Popen(['git', 'log', '--pretty=oneline', tree],
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE).communicate()
         lines = filter(lambda x: x.find('l10n: ') != 41 and \
