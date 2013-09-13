@@ -36,6 +36,17 @@ class ChangeLog:
     def __init__(self, options):
         self.options = options
         self.ignore = None
+    
+    def _getEVR(self, name, commit):
+        pop = subprocess.Popen('set -e; TMPFILE=$(mktemp /tmp/output.XXXXXXXXXX); git show %s:%s > $TMPFILE; rpm --specfile $TMPFILE -q --queryformat \'%%{epoch}:%%{version}-%%{release}\' 2>/dev/null | tail -n1; rm -rf $TMPFILE' % (commit, name),
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE, shell=True)
+        proc = pop.communicate()
+        if pop.returncode != 0:
+            return None
+        
+        return proc[0].strip('\n')
+        
 
     def _getCommitDetail(self, commit, field):
         proc = subprocess.Popen(['git', 'log', '-1',
@@ -85,6 +96,11 @@ class ChangeLog:
             goodcommits += 1
             fields = line.split(' ')
             commit = fields[0]
+            
+            if self.options.name is not None:
+                evr = self._getEVR(self.options.name, commit)
+            else:
+                evr = ""
 
             body = self._getCommitDetail(commit, "%B")
             hash = self._getCommitDetail(commit, "%h")
@@ -92,7 +108,7 @@ class ChangeLog:
             email = self._getCommitDetail(commit, "%aE")
             date = self._getCommitDetail(commit, "%ct")
 
-            log.append(("* %s %s <%s>" % (datetime.datetime.fromtimestamp(int(date)).strftime('%a %b %d %Y'), author, email)))
+            log.append(("* %s %s <%s> %s" % (datetime.datetime.fromtimestamp(int(date)).strftime('%a %b %d %Y'), author, email, evr)))
             log.append(("+ Revision: %s" % hash))
             if isinstance(body, (list, tuple)):
                 for bodyline in body:
@@ -131,6 +147,8 @@ def main():
                       help="Back x number of commits from the topmost commit [overrides --from and --tag]")
     parser.add_option("-e", "--head", dest="head",
                       help="Specify the topmost commit (default HEAD)")
+    parser.add_option("-n", "--name", dest="name",
+                      help="Specify a name of a spec file to parse (allows for EVR in changelog)")
     (options, args) = parser.parse_args()
 
     if options.head is None:
