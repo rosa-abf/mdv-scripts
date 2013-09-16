@@ -20,6 +20,11 @@ script_path=`pwd`
 
 arches="i586 x86_64"
 
+# See: https://abf.rosalinux.ru/abf/abf-ideas/issues/51
+# Move debug packages to special separate repository
+# override below if need
+use_debug_repo='true'
+
 # distribution's main media_info folder
 mkdir -p $repository_path/{i586,x86_64}/media/media_info
 
@@ -38,6 +43,12 @@ for arch in $arches ; do
     paths+="$repository_path/$arch/$name/release/media_info "
     if [ "$released" == 'true' ] ; then
       paths+="$repository_path/$arch/$name/updates/media_info "
+    fi
+    if [ "$use_debug_repo" == 'true' ] ; then
+      paths+="$repository_path/$arch/debug_$name/release/media_info "
+      if [ "$released" == 'true' ] ; then
+        paths+="$repository_path/$arch/debug_$name/updates/media_info "
+      fi
     fi
   done
 
