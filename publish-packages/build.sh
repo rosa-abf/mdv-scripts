@@ -34,6 +34,11 @@ platform_path=/home/vagrant/share_folder
 
 repository_path=$platform_path
 
+# See: https://abf.rosalinux.ru/abf/abf-ideas/issues/51
+# Move debug packages to special separate repository
+# override below if need
+use_debug_repo='true'
+
 # Checks 'released' status of platform
 status='release'
 if [ "$released" == 'true' ] ; then
@@ -42,6 +47,9 @@ fi
 
 # Checks that 'repository' directory exist
 mkdir -p $repository_path/{SRPMS,i586,x86_64,armv7l,armv7hl}/$rep_name/$status/media_info
+if [ "$use_debug_repo" == 'true' ] ; then
+  mkdir -p $repository_path/{SRPMS,i586,x86_64,armv7l,armv7hl}/debug_$rep_name/$status/media_info
+fi
 
 sign_rpm=0
 gnupg_path=/home/vagrant/.gnupg
@@ -108,6 +116,16 @@ for arch in $arches ; do
   mkdir {$rpm_backup,$rpm_new}
   cp -rf $main_folder/$status/media_info $m_info_backup
 
+  if [ "$use_debug_repo" == 'true' ] ; then
+    debug_main_folder=$repository_path/$arch/debug_$rep_name
+    debug_rpm_backup="$debug_main_folder/$status-rpm-backup"
+    debug_rpm_new="$debug_main_folder/$status-rpm-new"
+    debug_m_info_backup="$debug_main_folder/$status-media_info-backup"
+    rm -rf $debug_rpm_backup $debug_rpm_new $debug_m_info_backup
+    mkdir {$debug_rpm_backup,$debug_rpm_new}
+    cp -rf $debug_main_folder/$status/media_info $debug_m_info_backup
+  fi
+
   # Downloads new packages
   echo "--> [`LANG=en_US.UTF-8  date -u`] Downloading new packages..."
   new_packages="$container_path/new.$arch.list"
@@ -151,13 +169,34 @@ for arch in $arches ; do
         echo "mv $package $rpm_backup/"
         mv $package $rpm_backup/
       fi
+
+      if [ "$use_debug_repo" == 'true' ] ; then
+        debug_package=$debug_main_folder/$status/$fullname
+        if [ -f "$debug_package" ]; then
+          echo "mv $debug_package $debug_rpm_backup/"
+          mv $debug_package $debug_rpm_backup/
+        fi
+      fi
+
     done
     update_repo=1
   fi
   echo "--> [`LANG=en_US.UTF-8  date -u`] Done."
 
+  # Move packages into repository
   if [ -f "$new_packages" ]; then
-    mv $rpm_new/* $main_folder/$status/
+    if [ "$use_debug_repo" == 'true' ] ; then
+      for file in $( ls -1 $rpm_new/ | grep .rpm$ ) ; do
+        rpm_name=`rpm -qp --queryformat %{NAME} $rpm_new/$file`
+        if [[ "$rpm_name" =~ debuginfo ]] ; then
+          mv $rpm_new/$file $debug_main_folder/$status/
+        else
+          mv $rpm_new/$file $main_folder/$status/
+        fi
+      done
+    else
+      mv $rpm_new/* $main_folder/$status/
+    fi
   fi
   rm -rf $rpm_new
 
@@ -171,6 +210,9 @@ for arch in $arches ; do
   fi
 
   build_repo "$main_folder/$status" "$arch" "$regenerate_metadata" &
+  if [ "$use_debug_repo" == 'true' ] ; then
+    build_repo "$debug_main_folder/$status" "$arch" "$regenerate_metadata" &
+  fi
 done
 
 # Waiting for genhdlist2...
@@ -201,6 +243,15 @@ else
     rpm_new="$main_folder/$status-rpm-new"
     m_info_backup="$main_folder/$status-media_info-backup"
     rm -rf $rpm_backup $rpm_new $m_info_backup
+
+    if [ "$use_debug_repo" == 'true' ] ; then
+      debug_main_folder=$repository_path/$arch/debug_$rep_name
+      debug_rpm_backup="$debug_main_folder/$status-rpm-backup"
+      debug_rpm_new="$debug_main_folder/$status-rpm-new"
+      debug_m_info_backup="$debug_main_folder/$status-media_info-backup"
+      rm -rf $debug_rpm_backup $debug_rpm_new $debug_m_info_backup
+    fi
+
     # Unlocks repository for sync
     rm -f $main_folder/.publish.lock
   done
