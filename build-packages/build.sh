@@ -60,6 +60,13 @@ UNAME="$UNAME" EMAIL="$EMAIL" PLATFORM_NAME="$PLATFORM_NAME" PLATFORM_ARCH="$ARC
   exit $rc
 fi
 
+if [ "$platform_name" == 'rosa-dx-chrome-1.0' ] ; then
+  # TODO: remove when "main" repository will be rebuilt
+  echo "rosa2012lts_main_release http://abf-downloads.rosalinux.ru/rosa2012lts/repository/$platform_arch/main/release" >> $media_list
+  echo "rosa2012lts_contrib_release http://abf-downloads.rosalinux.ru/rosa2012lts/repository/$platform_arch/contrib/release" >> $media_list
+  echo "rosa2012lts_contrib_updates http://abf-downloads.rosalinux.ru/rosa2012lts/repository/$platform_arch/contrib/updates" >> $media_list
+fi
+
 # create SPECS folder and move *.spec
 mkdir $tmpfs_path/SPECS
 mv $project_path/*.spec $tmpfs_path/SPECS/
