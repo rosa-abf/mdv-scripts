@@ -188,7 +188,7 @@ for arch in $arches ; do
     if [ "$use_debug_repo" == 'true' ] ; then
       for file in $( ls -1 $rpm_new/ | grep .rpm$ ) ; do
         rpm_name=`rpm -qp --queryformat %{NAME} $rpm_new/$file`
-        if [[ "$rpm_name" =~ debuginfo ]] ; then
+        if [[ "$rpm_name" =~ debug ]] ; then
           mv $rpm_new/$file $debug_main_folder/$status/
         else
           mv $rpm_new/$file $main_folder/$status/
