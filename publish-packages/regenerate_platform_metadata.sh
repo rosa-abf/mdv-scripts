@@ -23,7 +23,7 @@ arches="i586 x86_64"
 # See: https://abf.rosalinux.ru/abf/abf-ideas/issues/51
 # Move debug packages to special separate repository
 # override below if need
-use_debug_repo='true'
+use_debug_repo='false'
 
 # distribution's main media_info folder
 mkdir -p $repository_path/{i586,x86_64}/media/media_info
