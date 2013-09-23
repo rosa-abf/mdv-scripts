@@ -17,6 +17,9 @@ uname="$UNAME"
 email="$EMAIL"
 platform_name="$PLATFORM_NAME"
 platform_arch="$ARCH"
+extra_cfg_options="$EXTRA_CFG_OPTIONS"
+extra_build_src_rpm_options="$EXTRA_BUILD_SRC_RPM_OPTIONS"
+extra_build_rpm_options="$EXTRA_BUILD_RPM_OPTIONS"
 
 echo $git_project_address | awk '{ gsub(/\:\/\/.*\:\@/, "://[FILTERED]@"); print }'
 echo $commit_hash
@@ -90,56 +93,30 @@ rpm_path=$archives_path/RPM
 mkdir $rpm_path
 
 
-config_name="mdv-$platform_arch.cfg"
 config_dir=/etc/mock-urpm/
 # Change output format for mock-urpm
 sed '17c/format: %(message)s' $config_dir/logging.ini > ~/logging.ini
 sudo mv -f ~/logging.ini $config_dir/logging.ini
+
+
+config_name="mdv"
 if [[ "$platform_name" =~ .*lts$ ]] ; then
-  config_name="mdv-lts-$platform_arch.cfg"
+  config_name="mdv-lts"
 fi
-
 # Init config file
-default_cfg=$rpm_build_script_path/configs/default.cfg
-cp $rpm_build_script_path/configs/$config_name $default_cfg
-media_list=/home/vagrant/container/media.list
-
-if [ "$platform_name" == 'rosa-dx-chrome-1.0' ] ; then
-  # TODO: remove when "main" repository will be rebuilt
-  echo "rosa2012lts_main_release http://abf-downloads.rosalinux.ru/rosa2012lts/repository/$platform_arch/main/release" >> $media_list
-  echo "rosa2012lts_contrib_release http://abf-downloads.rosalinux.ru/rosa2012lts/repository/$platform_arch/contrib/release" >> $media_list
-  echo "rosa2012lts_contrib_updates http://abf-downloads.rosalinux.ru/rosa2012lts/repository/$platform_arch/contrib/updates" >> $media_list
-fi
-
-# TODO: Remove later, added temporally
-if [ "$platform_name" == "red3" ]; then
-  echo "rosa2012.1_contrib_release http://abf-downloads.rosalinux.ru/rosa2012.1/repository/$platform_arch/contrib/release" >> $media_list
-  echo "rosa2012.1_contrib_updates http://abf-downloads.rosalinux.ru/rosa2012.1/repository/$platform_arch/contrib/updates" >> $media_list
-fi
-
-echo "config_opts['macros']['%packager'] = '$uname <$email>'" >> $default_cfg
-
-echo 'config_opts["urpmi_media"] = {' >> $default_cfg
-first='1'
-while read CMD; do
-  name=`echo $CMD | awk '{ print $1 }'`
-  url=`echo $CMD | awk '{ print $2 }'`
-  if [ "$first" == '1' ] ; then
-    echo "\"$name\": \"$url\"" >> $default_cfg
-    first=0
-  else
-    echo ", \"$name\": \"$url\"" >> $default_cfg
-  fi
-done < $media_list
-echo '}' >> $default_cfg
-
-
-sudo rm -rf $config_dir/default.cfg
-sudo ln -s $default_cfg $config_dir/default.cfg
+EXTRA_CFG_OPTIONS="$extra_cfg_options" \
+  UNAME=$uname \
+  EMAIL=$email \
+  RPM_BUILD_SCRIPT_PATH=$rpm_build_script_path \
+  CONFIG_DIR=$config_dir \
+  CONFIG_NAME=$config_name \
+  PLATFORM_ARCH=$platform_arch \
+  PLATFORM_NAME=$platform_name \
+  /bin/bash $rpm_build_script_path/init_cfg_config.sh
 
 # Build src.rpm
 echo '--> Build src.rpm'
-mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after
+mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after $extra_build_src_rpm_options
 # Save exit code
 rc=$?
 echo '--> Done.'
@@ -168,7 +145,7 @@ fi
 cd $src_rpm_path
 src_rpm_name=`ls -1 | grep 'src.rpm$'`
 echo '--> Building rpm...'
-mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean
+mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean $extra_build_rpm_options
 # Save exit code
 rc=$?
 echo '--> Done.'
