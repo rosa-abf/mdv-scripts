@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo '--> mdv-scripts/build-packages/configs: mdv.sh'
+echo '--> mdv-scripts/build-packages/configs: openmandriva.sh'
 
 extra_cfg_options="$EXTRA_CFG_OPTIONS"
 uname="$UNAME"
