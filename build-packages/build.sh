@@ -111,6 +111,12 @@ if [ "$platform_name" == 'rosa-dx-chrome-1.0' ] ; then
   echo "rosa2012lts_contrib_updates http://abf-downloads.rosalinux.ru/rosa2012lts/repository/$platform_arch/contrib/updates" >> $media_list
 fi
 
+# TODO: Remove later, added temporally
+if [ "$platform_name" == "red3" ]; then
+  echo "rosa2012.1_contrib_release http://abf-downloads.rosalinux.ru/rosa2012.1/repository/$platform_arch/contrib/release" >> $media_list
+  echo "rosa2012.1_contrib_updates http://abf-downloads.rosalinux.ru/rosa2012.1/repository/$platform_arch/contrib/updates" >> $media_list
+fi
+
 echo "config_opts['macros']['%packager'] = '$uname <$email>'" >> $default_cfg
 
 echo 'config_opts["urpmi_media"] = {' >> $default_cfg
