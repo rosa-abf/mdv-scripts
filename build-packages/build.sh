@@ -47,10 +47,29 @@ git submodule update --init
 git remote rm origin
 git checkout $commit_hash
 
-# TODO: build changelog
-
 # Downloads extra files by .abf.yml
 ruby $rpm_build_script_path/../abf_yml.rb -p $project_path
+
+# Check count of *.spec files (should be one)
+x=`ls -1 | grep '.spec$' | wc -l | sed 's/^ *//' | sed 's/ *$//'`
+spec_name=`ls -1 | grep '.spec$'`
+if [ $x -eq '0' ] ; then
+  echo '--> There are no spec files in repository.'
+  exit 1
+else
+  if [ $x -ne '1' ] ; then
+    echo '--> There are more than one spec file in repository.'
+    exit 1
+  fi
+fi
+
+# TODO: remove later
+if [ "$uname" == 'avokhmin' ] ; then
+  # build changelog (limited to ~10 for reasonable changelog size)
+  sed -i '/%changelog/,$d' $spec_name
+  echo '%changelog' >> $spec_name
+  python $rpm_build_script_path/build-changelog.py -b 5 -e $commit_hash -n $spec_name >> $spec_name
+fi
 
 # Remove .git folder
 rm -rf $project_path/.git
@@ -66,19 +85,6 @@ fi
 # create SPECS folder and move *.spec
 mkdir $tmpfs_path/SPECS
 mv $project_path/*.spec $tmpfs_path/SPECS/
-# Check count of *.spec files (should be one)
-cd $tmpfs_path/SPECS
-x=`ls -1 | grep '.spec$' | wc -l | sed 's/^ *//' | sed 's/ *$//'`
-spec_name=`ls -1 | grep '.spec$'`
-if [ $x -eq '0' ] ; then
-  echo '--> There are no spec files in repository.'
-  exit 1
-else
-  if [ $x -ne '1' ] ; then
-    echo '--> There are more than one spec file in repository.'
-    exit 1
-  fi
-fi
 
 #create SOURCES folder and move src
 mkdir $tmpfs_path/SOURCES
