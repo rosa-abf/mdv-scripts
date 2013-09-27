@@ -60,10 +60,13 @@ else
   fi
 fi
 
-# build changelog (limited to ~10 for reasonable changelog size)
-sed -i '/%changelog/,$d' $spec_name
-echo '%changelog' >> $spec_name
-python $rpm_build_script_path/build-changelog.py -b 5 -e $commit_hash -n $spec_name >> $spec_name
+# TODO: remove later
+if [ "$uname" == 'avokhmin' ] ; then
+  # build changelog (limited to ~10 for reasonable changelog size)
+  sed -i '/%changelog/,$d' $spec_name
+  echo '%changelog' >> $spec_name
+  python $rpm_build_script_path/build-changelog.py -b 5 -e $commit_hash -n $spec_name >> $spec_name
+fi
 
 # Remove .git folder
 rm -rf $project_path/.git
