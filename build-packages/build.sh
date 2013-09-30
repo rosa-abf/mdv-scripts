@@ -64,7 +64,7 @@ else
 fi
 
 # TODO: remove later
-if [ "$uname" == 'avokhmin' ] ; then
+if [ "$uname" == 'robxu9' ] ; then
   # build changelog (limited to ~10 for reasonable changelog size)
   sed -i '/%changelog/,$d' $spec_name
   echo '%changelog' >> $spec_name
