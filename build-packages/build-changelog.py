@@ -49,10 +49,9 @@ class ChangeLog:
         
 
     def _getCommitDetail(self, commit, field):
-        proc = subprocess.Popen(['git', 'log', '-1',
-                                 "--pretty=format:%s" % field, commit],
+        proc = subprocess.Popen('git log -1 --pretty=format:%s %s' % (field, commit),
                                 stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE).communicate()
+                                stderr=subprocess.PIPE, shell=True).communicate()
 
         ret = proc[0].strip('\n').split('\n')
 
