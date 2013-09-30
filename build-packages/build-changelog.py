@@ -36,17 +36,17 @@ class ChangeLog:
     def __init__(self, options):
         self.options = options
         self.ignore = None
-    
+
     def _getEVR(self, name, commit):
-        pop = subprocess.Popen('set -e; TMPFILE=$(mktemp /tmp/output.XXXXXXXXXX); git show %s:%s > $TMPFILE; rpm --specfile $TMPFILE -q --queryformat \'%%{epoch}:%%{version}-%%{release}\\n\' 2>/dev/null | tail -n1; rm -rf $TMPFILE' % (commit, name),
+        pop = subprocess.Popen('set -e; TMPFILE=$(mktemp /tmp/output.XXXXXXXXXX); git show %s:%s > $TMPFILE; if [ "$(rpm --specfile $TMPFILE -q --queryformat \'%%{epoch}\\n\' 2>/dev/null | tail -n1)" == "(none)" ]; then rpm --specfile $TMPFILE -q --queryformat \'%%{version}-%%{release}\\n\' 2>/dev/null | tail -n1; else rpm --specfile $TMPFILE -q --queryformat \'%%{epoch}:%%{version}-%%{release}\\n\' 2>/dev/null | tail -n1; fi; rm -rf $TMPFILE' % (commit, name),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE, shell=True)
         proc = pop.communicate()
         if pop.returncode != 0:
             return None
-        
+
         return proc[0].strip('\n')
-        
+
 
     def _getCommitDetail(self, commit, field):
         proc = subprocess.Popen('git log -1 --pretty=format:%s %s' % (field, commit),
@@ -95,7 +95,7 @@ class ChangeLog:
             goodcommits += 1
             fields = line.split(' ')
             commit = fields[0]
-            
+
             if self.options.name is not None:
                 evr = self._getEVR(self.options.name, commit)
             else:
