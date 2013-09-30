@@ -38,7 +38,7 @@ class ChangeLog:
         self.ignore = None
     
     def _getEVR(self, name, commit):
-        pop = subprocess.Popen('set -e; TMPFILE=$(mktemp /tmp/output.XXXXXXXXXX); git show %s:%s > $TMPFILE; rpm --specfile $TMPFILE -q --queryformat \'%%{epoch}:%%{version}-%%{release}\' 2>/dev/null | tail -n1; rm -rf $TMPFILE' % (commit, name),
+        pop = subprocess.Popen('set -e; TMPFILE=$(mktemp /tmp/output.XXXXXXXXXX); git show %s:%s > $TMPFILE; rpm --specfile $TMPFILE -q --queryformat \'%%{epoch}:%%{version}-%%{release}\\n\' 2>/dev/null | tail -n1; rm -rf $TMPFILE' % (commit, name),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE, shell=True)
         proc = pop.communicate()
