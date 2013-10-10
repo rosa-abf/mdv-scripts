@@ -65,11 +65,11 @@ for arch in $arches ; do
   fi
 
   mv -f gui_pkgs.yml.xz $repository_path/$arch/media/media_info/
-  mv -f gui_pkgs.yml.xz.md5sum $repository_path/$arch/media/media_info/
+  mv -f gui_pkgs.yml.md5sum $repository_path/$arch/media/media_info/
   mv -f sc_alternatives.yml.xz $repository_path/$arch/media/media_info/
-  mv -f sc_alternatives.yml.xz.md5sum $repository_path/$arch/media/media_info/
+  mv -f sc_alternatives.yml.md5sum $repository_path/$arch/media/media_info/
   mv -f sc_descriptions.yml.xz $repository_path/$arch/media/media_info/
-  mv -f sc_descriptions.yml.xz.md5sum $repository_path/$arch/media/media_info/
+  mv -f sc_descriptions.yml.md5sum $repository_path/$arch/media/media_info/
 
   echo "--> [`LANG=en_US.UTF-8  date -u`] Done."
 done
