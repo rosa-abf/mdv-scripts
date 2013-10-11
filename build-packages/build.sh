@@ -32,7 +32,8 @@ tmpfs_path="/home/vagrant/tmpfs"
 project_path="$tmpfs_path/project"
 rpm_build_script_path=`pwd`
 
-rm -rf $archives_path $results_path $tmpfs_path $project_path
+sudo umount $tmpfs_path
+sudo rm -rf $archives_path $results_path $tmpfs_path $project_path
 mkdir  $archives_path $results_path $tmpfs_path $project_path
 
 # Mount tmpfs
