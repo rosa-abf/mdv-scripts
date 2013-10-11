@@ -2,7 +2,7 @@
 
 sudo urpmi.update -a
 for p in urpmi mock-urpm perl-URPM genhdlist2 tree ; do
-sudo urpmi --auto --debug $p
+sudo urpmi --auto $p
 done
 
 echo '--> mdv-scripts/build-packages: build.sh'
