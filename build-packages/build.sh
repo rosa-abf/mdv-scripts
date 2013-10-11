@@ -1,6 +1,7 @@
 #!/bin/sh
 
-sudo urpmi.update -a
+sudo urpmi.update -va
+sudo cat /etc/urpmi/urpmi.cfg
 for p in urpmi mock-urpm perl-URPM genhdlist2 tree ; do
 sudo urpmi --auto $p
 done
