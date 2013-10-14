@@ -1,4 +1,6 @@
 #!/bin/sh
+echo "Checking /etc/rpm/platform"
+cat /etc/rpm/platform
 
 sudo urpmi.update -a
 for p in urpmi mock-urpm perl-URPM genhdlist2 tree ; do
