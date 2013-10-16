@@ -230,6 +230,9 @@ mv $src_rpm_path/*.rpm $results_path/
 # Remove archives folder
 rm -rf $archives_path
 
+# Cleanup ARM-releated hacks
+sudo rm -f /etc/rpm/platform
+
 # Check exit code after testing
 if [ $test_code != 0 ] ; then
   echo '--> Test failed, see: tests.log'
