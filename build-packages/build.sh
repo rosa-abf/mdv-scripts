@@ -3,7 +3,7 @@ echo "Checking /etc/rpm/platform"
 cat /etc/rpm/platform
 
 sudo urpmi.update -a
-for p in urpmi mock-urpm perl-URPM genhdlist2 tree ; do
+for p in curl urpmi mock-urpm perl-URPM genhdlist2 tree ; do
 sudo urpmi --auto $p
 done
 
