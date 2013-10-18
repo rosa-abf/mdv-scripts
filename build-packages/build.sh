@@ -2,10 +2,10 @@
 echo "Checking /etc/rpm/platform"
 cat /etc/rpm/platform
 
-sudo urpmi.update -a
-for p in curl urpmi mock-urpm perl-URPM genhdlist2 tree ; do
-sudo urpmi --auto $p
-done
+# sudo urpmi.update -a
+# for p in curl urpmi mock-urpm perl-URPM genhdlist2 tree ; do
+# sudo urpmi --auto $p
+# done
 
 echo '--> mdv-scripts/build-packages: build.sh'
 
@@ -34,12 +34,14 @@ tmpfs_path="/home/vagrant/tmpfs"
 project_path="$tmpfs_path/project"
 rpm_build_script_path=`pwd`
 
-sudo umount $tmpfs_path
+sudo chown vagrant:vagrant -R /home/vagrant
+
+# sudo umount $tmpfs_path
 sudo rm -rf $archives_path $results_path $tmpfs_path $project_path
 mkdir  $archives_path $results_path $tmpfs_path $project_path
 
 # Mount tmpfs
-sudo mount -t tmpfs tmpfs -o size=40000M,nr_inodes=10M $tmpfs_path
+# sudo mount -t tmpfs tmpfs -o size=40000M,nr_inodes=10M $tmpfs_path
 
 # Download project
 # Fix for: 'fatal: index-pack failed'
@@ -215,7 +217,7 @@ fi
 
 # Umount tmpfs
 cd /
-sudo umount $tmpfs_path
+# sudo umount $tmpfs_path
 rm -rf $tmpfs_path
 
 
