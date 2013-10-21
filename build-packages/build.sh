@@ -1,7 +1,7 @@
 #!/bin/sh
 echo "Checking /etc/rpm/platform"
 cat /etc/rpm/platform
-echi "Removing /etc/rpm/platform to avoid problems"
+echo "Removing /etc/rpm/platform to avoid problems"
 sudo rm -f /etc/rpm/platform
 
 sudo urpmi.update -a
