@@ -2,7 +2,7 @@
 echo "Checking /etc/rpm/platform"
 cat /etc/rpm/platform
 echo "Removing /etc/rpm/platform to avoid problems"
-sudo rm -f /etc/rpm/platform
+sudo rm -rf /etc/rpm/platform
 
 sudo urpmi.update -a
 for p in curl urpmi mock-urpm perl-URPM genhdlist2 tree ; do
