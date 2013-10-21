@@ -6,5 +6,6 @@ sudo urpmi ${PACKAGES[*]} --auto --no-suggests --no-verify-rpm
 
 # sudo usermod -a -G vboxsf vagrant
 sudo usermod -a -G  mock-urpm vagrant
+sudo cp -f  /usr/share/zoneinfo/UTC /etc/localtime
 
 exit 0
