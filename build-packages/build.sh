@@ -1,4 +1,5 @@
 #!/bin/sh
+
 echo "Checking /etc/rpm/platform"
 cat /etc/rpm/platform
 
@@ -35,6 +36,9 @@ project_path="$tmpfs_path/project"
 rpm_build_script_path=`pwd`
 
 sudo chown vagrant:vagrant -R /home/vagrant
+
+# !!!!!
+/bin/bash $rpm_build_script_path/../startup-vm/startup.sh
 
 # sudo umount $tmpfs_path
 sudo rm -rf $archives_path $results_path $tmpfs_path $project_path
