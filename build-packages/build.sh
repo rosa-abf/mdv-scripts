@@ -103,6 +103,9 @@ for x in $project_path/* $project_path/.[!.]* $project_path/..?*; do
     if [ -e "$x" ]; then mv -- "$x" $tmpfs_path/SOURCES/
 done
 
+# remove unnecessary files
+rm -f $tmpfs_path/SOURCES/.abf.yml $tmpfs_path/SOURCES/.gitignore
+
 # Init folders for building src.rpm
 cd $archives_path
 src_rpm_path=$archives_path/SRC_RPM
