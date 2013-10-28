@@ -100,7 +100,9 @@ mkdir $tmpfs_path/SOURCES
 
 # account for hidden files
 for x in $project_path/* $project_path/.[!.]* $project_path/..?*; do
-    if [ -e "$x" ]; then mv -- "$x" $tmpfs_path/SOURCES/
+  if [ -e "$x" ]; then
+    mv -- "$x" $tmpfs_path/SOURCES/
+  fi
 done
 
 # remove unnecessary files
