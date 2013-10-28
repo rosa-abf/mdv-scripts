@@ -97,7 +97,11 @@ mv $project_path/*.spec $tmpfs_path/SPECS/
 
 #create SOURCES folder and move src
 mkdir $tmpfs_path/SOURCES
-mv $project_path/* $tmpfs_path/SOURCES/
+
+# account for hidden files
+for x in $project_path/* $project_path/.[!.]* $project_path/..?*; do
+    if [ -e "$x" ]; then mv -- "$x" $tmpfs_path/SOURCES/
+done
 
 # Init folders for building src.rpm
 cd $archives_path
