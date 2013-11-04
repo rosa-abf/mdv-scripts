@@ -74,7 +74,13 @@ EXTRA_CFG_OPTIONS="$extra_cfg_options" \
 
 # prepare ARM stuff
 echo '--> Load binfmt_misc kernel module'
-sudo modprobe binfmt_misc
+if [ ! -d /proc/sys/fs/binfmt_misc ]; then
+   sudo /sbin/modprobe binfmt_misc
+fi
+if [ ! -f /proc/sys/fs/binfmt_misc/register ]; then
+   sudo mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc
+fi
+
 echo '--> install ARM-related env'
 sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
 sudo sh -c "echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-wrapper:' > /proc/sys/fs/binfmt_misc/register"
