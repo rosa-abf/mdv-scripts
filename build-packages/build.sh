@@ -2,6 +2,8 @@
 
 echo "Checking /etc/rpm/platform"
 cat /etc/rpm/platform
+echo "Removing /etc/rpm/platform to avoid problems"
+sudo rm -rf /etc/rpm/platform
 
 # sudo urpmi.update -a
 # for p in curl urpmi mock-urpm perl-URPM genhdlist2 tree ; do
@@ -40,7 +42,7 @@ sudo chown vagrant:vagrant -R /home/vagrant
 # !!!!!
 /bin/bash $rpm_build_script_path/../startup-vm/startup.sh
 
-# sudo umount $tmpfs_path
+# sudo umount -l $tmpfs_path
 sudo rm -rf $archives_path $results_path $tmpfs_path $project_path
 mkdir  $archives_path $results_path $tmpfs_path $project_path
 
@@ -101,7 +103,16 @@ mv $project_path/*.spec $tmpfs_path/SPECS/
 
 #create SOURCES folder and move src
 mkdir $tmpfs_path/SOURCES
-mv $project_path/* $tmpfs_path/SOURCES/
+
+# account for hidden files
+for x in $project_path/* $project_path/.[!.]* $project_path/..?*; do
+  if [ -e "$x" ]; then
+    mv -- "$x" $tmpfs_path/SOURCES/
+  fi
+done
+
+# remove unnecessary files
+rm -f $tmpfs_path/SOURCES/.abf.yml $tmpfs_path/SOURCES/.gitignore
 
 # Init folders for building src.rpm
 cd $archives_path
@@ -221,7 +232,7 @@ fi
 
 # Umount tmpfs
 cd /
-# sudo umount $tmpfs_path
+# sudo umount -l $tmpfs_path
 sudo rm -rf $tmpfs_path
 
 
