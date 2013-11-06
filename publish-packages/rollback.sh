@@ -5,7 +5,9 @@ echo '--> mdv-scripts/publish-packages: rollback.sh'
 released="$RELEASED"
 rep_name="$REPOSITORY_NAME"
 use_file_store="$USE_FILE_STORE"
+testing="$TESTING"
 
+echo "TESTING = $testing"
 echo "RELEASED = $released"
 echo "REPOSITORY_NAME = $rep_name"
 
@@ -23,6 +25,10 @@ use_debug_repo='true'
 status='release'
 if [ "$released" == 'true' ] ; then
   status='updates'
+fi
+if [ "$testing" == 'true' ] ; then
+  status='testing'
+  use_debug_repo='false'
 fi
 
 # Update genhdlist2

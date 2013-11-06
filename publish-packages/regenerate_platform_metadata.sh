@@ -50,6 +50,9 @@ for arch in $arches ; do
         paths+="$repository_path/$arch/debug_$name/updates/media_info "
       fi
     fi
+    if [ -d "$repository_path/$arch/$name/testing/media_info" ] ; then
+      paths+="$repository_path/$arch/$name/testing/media_info "
+    fi
   done
 
   # Downloads extra files by .abf.yml

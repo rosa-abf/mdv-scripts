@@ -9,6 +9,7 @@ sudo urpmi --auto genhdlist2
 released="$RELEASED"
 rep_name="$REPOSITORY_NAME"
 is_container="$IS_CONTAINER"
+testing="$TESTING"
 id="$ID"
 # save_to_platform - main or personal platform
 save_to_platform="$SAVE_TO_PLATFORM"
@@ -16,6 +17,7 @@ save_to_platform="$SAVE_TO_PLATFORM"
 build_for_platform="$BUILD_FOR_PLATFORM"
 regenerate_metadata="$REGENERATE_METADATA"
 
+echo "TESTING = $testing"
 echo "RELEASED = $released"
 echo "REPOSITORY_NAME = $rep_name"
 
@@ -44,6 +46,10 @@ status='release'
 if [ "$released" == 'true' ] ; then
   status='updates'
 fi
+if [ "$testing" == 'true' ] ; then
+  status='testing'
+  use_debug_repo='false'
+fi
 
 # Checks that 'repository' directory exist
 mkdir -p $repository_path/{SRPMS,i586,x86_64,armv7l,armv7hl}/$rep_name/$status/media_info
@@ -52,12 +58,14 @@ if [ "$use_debug_repo" == 'true' ] ; then
 fi
 
 sign_rpm=0
-gnupg_path=/home/vagrant/.gnupg
-if [ ! -d "$gnupg_path" ]; then
-  echo "--> $gnupg_path does not exist"
-else
-  sign_rpm=1
-  /bin/bash $script_path/init_rpmmacros.sh
+if [ "$testing" != 'true' ] ; then
+  gnupg_path=/home/vagrant/.gnupg
+  if [ ! -d "$gnupg_path" ]; then
+    echo "--> $gnupg_path does not exist"
+  else
+    sign_rpm=1
+    /bin/bash $script_path/init_rpmmacros.sh
+  fi
 fi
 
 
@@ -213,6 +221,11 @@ for arch in $arches ; do
   if [ "$use_debug_repo" == 'true' ] ; then
     build_repo "$debug_main_folder/$status" "$arch" "$regenerate_metadata" &
   fi
+
+  if [ "$regenerate_metadata" == 'true' ] && [ -d "$main_folder/testing" ] ; then
+    build_repo "$main_folder/testing" "$arch" "$regenerate_metadata" &
+  fi
+
 done
 
 # Waiting for genhdlist2...
@@ -235,7 +248,7 @@ done
 # Check exit code after build and rollback
 if [ $rc != 0 ] ; then
   cd $script_path/
-  RELEASED=$released REPOSITORY_NAME=$rep_name USE_FILE_STORE=false /bin/bash $script_path/rollback.sh
+  TESTING=$testing RELEASED=$released REPOSITORY_NAME=$rep_name USE_FILE_STORE=false /bin/bash $script_path/rollback.sh
 else
   for arch in $arches ; do
     main_folder=$repository_path/$arch/$rep_name
