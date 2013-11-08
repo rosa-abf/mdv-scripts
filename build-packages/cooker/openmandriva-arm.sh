@@ -192,7 +192,7 @@ fi
 # Umount tmpfs
 cd /
 # sudo umount -l $tmpfs_path
-rm -rf $tmpfs_path
+sudo rm -rf $tmpfs_path
 
 
 move_logs $rpm_path 'rpm'
