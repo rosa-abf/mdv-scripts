@@ -13,9 +13,9 @@ config_opts['root'] = 'Rosa-2012.1-$platform_arch'
 config_opts['target_arch'] = '$platform_arch'
 config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64')
 
-config_opts['chroot_setup'] = 'basesystem-minimal locales locales-en locales-de locales-uk locales-es locales-ru make patch unzip gnupg rpm-build meta-task'
+config_opts['chroot_setup'] = 'basesystem-minimal locales locales-en locales-de locales-uk locales-es locales-ru make patch unzip gnupg rpm-build meta-task wget'
 config_opts['urpmi_options'] = '--no-suggests --no-verify-rpm --fastunsafe --ignoresize $extra_cfg_options'
-config_opts['urpm_options'] = ''
+config_opts['urpm_options'] = '--wget'
 
 # If it's True - current urpmi configs will be copied to the chroot.
 # Ater that other media will be added.
