@@ -13,6 +13,7 @@ email="$EMAIL"
 platform_name="$PLATFORM_NAME"
 platform_arch="$ARCH"
 extra_cfg_options="$EXTRA_CFG_OPTIONS"
+extra_cfg_urpm_options="$EXTRA_CFG_URPM_OPTIONS"
 extra_build_src_rpm_options="$EXTRA_BUILD_SRC_RPM_OPTIONS"
 extra_build_rpm_options="$EXTRA_BUILD_RPM_OPTIONS"
 
@@ -63,6 +64,7 @@ sudo mv -f ~/logging.ini $config_dir/logging.ini
 
 # Init config file
 EXTRA_CFG_OPTIONS="$extra_cfg_options" \
+  EXTRA_CFG_URPM_OPTIONS="$extra_cfg_urpm_options" \
   UNAME=$uname \
   EMAIL=$email \
   RPM_BUILD_SCRIPT_PATH=$rpm_build_script_path \

@@ -3,6 +3,7 @@
 echo '--> mdv-scripts/build-packages/configs: mdv.sh'
 
 extra_cfg_options="$EXTRA_CFG_OPTIONS"
+extra_cfg_urpm_options="$EXTRA_CFG_URPM_OPTIONS"
 uname="$UNAME"
 email="$EMAIL"
 platform_arch="$PLATFORM_ARCH"
@@ -15,7 +16,7 @@ config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64')
 
 config_opts['chroot_setup'] = 'basesystem-minimal locales locales-en locales-de locales-uk locales-es locales-ru make patch unzip gnupg rpm-build meta-task'
 config_opts['urpmi_options'] = '--no-suggests --no-verify-rpm --ignoresize $extra_cfg_options'
-config_opts['urpm_options'] = ''
+config_opts['urpm_options'] = '$extra_cfg_urpm_options'
 
 # If it's True - current urpmi configs will be copied to the chroot.
 # Ater that other media will be added.
