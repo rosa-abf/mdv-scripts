@@ -23,6 +23,7 @@ email="$EMAIL"
 platform_name="$PLATFORM_NAME"
 platform_arch="$ARCH"
 extra_cfg_options="$EXTRA_CFG_OPTIONS"
+extra_cfg_urpm_options="$EXTRA_CFG_URPM_OPTIONS"
 extra_build_src_rpm_options="$EXTRA_BUILD_SRC_RPM_OPTIONS"
 extra_build_rpm_options="$EXTRA_BUILD_RPM_OPTIONS"
 
@@ -90,8 +91,16 @@ cat $changelog_log >> $spec_name
 rm -rf $project_path/.git
 
 if [[ "$platform_name" == "cooker" && ("$platform_arch" == "armv7l" || "$platform_arch" == "armv7hl" )]]; then
-cd $rpm_build_script_path
-UNAME="$UNAME" EMAIL="$EMAIL" PLATFORM_NAME="$PLATFORM_NAME" PLATFORM_ARCH="$ARCH" /bin/bash $rpm_build_script_path/cooker/openmandriva-arm.sh
+  cd $rpm_build_script_path
+  UNAME="$UNAME" \
+    EXTRA_CFG_OPTIONS="$extra_cfg_options" \
+    EXTRA_CFG_URPM_OPTIONS="$extra_cfg_urpm_options" \
+    EXTRA_BUILD_SRC_RPM_OPTIONS="$extra_build_src_rpm_options" \
+    EXTRA_BUILD_RPM_OPTIONS="$extra_build_rpm_options" \
+    EMAIL="$EMAIL" \
+    PLATFORM_NAME="$PLATFORM_NAME" \
+    PLATFORM_ARCH="$ARCH" \
+    /bin/bash $rpm_build_script_path/cooker/openmandriva-arm.sh
   # Save exit code
   rc=$?
   exit $rc
@@ -135,6 +144,7 @@ if [[ "$platform_name" =~ .*lts$ ]] ; then
 fi
 # Init config file
 EXTRA_CFG_OPTIONS="$extra_cfg_options" \
+  EXTRA_CFG_URPM_OPTIONS="$extra_cfg_urpm_options" \
   UNAME=$uname \
   EMAIL=$email \
   RPM_BUILD_SCRIPT_PATH=$rpm_build_script_path \
