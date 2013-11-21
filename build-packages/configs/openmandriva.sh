@@ -15,7 +15,7 @@ config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64', 'armv7l', 'armv7hl
 
 config_opts['chroot_setup'] = 'basesystem-minimal locales locales-en locales-de locales-uk locales-es locales-ru distro-release-OpenMandriva gnupg rpm-build urpmi meta-task wget'
 config_opts['urpmi_options'] = '--no-suggests --no-verify-rpm --fastunsafe --ignoresize --ignorearch --excludedocs'
-config_opts['urpm_options'] = '--wget'
+config_opts['urpm_options'] = '--wget --wget-options --auth-no-challenge'
 
 # If it's True - current urpmi configs will be copied to the chroot.
 # Ater that other media will be added.
