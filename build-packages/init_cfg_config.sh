@@ -21,8 +21,8 @@ EOF
 fi
 if [ "$platform_name" == "red3" ]; then
 cat <<EOF>> $media_list
-rosa2012.1_contrib_release http://abf-downloads.rosalinux.ru/rosa2012.1/repository/$platform_arch/contrib/release
-rosa2012.1_contrib_updates http://abf-downloads.rosalinux.ru/rosa2012.1/repository/$platform_arch/contrib/updates
+rosa2012.1_main_release http://abf-downloads.rosalinux.ru/rosa2012.1/repository/$platform_arch/main/release
+rosa2012.1_main_updates http://abf-downloads.rosalinux.ru/rosa2012.1/repository/$platform_arch/main/updates
 EOF
 fi
 
