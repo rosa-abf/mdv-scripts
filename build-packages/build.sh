@@ -106,6 +106,22 @@ if [[ "$platform_name" == "cooker" && ("$platform_arch" == "armv7l" || "$platfor
   exit $rc
 fi
 
+if [[ "$platform_name" == "cooker" && ("$platform_arch" == "aarch64" )]]; then
+  cd $rpm_build_script_path
+  UNAME="$UNAME" \
+    EXTRA_CFG_OPTIONS="$extra_cfg_options" \
+    EXTRA_CFG_URPM_OPTIONS="$extra_cfg_urpm_options" \
+    EXTRA_BUILD_SRC_RPM_OPTIONS="$extra_build_src_rpm_options" \
+    EXTRA_BUILD_RPM_OPTIONS="$extra_build_rpm_options" \
+    EMAIL="$EMAIL" \
+    PLATFORM_NAME="$PLATFORM_NAME" \
+    PLATFORM_ARCH="$ARCH" \
+    /bin/bash $rpm_build_script_path/cooker/openmandriva-arm64.sh
+  # Save exit code
+  rc=$?
+  exit $rc
+fi
+
 # create SPECS folder and move *.spec
 mkdir $tmpfs_path/SPECS
 mv $project_path/*.spec $tmpfs_path/SPECS/
