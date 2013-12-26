@@ -124,7 +124,6 @@ for arch in $arches ; do
       if [ "$r" == '[]' ] ; then
         echo "--> Package with sha1 '$sha1' for $arch does not exist!!!"
         all_packages_exist=1
-      else
       fi
     done
   fi
