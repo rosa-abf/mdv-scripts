@@ -149,6 +149,7 @@ for arch in $arches ; do
         # Add signature to RPM
         if [ $sign_rpm != 0 ] ; then
           chmod 0666 $fullname
+          echo "--> Starting to sign rpm package"
           rpm --addsign $rpm_new/$fullname
           # Save exit code
           rc=$?
