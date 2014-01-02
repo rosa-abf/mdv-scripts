@@ -16,6 +16,7 @@ save_to_platform="$SAVE_TO_PLATFORM"
 # build_for_platform - only main platform
 build_for_platform="$BUILD_FOR_PLATFORM"
 regenerate_metadata="$REGENERATE_METADATA"
+key_server="pool.sks-keyservers.net"
 OMV_key="BF81DE15"
 
 echo "TESTING = $testing"
@@ -60,14 +61,15 @@ fi
 
 sign_rpm=0
 if [ "$testing" != 'true' ] ; then
-if [[ "$save_to_platform" =~ ^.*openmandriva.*$ ]] || [[ "$save_to_platform" =~ ^.*cooker.*$ ]]; then
-	echo "--> Importing OpenMandriva GPG key from external keyserver"
-	gpg --recv-keys $OMV_key
-    
-else
-	echo "--> Missing gpg key for this platform"
-fi
-  gnupg_path=/home/vagrant/.gnupg
+	gnupg_path=/home/vagrant/.gnupg
+	
+   	if [[ "$save_to_platform" =~ ^.*openmandriva.*$ ]] || [[ "$save_to_platform" =~ ^.*cooker.*$ ]]; then
+		echo "--> Importing OpenMandriva GPG key from external keyserver"
+		gpg --homedir $gnupg_path --keyserver $key_server --recv-keys $OMV_key
+	else
+		echo "--> Missing gpg key for this platform"
+	fi
+
   if [ ! -d "$gnupg_path" ]; then
     echo "--> $gnupg_path does not exist, signing rpms will be not possible"
   else
