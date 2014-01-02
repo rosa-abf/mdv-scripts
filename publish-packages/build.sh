@@ -61,7 +61,7 @@ sign_rpm=0
 if [ "$testing" != 'true' ] ; then
   gnupg_path=/home/vagrant/.gnupg
   if [ ! -d "$gnupg_path" ]; then
-    echo "--> $gnupg_path does not exist"
+    echo "--> $gnupg_path does not exist, signing rpms will be not possible"
   else
     sign_rpm=1
     /bin/bash $script_path/init_rpmmacros.sh
@@ -158,6 +158,8 @@ for arch in $arches ; do
           else
             echo "--> Package '$fullname' has not been signed successfully!!!"
           fi
+        else
+        	echo "--> RPM signing is disabled"
         fi
         chmod 0644 $rpm_new/$fullname
       else
