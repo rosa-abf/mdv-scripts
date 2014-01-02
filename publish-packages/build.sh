@@ -60,7 +60,7 @@ fi
 
 sign_rpm=0
 if [ "$testing" != 'true' ] ; then
-if [[ "$save_to_platform" =~ ^openmandriva$ ]]; then
+if [[ "$save_to_platform" =~ ^.*openmandriva.*$ ]]; then
 	echo "--> Importing OpenMandriva GPG key from external keyserver"
 	gpg --recv-keys $OMV_key
     
