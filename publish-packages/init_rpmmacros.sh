@@ -10,7 +10,7 @@ gpg --list-keys
 rpmmacros=~/.rpmmacros
 
 rm -f $rpmmacros
-keyname=`gpg --with-fingerprint $gnupg_path/secring.gpg | sed -n 1p | awk '{ print $2 }' | awk '{ sub(/.*\//, ""); print }'`
+keyname=`gpg --list-public-keys --homedir $gnupg_path | sed -n 3p | awk '{ print $2 }' | awk '{ sub(/.*\//, ""); print }'`
 echo "%_signature gpg"        >> $rpmmacros
 echo "%_gpg_name $keyname"    >> $rpmmacros
 echo "%_gpg_path $gnupg_path" >> $rpmmacros
