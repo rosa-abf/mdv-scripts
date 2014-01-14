@@ -236,8 +236,8 @@ for arch in $arches ; do
       echo "--> Starting to sign rpms in '$main_folder'"
       # evil lo0pz
       for i in `ls $main_folder/$status/*.rpm`; do
-      	rpm --resign $i;
-      	chmod 0644 $i;
+      	rpm --resign $main_folder/$status/$i;
+      	chmod 0644 $main_folder/$status/$i;
       done
       # Save exit code
       rc=$?
