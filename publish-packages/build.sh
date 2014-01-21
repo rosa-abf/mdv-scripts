@@ -16,6 +16,8 @@ save_to_platform="$SAVE_TO_PLATFORM"
 # build_for_platform - only main platform
 build_for_platform="$BUILD_FOR_PLATFORM"
 regenerate_metadata="$REGENERATE_METADATA"
+key_server="pool.sks-keyservers.net"
+OMV_key="BF81DE15"
 
 echo "TESTING = $testing"
 echo "RELEASED = $released"
@@ -59,9 +61,17 @@ fi
 
 sign_rpm=0
 if [ "$testing" != 'true' ] ; then
-  gnupg_path=/home/vagrant/.gnupg
+	gnupg_path=/home/vagrant/.gnupg
+	
+   	if [[ "$save_to_platform" =~ ^.*openmandriva.*$ ]] || [[ "$save_to_platform" =~ ^.*cooker.*$ ]]; then
+		echo "--> Importing OpenMandriva GPG key from external keyserver"
+		gpg --homedir $gnupg_path --keyserver $key_server --recv-keys $OMV_key
+	else
+		echo "--> Missing gpg key for this platform"
+	fi
+
   if [ ! -d "$gnupg_path" ]; then
-    echo "--> $gnupg_path does not exist"
+    echo "--> $gnupg_path does not exist, signing rpms will be not possible"
   else
     sign_rpm=1
     /bin/bash $script_path/init_rpmmacros.sh
@@ -113,6 +123,31 @@ if [ $rep_locked != 0 ] ; then
   exit 1
 fi
 
+# Ensures that all packages exist
+file_store_url='http://file-store.rosalinux.ru/api/v1/file_stores.json'
+all_packages_exist=0
+for arch in $arches ; do
+  new_packages="$container_path/new.$arch.list"
+  if [ -f "$new_packages" ]; then
+    for sha1 in `cat $new_packages` ; do
+      r=`curl ${file_store_url}?hash=${sha1}`
+      if [ "$r" == '[]' ] ; then
+        echo "--> Package with sha1 '$sha1' for $arch does not exist!!!"
+        all_packages_exist=1
+      fi
+    done
+  fi
+done
+# Fails publishing if some packages does not exist
+if [ $all_packages_exist != 0 ] ; then
+  # Unlocks repository for sync
+  for arch in $arches ; do
+    rm -f $repository_path/$arch/$rep_name/.publish.lock
+  done
+  echo "--> [`LANG=en_US.UTF-8  date -u`] ERROR: some packages does not exist"
+  exit 1
+fi
+
 file_store_url='http://file-store.rosalinux.ru/api/v1/file_stores'
 for arch in $arches ; do
   update_repo=0
@@ -149,6 +184,7 @@ for arch in $arches ; do
         # Add signature to RPM
         if [ $sign_rpm != 0 ] ; then
           chmod 0666 $fullname
+          echo "--> Starting to sign rpm package"
           rpm --addsign $rpm_new/$fullname
           # Save exit code
           rc=$?
@@ -157,6 +193,8 @@ for arch in $arches ; do
           else
             echo "--> Package '$fullname' has not been signed successfully!!!"
           fi
+        else
+        	echo "--> RPM signing is disabled"
         fi
         chmod 0644 $rpm_new/$fullname
       else
@@ -196,7 +234,7 @@ for arch in $arches ; do
     if [ "$use_debug_repo" == 'true' ] ; then
       for file in $( ls -1 $rpm_new/ | grep .rpm$ ) ; do
         rpm_name=`rpm -qp --queryformat %{NAME} $rpm_new/$file`
-        if [[ "$rpm_name" =~ debug ]] ; then
+        if [[ "$rpm_name" =~ debuginfo ]] ; then
           mv $rpm_new/$file $debug_main_folder/$status/
         else
           mv $rpm_new/$file $main_folder/$status/
@@ -216,6 +254,27 @@ for arch in $arches ; do
       continue
     fi
   fi
+	
+    # resign all packages
+  if [ "$regenerate_metadata" == 'true' ]; then
+    if [ $sign_rpm != 0 ] ; then
+      echo "--> Starting to sign rpms in '$main_folder'"
+      # evil lo0pz
+      for i in `ls $main_folder/$status/*.rpm`; do
+      	rpm --resign $main_folder/$status/$i;
+      	chmod 0644 $main_folder/$status/$i;
+      done
+      # Save exit code
+      rc=$?
+      if [[ $rc == 0 ]] ; then
+        echo "--> Packages in '$main_folder' has been signed successfully."
+      else
+        echo "--> Packages in '$main_folder' has not been signed successfully!!!"
+      fi
+     else
+       echo "--> RPM signing is disabled"
+     fi
+   fi
 
   build_repo "$main_folder/$status" "$arch" "$regenerate_metadata" &
   if [ "$use_debug_repo" == 'true' ] ; then

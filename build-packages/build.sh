@@ -6,7 +6,7 @@ echo "Removing /etc/rpm/platform to avoid problems"
 sudo rm -rf /etc/rpm/platform
 
 # sudo urpmi.update -a
-# for p in curl urpmi mock-urpm perl-URPM genhdlist2 tree ; do
+# for p in wget curl urpmi mock-urpm perl-URPM genhdlist2 tree ; do
 # sudo urpmi --auto $p
 # done
 

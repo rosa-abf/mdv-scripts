@@ -25,6 +25,9 @@ arches="i586 x86_64"
 # override below if need
 use_debug_repo='false'
 
+# Software from testing repo must not be visible to users of SoftwareCenter, so, we skip testing repo
+use_testing_repo='false'
+
 # distribution's main media_info folder
 mkdir -p $repository_path/{i586,x86_64}/media/media_info
 
@@ -44,14 +47,18 @@ for arch in $arches ; do
     if [ "$released" == 'true' ] ; then
       paths+="$repository_path/$arch/$name/updates/media_info "
     fi
+    
     if [ "$use_debug_repo" == 'true' ] ; then
       paths+="$repository_path/$arch/debug_$name/release/media_info "
       if [ "$released" == 'true' ] ; then
         paths+="$repository_path/$arch/debug_$name/updates/media_info "
       fi
     fi
-    if [ -d "$repository_path/$arch/$name/testing/media_info" ] ; then
-      paths+="$repository_path/$arch/$name/testing/media_info "
+    
+    if [ "$use_testing_repo" == 'true' ] ; then
+      if [ -d "$repository_path/$arch/$name/testing/media_info" ] ; then
+        paths+="$repository_path/$arch/$name/testing/media_info "
+      fi
     fi
   done
 
@@ -73,6 +80,8 @@ for arch in $arches ; do
   mv -f sc_alternatives.yml.md5sum $repository_path/$arch/media/media_info/
   mv -f sc_descriptions.yml.xz $repository_path/$arch/media/media_info/
   mv -f sc_descriptions.yml.md5sum $repository_path/$arch/media/media_info/
+  mv -f sc_descriptions-ru.yml.xz $repository_path/$arch/media/media_info/
+  mv -f sc_descriptions-ru.yml.md5sum $repository_path/$arch/media/media_info/
 
   echo "--> [`LANG=en_US.UTF-8  date -u`] Done."
 done
