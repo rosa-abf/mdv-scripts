@@ -254,6 +254,27 @@ for arch in $arches ; do
       continue
     fi
   fi
+	
+    # resign all packages
+  if [ "$regenerate_metadata" == 'true' ]; then
+    if [ $sign_rpm != 0 ] ; then
+      echo "--> Starting to sign rpms in '$main_folder'"
+      # evil lo0pz
+      for i in `ls $main_folder/$status/*.rpm`; do
+      	rpm --resign $main_folder/$status/$i;
+      	chmod 0644 $main_folder/$status/$i;
+      done
+      # Save exit code
+      rc=$?
+      if [[ $rc == 0 ]] ; then
+        echo "--> Packages in '$main_folder' has been signed successfully."
+      else
+        echo "--> Packages in '$main_folder' has not been signed successfully!!!"
+      fi
+     else
+       echo "--> RPM signing is disabled"
+     fi
+   fi
 
   build_repo "$main_folder/$status" "$arch" "$regenerate_metadata" &
   if [ "$use_debug_repo" == 'true' ] ; then
