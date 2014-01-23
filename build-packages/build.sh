@@ -5,10 +5,10 @@ cat /etc/rpm/platform
 echo "Removing /etc/rpm/platform to avoid problems"
 sudo rm -rf /etc/rpm/platform
 
-# sudo urpmi.update -a
-# for p in wget curl urpmi mock-urpm perl-URPM genhdlist2 tree ; do
-# sudo urpmi --auto $p
-# done
+sudo urpmi.update -a
+for p in wget curl urpmi mock-urpm perl-URPM genhdlist2 tree ; do
+sudo urpmi --auto --ignorearch --no-suggests --no-verify-rpm $p
+done
 
 echo '--> mdv-scripts/build-packages: build.sh'
 
