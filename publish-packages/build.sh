@@ -61,14 +61,14 @@ fi
 
 sign_rpm=0
 if [ "$testing" != 'true' ] ; then
-	gnupg_path=/home/vagrant/.gnupg
-	
-   	if [[ "$save_to_platform" =~ ^.*openmandriva.*$ ]] || [[ "$save_to_platform" =~ ^.*cooker.*$ ]]; then
-		echo "--> Importing OpenMandriva GPG key from external keyserver"
-		gpg --homedir $gnupg_path --keyserver $key_server --recv-keys $OMV_key
-	else
-		echo "--> Missing gpg key for this platform"
-	fi
+  gnupg_path=/home/vagrant/.gnupg
+
+  if [[ "$save_to_platform" =~ ^.*openmandriva.*$ ]] || [[ "$save_to_platform" =~ ^.*cooker.*$ ]]; then
+    echo "--> Importing OpenMandriva GPG key from external keyserver"
+    gpg --homedir $gnupg_path --keyserver $key_server --recv-keys $OMV_key
+  else
+    echo "--> Missing gpg key for this platform"
+  fi
 
   if [ ! -d "$gnupg_path" ]; then
     echo "--> $gnupg_path does not exist, signing rpms will be not possible"
@@ -184,21 +184,19 @@ for arch in $arches ; do
         # Add signature to RPM
         if [ $sign_rpm != 0 ] ; then
           chmod 0666 $fullname
-          for i in `ls *.rpm`; do
-          	echo "--> Starting to sign rpm package"
-          	rpm --addsign $i
-          	# Save exit code
-          	rc=$?
-          		if [[ $rc == 0 ]] ; then
-            		echo "--> Package '$fullname' has been signed successfully."
-          		else
-            		echo "--> Package '$fullname' has not been signed successfully!!!"
-          		fi
-          done
+          echo "--> Starting to sign rpm package"
+          rpm --addsign $fullname
+          # Save exit code
+          rc=$?
+          if [[ $rc == 0 ]] ; then
+            echo "--> Package '$fullname' has been signed successfully."
+          else
+            echo "--> Package '$fullname' has not been signed successfully!!!"
+          fi
         else
-        	echo "--> RPM signing is disabled"
+          echo "--> RPM signing is disabled"
         fi
-        chmod 0644 $rpm_new/$fullname
+        chmod 0644 $fullname
       else
         echo "--> Package with sha1 '$sha1' does not exist!!!"
       fi
@@ -246,6 +244,7 @@ for arch in $arches ; do
       mv $rpm_new/* $main_folder/$status/
     fi
   fi
+  cd $main_folder
   rm -rf $rpm_new
 
   if [ $update_repo != 1 ] ; then
@@ -256,16 +255,16 @@ for arch in $arches ; do
       continue
     fi
   fi
-	
-    # resign all packages
+
+  # resign all packages
   if [ "$regenerate_metadata" == 'true' ]; then
     if [ $sign_rpm != 0 ] ; then
       echo "--> Starting to sign rpms in '$main_folder'"
       # evil lo0pz
       for i in `ls $main_folder/$status/*.rpm`; do
-      	chmod 0666 $i;
-      	rpm --resign $i;
-      	chmod 0644 $i;
+        chmod 0666 $i;
+        rpm --resign $i;
+        chmod 0644 $i;
       done
       # Save exit code
       rc=$?
