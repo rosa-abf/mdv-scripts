@@ -159,15 +159,17 @@ for arch in $arches ; do
         # Add signature to RPM
         if [ $sign_rpm != 0 ] ; then
           chmod 0666 $fullname
-          echo "--> Starting to sign rpm package"
-          rpm --addsign $rpm_new/$fullname
-          # Save exit code
-          rc=$?
-          if [[ $rc == 0 ]] ; then
-            echo "--> Package '$fullname' has been signed successfully."
-          else
-            echo "--> Package '$fullname' has not been signed successfully!!!"
-          fi
+          for i in `ls *.rpm`; do
+          	echo "--> Starting to sign rpm package"
+          	rpm --addsign $i
+          	# Save exit code
+          	rc=$?
+          		if [[ $rc == 0 ]] ; then
+            		echo "--> Package '$fullname' has been signed successfully."
+          		else
+            		echo "--> Package '$fullname' has not been signed successfully!!!"
+          		fi
+          done
         else
         	echo "--> RPM signing is disabled"
         fi
@@ -236,6 +238,7 @@ for arch in $arches ; do
       echo "--> Starting to sign rpms in '$main_folder'"
       # evil lo0pz
       for i in `ls $main_folder/$status/*.rpm`; do
+      	chmod 0666 $main_folder/$status/$i;
       	rpm --resign $main_folder/$status/$i;
       	chmod 0644 $main_folder/$status/$i;
       done
