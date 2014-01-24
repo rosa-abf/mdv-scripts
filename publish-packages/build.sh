@@ -63,18 +63,19 @@ sign_rpm=0
 if [ "$testing" != 'true' ] ; then
   gnupg_path=/home/vagrant/.gnupg
 
-  if [[ "$save_to_platform" =~ ^.*openmandriva.*$ ]] || [[ "$save_to_platform" =~ ^.*cooker.*$ ]]; then
-    echo "--> Importing OpenMandriva GPG key from external keyserver"
-    gpg --homedir $gnupg_path --keyserver $key_server --recv-keys $OMV_key
-  else
-    echo "--> Missing gpg key for this platform"
-  fi
-
   if [ ! -d "$gnupg_path" ]; then
     echo "--> $gnupg_path does not exist, signing rpms will be not possible"
   else
     sign_rpm=1
     /bin/bash $script_path/init_rpmmacros.sh
+
+    if [[ "$save_to_platform" =~ ^.*openmandriva.*$ ]] || [[ "$save_to_platform" =~ ^.*cooker.*$ ]]; then
+      echo "--> Importing OpenMandriva GPG key from external keyserver"
+      gpg --homedir $gnupg_path --keyserver $key_server --recv-keys $OMV_key
+    else
+      echo "--> Missing gpg key for this platform"
+    fi
+
   fi
 fi
 
