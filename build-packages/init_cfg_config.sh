@@ -16,6 +16,9 @@ media_list=/home/vagrant/container/media.list
 # TODO: Remove later, added temporally
 if [ "$platform_name" == 'rosa-dx-chrome-1.0' ] ; then
 cat <<EOF>> $media_list
+rosa2012lts_main_release http://abf-downloads.rosalinux.ru/rosa2012lts/repository/$platform_arch/main/release
+rosa2012lts_contrib_release http://abf-downloads.rosalinux.ru/rosa2012lts/repository/$platform_arch/contrib/release
+rosa2012lts_contrib_updates http://abf-downloads.rosalinux.ru/rosa2012lts/repository/$platform_arch/contrib/updates
 dx_rc_main http://abf-downloads.rosalinux.ru/dx_rc_personal/repository/rosa-dx-chrome-1.0/$platform_arch/main/release/
 EOF
 fi
