@@ -26,7 +26,7 @@ EOF
 fi
 
 cat <<EOF>> $default_cfg
-config_opts['urpmi_options'] = '--no-suggests --no-verify-rpm --ignoresize $extra_cfg_options'
+config_opts['urpmi_options'] = '--retry 5 --no-suggests --no-verify-rpm --ignoresize $extra_cfg_options'
 config_opts['urpm_options'] = '$extra_cfg_urpm_options'
 
 # If it's True - current urpmi configs will be copied to the chroot.
