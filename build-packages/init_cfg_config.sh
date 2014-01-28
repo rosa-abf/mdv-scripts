@@ -45,3 +45,9 @@ echo '}' >> $default_cfg
 
 sudo rm -rf $config_dir/default.cfg
 sudo ln -s $default_cfg $config_dir/default.cfg
+
+echo '---> $config_dir/default.cfg :'
+
+sudo cat $config_dir/default.cfg
+
+echo '<--- $config_dir/default.cfg
