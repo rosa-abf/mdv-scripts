@@ -84,6 +84,30 @@ function build_repo {
   path=$1
   arch=$2
   regenerate=$3
+  sign_rpm=$4
+
+  # resign all packages
+  if [ "$regenerate" == 'true' ]; then
+    if [ $sign_rpm != 0 ] ; then
+      echo "--> Starting to sign rpms in '$path'"
+      # evil lo0pz
+      for i in `ls -1 $path/*.rpm`; do
+        chmod 0666 $i;
+        rpm --resign $i;
+        chmod 0644 $i;
+      done
+      # Save exit code
+      rc=$?
+      if [[ $rc == 0 ]] ; then
+        echo "--> Packages in '$path' has been signed successfully."
+      else
+        echo "--> Packages in '$path' has not been signed successfully!!!"
+      fi
+    else
+      echo "--> RPM signing is disabled"
+    fi
+  fi
+
   # Build repo
   echo "--> [`LANG=en_US.UTF-8  date -u`] Generating repository..."
   cd $script_path/
@@ -257,35 +281,13 @@ for arch in $arches ; do
     fi
   fi
 
-  # resign all packages
-  if [ "$regenerate_metadata" == 'true' ]; then
-    if [ $sign_rpm != 0 ] ; then
-      echo "--> Starting to sign rpms in '$main_folder'"
-      # evil lo0pz
-      for i in `ls -1 $main_folder/$status/*.rpm`; do
-        chmod 0666 $i;
-        rpm --resign $i;
-        chmod 0644 $i;
-      done
-      # Save exit code
-      rc=$?
-      if [[ $rc == 0 ]] ; then
-        echo "--> Packages in '$main_folder' has been signed successfully."
-      else
-        echo "--> Packages in '$main_folder' has not been signed successfully!!!"
-      fi
-    else
-      echo "--> RPM signing is disabled"
-    fi
-  fi
-
-  build_repo "$main_folder/$status" "$arch" "$regenerate_metadata" &
+  build_repo "$main_folder/$status" "$arch" "$regenerate_metadata" $sign_rpm &
   if [ "$use_debug_repo" == 'true' ] ; then
-    build_repo "$debug_main_folder/$status" "$arch" "$regenerate_metadata" &
+    build_repo "$debug_main_folder/$status" "$arch" "$regenerate_metadata" $sign_rpm &
   fi
 
   if [ "$regenerate_metadata" == 'true' ] && [ -d "$main_folder/testing" ] ; then
-    build_repo "$main_folder/testing" "$arch" "$regenerate_metadata" &
+    build_repo "$main_folder/testing" "$arch" "$regenerate_metadata" $sign_rpm &
   fi
 
 done
