@@ -262,7 +262,7 @@ for arch in $arches ; do
     if [ $sign_rpm != 0 ] ; then
       echo "--> Starting to sign rpms in '$main_folder'"
       # evil lo0pz
-      for i in `ls $main_folder/$status/*.rpm`; do
+      for i in `ls -1 $main_folder/$status/*.rpm`; do
         chmod 0666 $i;
         rpm --resign $i;
         chmod 0644 $i;
@@ -274,10 +274,10 @@ for arch in $arches ; do
       else
         echo "--> Packages in '$main_folder' has not been signed successfully!!!"
       fi
-     else
-       echo "--> RPM signing is disabled"
-     fi
-   fi
+    else
+      echo "--> RPM signing is disabled"
+    fi
+  fi
 
   build_repo "$main_folder/$status" "$arch" "$regenerate_metadata" &
   if [ "$use_debug_repo" == 'true' ] ; then
