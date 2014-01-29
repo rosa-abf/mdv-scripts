@@ -100,7 +100,8 @@ function build_repo {
     if [ "$start_sign_rpms" == '1' ] ; then
       echo "--> Starting to sign rpms in '$path'"
       # evil lo0pz
-      for i in `ls -1 $path/*.rpm`; do
+      # for i in `ls -1 $path/*.rpm`; do
+      for i in `find $path -name '*.rpm'`; do
 
         has_key=`rpm -Kv $i | grep 'key ID' | grep "$key_name"`
         if [ "$has_key" == '' ] ; then
