@@ -303,7 +303,8 @@ for arch in $arches ; do
   fi
 
   if [ "$regenerate_metadata" == 'true' ] && [ -d "$main_folder/testing" ] ; then
-    build_repo "$main_folder/testing" "$arch" "$regenerate_metadata" $sign_rpm $keyname &
+    # 0 - disable resign of packages
+    build_repo "$main_folder/testing" "$arch" "$regenerate_metadata" 0 $keyname &
   fi
 
 done
