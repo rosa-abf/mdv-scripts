@@ -92,12 +92,12 @@ function build_repo {
   path=$1
   arch=$2
   regenerate=$3
-  sign_rpm=$4
+  start_sign_rpms=$4
   key_name=$5
 
   # resign all packages
   if [ "$regenerate" == 'true' ]; then
-    if [ $sign_rpm != 0 ] ; then
+    if [ "$start_sign_rpms" == '1' ] ; then
       echo "--> Starting to sign rpms in '$path'"
       # evil lo0pz
       for i in `ls -1 $path/*.rpm`; do
@@ -297,14 +297,14 @@ for arch in $arches ; do
     fi
   fi
 
-  build_repo "$main_folder/$status" "$arch" "$regenerate_metadata" $sign_rpm $keyname &
+  build_repo "$main_folder/$status" "$arch" "$regenerate_metadata" "$sign_rpm" "$keyname" &
   if [ "$use_debug_repo" == 'true' ] ; then
-    build_repo "$debug_main_folder/$status" "$arch" "$regenerate_metadata" $sign_rpm $keyname &
+    build_repo "$debug_main_folder/$status" "$arch" "$regenerate_metadata" "$sign_rpm" "$keyname" &
   fi
 
   if [ "$regenerate_metadata" == 'true' ] && [ -d "$main_folder/testing" ] ; then
     # 0 - disable resign of packages
-    build_repo "$main_folder/testing" "$arch" "$regenerate_metadata" 0 $keyname &
+    build_repo "$main_folder/testing" "$arch" "$regenerate_metadata" "0" "$keyname" &
   fi
 
 done
