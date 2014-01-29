@@ -60,8 +60,9 @@ if [ "$use_debug_repo" == 'true' ] ; then
 fi
 
 sign_rpm=0
+gnupg_path=/home/vagrant/.gnupg
+keyname=''
 if [ "$testing" != 'true' ] ; then
-  gnupg_path=/home/vagrant/.gnupg
 
   if [ ! -d "$gnupg_path" ]; then
     echo "--> $gnupg_path does not exist, signing rpms will be not possible"
@@ -76,6 +77,13 @@ if [ "$testing" != 'true' ] ; then
       echo "--> Missing gpg key for this platform"
     fi
 
+    keyname=`gpg --list-public-keys --homedir $gnupg_path |
+      sed -n 3p |
+      awk '{ print $2 }' |
+      awk '{ sub(/.*\//, ""); print tolower($0) }'`
+
+    echo "--> keyname: $keyname"
+
   fi
 fi
 
@@ -85,6 +93,7 @@ function build_repo {
   arch=$2
   regenerate=$3
   sign_rpm=$4
+  key_name=$5
 
   # resign all packages
   if [ "$regenerate" == 'true' ]; then
@@ -92,9 +101,16 @@ function build_repo {
       echo "--> Starting to sign rpms in '$path'"
       # evil lo0pz
       for i in `ls -1 $path/*.rpm`; do
-        chmod 0666 $i;
-        rpm --resign $i;
-        chmod 0644 $i;
+
+        has_key=`rpm -Kv $i | grep 'key ID' | grep "$key_name"`
+        if [ "$has_key" == '' ] ; then
+          chmod 0666 $i;
+          rpm --resign $i;
+          chmod 0644 $i;
+        else
+          echo "--> Package '$i' already signed"
+        fi
+
       done
       # Save exit code
       rc=$?
@@ -281,13 +297,13 @@ for arch in $arches ; do
     fi
   fi
 
-  build_repo "$main_folder/$status" "$arch" "$regenerate_metadata" $sign_rpm &
+  build_repo "$main_folder/$status" "$arch" "$regenerate_metadata" $sign_rpm $keyname &
   if [ "$use_debug_repo" == 'true' ] ; then
-    build_repo "$debug_main_folder/$status" "$arch" "$regenerate_metadata" $sign_rpm &
+    build_repo "$debug_main_folder/$status" "$arch" "$regenerate_metadata" $sign_rpm $keyname &
   fi
 
   if [ "$regenerate_metadata" == 'true' ] && [ -d "$main_folder/testing" ] ; then
-    build_repo "$main_folder/testing" "$arch" "$regenerate_metadata" $sign_rpm &
+    build_repo "$main_folder/testing" "$arch" "$regenerate_metadata" $sign_rpm $keyname &
   fi
 
 done
