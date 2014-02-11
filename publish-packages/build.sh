@@ -4,7 +4,7 @@ echo '--> mdv-scripts/publish-packages: build.sh'
 
 # Update genhdlist2
 sudo urpmi.update -a
-sudo urpmi --auto genhdlist2
+sudo urpmi --downloader wget --wget-options --auth-no-challenge --auto genhdlist2
 
 released="$RELEASED"
 rep_name="$REPOSITORY_NAME"

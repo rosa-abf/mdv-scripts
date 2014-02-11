@@ -3,7 +3,7 @@
 # See: https://abf.rosalinux.ru/abf/abf-ideas/issues/91
 echo '--> mdv-scripts/publish-packages: regenerate_platform_metadata.sh'
 
-sudo urpmi --auto perl-YAML-Syck
+sudo urpmi --downloader wget --wget-options --auth-no-challenge --auto perl-YAML-Syck
 
 released="$RELEASED"
 
