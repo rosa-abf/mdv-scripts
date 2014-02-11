@@ -6,7 +6,7 @@ sudo rm -rf /etc/rpm/platform
 
 sudo urpmi.update -a
 for p in wget curl urpmi mock-urpm perl-URPM genhdlist2 tree ; do
-sudo urpmi --auto $p
+sudo urpmi --downloader wget --wget-options --auth-no-challenge --auto $p
 done
 
 echo '--> mdv-scripts/build-packages: build.sh'
@@ -231,7 +231,7 @@ if [ $rc == 0 ] ; then
   ls -la $rpm_path/ >> $test_log
   mkdir $test_root
   rpm -q --queryformat "%{name}-%{version}-%{release}.%{arch}.%{disttag}%{distepoch}\n" urpmi
-  sudo urpmi -v --debug --no-verify --no-suggests --test $rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
+  sudo urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test $rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
   test_code=$?
   echo 'Test code output: ' $test_code >> $test_log 2>&1
   rm -rf $test_root
@@ -240,7 +240,7 @@ fi
 if [ $rc == 0 ] && [ $test_code == 0 ] ; then
   ls -la $src_rpm_path/ >> $test_log
   mkdir $test_root
-  sudo urpmi -v --debug --no-verify --test --buildrequires $src_rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
+  sudo urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires $src_rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
   test_code=$?
   echo 'Test code output: ' $test_code >> $test_log 2>&1
   rm -rf $test_root
