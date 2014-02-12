@@ -50,4 +50,4 @@ echo '---> $config_dir/default.cfg :'
 
 sudo cat $config_dir/default.cfg
 
-echo '<--- $config_dir/default.cfg
+echo '<--- $config_dir/default.cfg'
