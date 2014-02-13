@@ -263,7 +263,7 @@ sudo rm -rf $tmpfs_path
 
 # Extract rpmlint logs into separate file
 echo "--> Grepping rpmlint logs from ${rpm_path}/build.log to ${results_path}/rpmlint.log"
-sed -n "/usr\/bin\/rpmlint/,/packages and.*specfiles checked/p" $rpm_path/build.log > $results_path/rpmlint.log
+sed -n "/Executing \"\/usr\/bin\/rpmlint/,/packages and.*specfiles checked/p" $rpm_path/build.log > $results_path/rpmlint.log
 
 move_logs $rpm_path 'rpm'
 
