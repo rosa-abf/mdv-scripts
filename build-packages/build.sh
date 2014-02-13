@@ -261,11 +261,11 @@ cd /
 # sudo umount -l $tmpfs_path
 sudo rm -rf $tmpfs_path
 
+# Extract rpmlint logs into separate file
+echo "--> Grepping rpmlint logs from ${rpm_path}/build.log to ${results_path}/rpmlint.log"
+sed -n "/usr\/bin\/rpmlint/,/packages and.*specfiles checked/p" $rpm_path/build.log > $results_path/rpmlint.log
 
 move_logs $rpm_path 'rpm'
-
-# Extract rpmlint logs into separate file
-awk '/\/usr\/bin\/rpmlint/{a=1;next}/packages and .* specfiles checked/{a=0;next}a' $results_path/rpm-build.log > $results_path/rpmlint.log
 
 # Check exit code after build
 if [ $rc != 0 ] ; then
