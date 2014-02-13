@@ -235,27 +235,27 @@ test_code=0
 rpm -qa --queryformat "%{name}-%{version}-%{release}.%{arch}.%{disttag}%{distepoch}\n" --root $chroot_path >> $results_path/rpm-qa.log
 if [ $rc == 0 ] ; then
   ls -la $rpm_path/ >> $test_log
-  mkdir -p $chroot_path/$test_root
+  mkdir -p $chroot_path/test_root
   rpm -q --queryformat "%{name}-%{version}-%{release}.%{arch}.%{disttag}%{distepoch}\n" urpmi
   cp $rpm_path/*.rpm $chroot_path/
-  sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test /*.rpm --root $test_root --auto >> $test_log 2>&1
+  sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test /*.rpm --root test_root --auto >> $test_log 2>&1
 #  sudo urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test $rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
   rm -f  $chroot_path/*.rpm
   test_code=$?
   echo 'Test code output: ' $test_code >> $test_log 2>&1
-  rm -rf $chroot_path/$test_root
+  rm -rf $chroot_path/test_root
 fi
 
 if [ $rc == 0 ] && [ $test_code == 0 ] ; then
   ls -la $src_rpm_path/ >> $test_log
-  mkdir -p $chroot_path/$test_root
+  mkdir -p $chroot_path/test_root
   cp $src_rpm_path/*.rpm $chroot_path/
-  sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires /*.rpm --root $test_root --auto >> $test_log 2>&1
+  sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires /*.rpm --root test_root --auto >> $test_log 2>&1
 # sudo urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires $src_rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
   rm -f $chroot_path/*.rpm
   test_code=$?
   echo 'Test code output: ' $test_code >> $test_log 2>&1
-  rm -rf $chroot_path/$test_root
+  rm -rf $chroot_path/test_root
 fi
 
 if [ $rc != 0 ] || [ $test_code != 0 ] ; then
