@@ -17,11 +17,11 @@ EOF
 
 if [ "$platform_arch" == 'x86_64' ] ; then
 cat <<EOF>> $default_cfg
-config_opts['chroot_setup'] = 'basesystem-minimal locales locales-en locales-de locales-uk locales-es locales-ru basesystem-minimal lib64mpc2 lib64mpfr4 lib64natspec0 lib64pwl5 make patch unzip mandriva-release-common binutils curl gcc gcc-c++ gnupg mandriva-release-Free rpm-build wget'
+config_opts['chroot_setup'] = 'basesystem-minimal locales locales-en locales-de locales-uk locales-es locales-ru basesystem-minimal lib64mpc2 lib64mpfr4 lib64natspec0 lib64pwl5 make patch unzip mandriva-release-common binutils curl gcc gcc-c++ gnupg mandriva-release-Free rpm-build wget urpmi'
 EOF
 else
 cat <<EOF>> $default_cfg
-config_opts['chroot_setup'] = 'basesystem-minimal locales locales-en locales-de locales-uk locales-es locales-ru basesystem-minimal libmpc2 libmpfr4 libnatspec0 libpwl5 make patch unzip mandriva-release-common binutils curl gcc gcc-c++ gnupg mandriva-release-Free rpm-build wget'
+config_opts['chroot_setup'] = 'basesystem-minimal locales locales-en locales-de locales-uk locales-es locales-ru basesystem-minimal libmpc2 libmpfr4 libnatspec0 libpwl5 make patch unzip mandriva-release-common binutils curl gcc gcc-c++ gnupg mandriva-release-Free rpm-build wget urpmi'
 EOF
 fi
 
