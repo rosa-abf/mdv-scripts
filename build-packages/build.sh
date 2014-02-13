@@ -264,6 +264,9 @@ sudo rm -rf $tmpfs_path
 
 move_logs $rpm_path 'rpm'
 
+# Extract rpmlint logs into separate file
+awk '/\/usr\/bin\/rpmlint/{a=1;next}/packages and .* specfiles checked/{a=0;next}a' $results_path/rpm-build.log > $results_path/rpmlint.log
+
 # Check exit code after build
 if [ $rc != 0 ] ; then
   echo '--> Build failed!!!'
