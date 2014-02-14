@@ -14,7 +14,7 @@ config_opts['root'] = 'Rosa-2012.1-$platform_arch'
 config_opts['target_arch'] = '$platform_arch'
 config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64')
 
-config_opts['chroot_setup'] = 'basesystem-minimal locales locales-en locales-de locales-uk locales-es locales-ru make patch unzip gnupg rpm-build meta-task urpmi'
+config_opts['chroot_setup'] = 'basesystem-minimal locales locales-en locales-de locales-uk locales-es locales-ru make patch unzip gnupg rpm-build meta-task wget urpmi'
 config_opts['urpmi_options'] = '--downloader wget --wget-options --auth-no-challenge --retry 5 --no-suggests --no-verify-rpm --fastunsafe --ignoresize $extra_cfg_options'
 config_opts['urpm_options'] = '--downloader wget --wget-options --auth-no-challenge $extra_cfg_urpm_options'
 
