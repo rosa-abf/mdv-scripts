@@ -85,17 +85,19 @@ fi
 
 echo '--> install ARM-related env'
 sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+# clean binfmt from previous build
+sudo sh -s "echo '-1' > /proc/sys/fs/binfmt_misc/$platform_arch"
+# echo new wrapper
 sudo sh -c "echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-wrapper:' > /proc/sys/fs/binfmt_misc/register"
-
 
 # copy qemu binaries
 # it is big ugly hack
 # but i do now know another proper way
 # experiments with setup.spec was not successful
 
-(while [ ! -e  $tmpfs_path/openmandriva-2013.0-$platform_arch/root/usr/bin/ ]
+(while [ ! -e  $tmpfs_path/openmandriva-$platform_arch/root/usr/bin/ ]
   do sleep 1;done
-  sudo cp $rpm_build_script_path/cooker/qemu*  $tmpfs_path/openmandriva-2013.0-$platform_arch/root/usr/bin/) &
+  sudo cp $rpm_build_script_path/cooker/qemu*  $tmpfs_path/openmandriva-$platform_arch/root/usr/bin/) &
   subshellpid=$!
 
 # Build src.rpm
@@ -168,22 +170,22 @@ if [ $rc == 0 ] ; then
   ls -la $rpm_path/ >> $test_log
   mkdir $test_root
   rpm -q --queryformat "%{name}-%{version}-%{release}.%{arch}.%{disttag}%{distepoch}\n" urpmi
-  sudo mount -obind $rpm_path/ $tmpfs_path/openmandriva-2013.0-$platform_arch/root/tmp/
-  sudo chroot $tmpfs_path/openmandriva-2013.0-$platform_arch/root/ /bin/bash --init-file /etc/bashrc -i -c "urpmi -v --debug --no-verify --no-suggests --test --ignorearch --noscripts /tmp/*.rpm --auto && exit" >> $test_log 2>&1
+  sudo mount -obind $rpm_path/ $tmpfs_path/openmandriva-$platform_arch/root/tmp/
+  sudo chroot $tmpfs_path/openmandriva-$platform_arch/root/ /bin/bash --init-file /etc/bashrc -i -c "urpmi -v --debug --no-verify --no-suggests --test --ignorearch --noscripts /tmp/*.rpm --auto && exit" >> $test_log 2>&1
   test_code=$?
   echo 'Test code output: ' $test_code >> $test_log 2>&1
-  sudo umount $tmpfs_path/openmandriva-2013.0-$platform_arch/root/tmp/
+  sudo umount $tmpfs_path/openmandriva-$platform_arch/root/tmp/
   rm -rf $test_root
 fi
 
 if [ $rc == 0 ] && [ $test_code == 0 ] ; then
   ls -la $src_rpm_path/ >> $test_log
   mkdir $test_root
-  sudo mount -obind $src_rpm_path/  $tmpfs_path/openmandriva-2013.0-$platform_arch/root/tmp/
-  sudo chroot $tmpfs_path/openmandriva-2013.0-$platform_arch/root/ /bin/bash --init-file /etc/bashrc -i -c "urpmi -v --debug --no-verify --test --buildrequires /tmp/*.src.rpm && exit" >> $test_log 2>&1
+  sudo mount -obind $src_rpm_path/  $tmpfs_path/openmandriva-$platform_arch/root/tmp/
+  sudo chroot $tmpfs_path/openmandriva-$platform_arch/root/ /bin/bash --init-file /etc/bashrc -i -c "urpmi -v --debug --no-verify --test --buildrequires /tmp/*.src.rpm && exit" >> $test_log 2>&1
   test_code=$?
   echo 'Test code output: ' $test_code >> $test_log 2>&1
-  sudo umount $tmpfs_path/openmandriva-2013.0-$platform_arch/root/tmp/
+  sudo umount $tmpfs_path/openmandriva-$platform_arch/root/tmp/
   rm -rf $test_root
 fi
 
