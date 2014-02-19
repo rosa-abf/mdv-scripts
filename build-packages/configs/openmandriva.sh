@@ -24,7 +24,7 @@ config_opts['urpmi_options'] = '--no-suggests --no-verify-rpm --ignoresize --ign
 EOF
 else
 
-cat <<EOF>> $default_cfg
+cat <<EOF> $default_cfg
 config_opts['target_arch'] = '$platform_arch'
 config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64')
 config_opts['urpmi_options'] = '--no-suggests --no-verify-rpm --ignoresize --excludedocs --downloader wget --fastunsafe $extra_cfg_options'
