@@ -192,7 +192,7 @@ fi
 
 # Umount tmpfs
 cd /
-sudo umount -l $tmpfs_path
+# sudo umount -l $tmpfs_path
 sudo rm -rf $tmpfs_path
 
 
