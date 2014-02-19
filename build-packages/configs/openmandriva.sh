@@ -32,7 +32,7 @@ EOF
 fi
 
 cat <<EOF>> $default_cfg
-config_opts['root'] = 'openmandriva-$platform_arch
+config_opts['root'] = 'openmandriva-$platform_arch'
 config_opts['chroot_setup'] = 'basesystem-minimal locales locales-en locales-de locales-uk locales-es locales-ru distro-release-OpenMandriva gnupg rpm-build urpmi meta-task task-devel'
 config_opts['urpm_options'] = '$extra_cfg_urpm_options'
 
