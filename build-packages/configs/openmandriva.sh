@@ -16,7 +16,7 @@ config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64', 'aarch64')
 config_opts['urpmi_options'] = '--no-suggests --no-verify-rpm --ignoresize --ignorearch --excludedocs --downloader wget --fastunsafe $extra_cfg_options'
 EOF
 
-elif [ "$platform_arch" == 'armv7hl' || "$platform_arch" == 'armv7l' ] ; then
+elif [[ "$platform_arch" == 'armv7hl' || "$platform_arch" == 'armv7l' ]] ; then
 cat <<EOF> $default_cfg
 config_opts['target_arch'] = '$platform_arch --without check'
 config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64', 'armv7l', 'armv7hl')
