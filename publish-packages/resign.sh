@@ -33,7 +33,7 @@ function resign_all_rpm_in_folder {
   fi
 }
 
-for arch in SRPMS i586 x86_64 armv7l armv7hl ; do
+for arch in SRPMS i586 x86_64 armv7l armv7hl aarch64 ; do
   for rep in release updates ; do
     resign_all_rpm_in_folder "$repository_path/$arch/$rep_name/$rep" &
     resign_all_rpm_in_folder "$repository_path/$arch/debug_$rep_name/$rep" &
