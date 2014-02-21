@@ -3,7 +3,7 @@
 # See: https://abf.rosalinux.ru/abf/abf-ideas/issues/91
 echo '--> mdv-scripts/publish-packages: regenerate_platform_metadata.sh'
 
-sudo urpmi --auto python
+sudo urpmi --auto python python-lzma python-yaml
 
 # main,media,contrib,...
 repository_names="$REPOSITORY_NAMES"
