@@ -18,6 +18,9 @@ script_path=`pwd`
 
 arches="i586 x86_64"
 
+# Prefix for all special packages
+data_packages_prefix="sc-metadata-gen-stages"
+
 # A list of all required packages containing data prepared for SC
 data_packages="packages alternatives wiki-descriptions"
 
@@ -51,8 +54,8 @@ for arch in $arches ; do
   
   # Install special packages
   for pkg in $data_packages; do
-    echo "Install the special package: $pkg..."
-    sudo urpmi --auto "$pkg"
+    echo "Install the special package: $data_packages_prefix-$pkg..."
+    sudo urpmi --auto "$data_packages_prefix-$pkg"
   done
 
   # Construct argument for script
@@ -69,8 +72,8 @@ for arch in $arches ; do
   
   # Remove special packages
   for pkg in $data_packages; do
-    echo "Remove the special package: $pkg..."
-    sudo urpme --auto "$pkg"
+    echo "Remove the special package: $data_packages_prefix-$pkg..."
+    sudo urpme --auto "$data_packages_prefix-$pkg"
   done
   
   # Remove special repository
@@ -81,14 +84,16 @@ for arch in $arches ; do
   for f in $result_files; do
     echo "Move result $f to the destination repository..."
     mv -f "sc_$f.yml.xz" "$repository_path/$arch/media/media_info/"
-    mv -f "sc_$f.md5sum" "$repository_path/$arch/media/media_info/"
+    mv -f "sc_$f.yml.xz.md5sum" "$repository_path/$arch/media/media_info/"
+    mv -f "sc_$f.yml.md5sum" "$repository_path/$arch/media/media_info/"
   done
   
   # Move descriptions to destination repository (for each language)
   for l in $languages; do
     echo "Move descriptions for lang $l to the destination repository..."
     mv -f "sc_descriptions_$l.yml.xz" "$repository_path/$arch/media/media_info/"
-    mv -f "sc_descriptions_$l.md5sum" "$repository_path/$arch/media/media_info/"
+    mv -f "sc_descriptions_$l.yml.xz.md5sum" "$repository_path/$arch/media/media_info/"
+    mv -f "sc_descriptions_$l.yml.md5sum" "$repository_path/$arch/media/media_info/"
   done
 
   echo "--> [`LANG=en_US.UTF-8  date -u`] Done."
