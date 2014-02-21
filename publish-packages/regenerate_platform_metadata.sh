@@ -3,9 +3,7 @@
 # See: https://abf.rosalinux.ru/abf/abf-ideas/issues/91
 echo '--> mdv-scripts/publish-packages: regenerate_platform_metadata.sh'
 
-sudo urpmi --auto perl-YAML-Syck
-
-released="$RELEASED"
+sudo urpmi --auto python
 
 # main,media,contrib,...
 repository_names="$REPOSITORY_NAMES"
@@ -20,13 +18,15 @@ script_path=`pwd`
 
 arches="i586 x86_64"
 
-# See: https://abf.rosalinux.ru/abf/abf-ideas/issues/51
-# Move debug packages to special separate repository
-# override below if need
-use_debug_repo='false'
+# A list of all required packages containing data prepared for SC
+data_packages="packages alternatives wiki-descriptions"
 
-# Software from testing repo must not be visible to users of SoftwareCenter, so, we skip testing repo
-use_testing_repo='false'
+# A list of generated files
+result_files="applications descriptions alternatives"
+
+# A list of languages
+languages="ru"
+
 
 # distribution's main media_info folder
 mkdir -p $repository_path/{i586,x86_64}/media/media_info
@@ -38,50 +38,58 @@ rm -f SC-metadata-generator-master.tar.gz
 project_path=$script_path/SC-metadata-generator-master
 cd $project_path
 
+# Download script and extra files by .abf.yml
+sudo ruby $script_path/../abf_yml.rb -p $project_path
+
 for arch in $arches ; do
   # Build repo
-  echo "--> [`LANG=en_US.UTF-8  date -u`] Generating additional metadata for Software Center..."
-  paths=''
-  for name in ${repository_names//,/ } ; do
-    paths+="$repository_path/$arch/$name/release/media_info "
-    if [ "$released" == 'true' ] ; then
-      paths+="$repository_path/$arch/$name/updates/media_info "
-    fi
-    
-    if [ "$use_debug_repo" == 'true' ] ; then
-      paths+="$repository_path/$arch/debug_$name/release/media_info "
-      if [ "$released" == 'true' ] ; then
-        paths+="$repository_path/$arch/debug_$name/updates/media_info "
-      fi
-    fi
-    
-    if [ "$use_testing_repo" == 'true' ] ; then
-      if [ -d "$repository_path/$arch/$name/testing/media_info" ] ; then
-        paths+="$repository_path/$arch/$name/testing/media_info "
-      fi
-    fi
+  echo "--> [`LANG=en_US.UTF-8  date -u`] Generating additional metadata for Software Center for arch $arch..."
+
+  # Add special repository that contains special packages
+  echo "Add the special repository..."
+  sudo urpmi.addmedia data_repo "http://abf-downloads.abf.io/sc_personal/repository/rosa2012.1/$arch/main/release/"
+  
+  # Install special packages
+  for pkg in $data_packages; do
+    echo "Install the special package: $pkg..."
+    sudo urpmi --auto "$pkg"
   done
 
-  # Downloads extra files by .abf.yml
-  # dump_gui_apps removes files after each run
-  sudo ruby $script_path/../abf_yml.rb -p $project_path
-
-  echo "perl dump_gui_apps $paths"
-  perl dump_gui_apps $paths
+  # Construct argument for script
+  param=`echo $languages | tr " " ","`
+  
+  # Generate metadata
+  echo "Generate SC Metadata..."
+  python generate_metadata.py "$param"
   # Save exit code
   rc=$?
   if [ $rc != 0 ] ; then
     exit $rc
   fi
-
-  mv -f gui_pkgs.yml.xz $repository_path/$arch/media/media_info/
-  mv -f gui_pkgs.yml.md5sum $repository_path/$arch/media/media_info/
-  mv -f sc_alternatives.yml.xz $repository_path/$arch/media/media_info/
-  mv -f sc_alternatives.yml.md5sum $repository_path/$arch/media/media_info/
-  mv -f sc_descriptions.yml.xz $repository_path/$arch/media/media_info/
-  mv -f sc_descriptions.yml.md5sum $repository_path/$arch/media/media_info/
-  mv -f sc_descriptions-ru.yml.xz $repository_path/$arch/media/media_info/
-  mv -f sc_descriptions-ru.yml.md5sum $repository_path/$arch/media/media_info/
+  
+  # Remove special packages
+  for pkg in $data_packages; do
+    echo "Remove the special package: $pkg..."
+    sudo urpme --auto "$pkg"
+  done
+  
+  # Remove special repository
+  echo "Remove the special repository..."
+  sudo urpmi.removemedia data_repo
+  
+  # Move result to destination repository
+  for f in $result_files; do
+    echo "Move result $f to the destination repository..."
+    mv -f "sc_$f.yml.xz" "$repository_path/$arch/media/media_info/"
+    mv -f "sc_$f.md5sum" "$repository_path/$arch/media/media_info/"
+  done
+  
+  # Move descriptions to destination repository (for each language)
+  for l in $languages; do
+    echo "Move descriptions for lang $l to the destination repository..."
+    mv -f "sc_descriptions_$l.yml.xz" "$repository_path/$arch/media/media_info/"
+    mv -f "sc_descriptions_$l.md5sum" "$repository_path/$arch/media/media_info/"
+  done
 
   echo "--> [`LANG=en_US.UTF-8  date -u`] Done."
 done
