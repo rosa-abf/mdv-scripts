@@ -50,7 +50,7 @@ for arch in $arches ; do
 
   # Add special repository that contains special packages
   echo "Add the special repository..."
-  sudo urpmi.addmedia data_repo "http://abf-downloads.abf.io/sc_personal/repository/rosa2012.1/$arch/main/release/"
+  sudo urpmi.addmedia data_repo "http://abf-downloads.abf.io/sc_personal/repository/$BUILD_FOR_PLATFORM/$arch/main/release/"
   
   # Install special packages
   for pkg in $data_packages; do
