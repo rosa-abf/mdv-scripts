@@ -19,7 +19,7 @@ script_path=`pwd`
 arches="i586 x86_64"
 
 # Prefix for all special packages
-data_packages_prefix="sc-metadata-gen-stages"
+data_packages_prefix="sc-metadata-gen-stage"
 
 # A list of all required packages containing data prepared for SC
 data_packages="packages alternatives wiki-descriptions"
