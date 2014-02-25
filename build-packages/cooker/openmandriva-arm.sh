@@ -86,7 +86,7 @@ fi
 echo '--> install ARM-related env'
 sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
 # clean binfmt from previous build
-sudo sh -s "echo '-1' > /proc/sys/fs/binfmt_misc/$platform_arch"
+sudo sh -c "echo '-1' > /proc/sys/fs/binfmt_misc/$platform_arch"
 # echo new wrapper
 sudo sh -c "echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-wrapper:' > /proc/sys/fs/binfmt_misc/register"
 
