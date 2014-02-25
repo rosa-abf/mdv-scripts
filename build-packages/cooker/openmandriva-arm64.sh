@@ -88,7 +88,7 @@ sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
 # clean binfmt from previous build
 sudo sh -c "echo '-1' > /proc/sys/fs/binfmt_misc/$platform_arch"
 # echo new wrapper
-sudo sh -c "echo ':aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7:\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff:/usr/bin/qemu-aarch64-binfmt:P' > /proc/sys/fs/binfmt_misc/register"
+sudo sh -c "echo ':aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7:\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff:/usr/bin/qemu-arm64-static:' > /proc/sys/fs/binfmt_misc/register"
 
 # copy qemu binaries
 # it is big ugly hack
