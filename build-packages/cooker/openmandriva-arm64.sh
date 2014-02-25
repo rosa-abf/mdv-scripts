@@ -97,7 +97,7 @@ sudo sh -c "echo ':aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x0
 
 (while [ ! -e  $tmpfs_path/openmandriva-$platform_arch/root/usr/bin/ ]
   do sleep 1;done
-  sudo cp $rpm_build_script_path/cooker/qemu-aarch64*  $tmpfs_path/openmandriva-$platform_arch/root/usr/bin/) &
+  sudo cp $rpm_build_script_path/cooker/qemu-arm64-static  $tmpfs_path/openmandriva-$platform_arch/root/usr/bin/) &
   subshellpid=$!
 
 # Build src.rpm
