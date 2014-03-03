@@ -23,7 +23,7 @@ data_package="sc-metadata-gen-stage-finish"
 metadata_dir="/usr/share/sc-metadata-gen-stages"
 
 # A list of destination files
-result_files="applications descriptions alternatives"
+result_files="applications descriptions alternatives icons"
 
 # A list of languages
 languages="ru"
@@ -31,6 +31,7 @@ languages="ru"
 
 # distribution's main media_info folder
 mkdir -p $repository_path/{i586,x86_64}/media/media_info
+mkdir -p $repository_path/{i586,x86_64}/media/media_info/icons
 
 
 for arch in $arches ; do
@@ -71,6 +72,11 @@ for arch in $arches ; do
         mv -f "sc_descriptions_$l.yml.xz" "$repository_path/$arch/media/media_info/"
         mv -f "sc_descriptions_$l.yml.xz.md5sum" "$repository_path/$arch/media/media_info/"
         mv -f "sc_descriptions_$l.yml.md5sum" "$repository_path/$arch/media/media_info/"
+    done
+    
+    # Move icons folder
+    for f in `ls "$metadata_dir/packaged_icons/"`; do
+        cp "$metadata_dir/packaged_icons/$f" "$repository_path/$arch/media/media_info/icons"
     done
   
     # Remove special packages
