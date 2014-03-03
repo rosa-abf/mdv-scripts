@@ -75,7 +75,7 @@ for arch in $arches ; do
     done
     
     # Move all icons to repository
-    cp -rfv -T "$metadata_dir/packaged_icons/" "$repository_path/$arch/media/media_info/icons"
+    cp -rfv -T "$metadata_dir/sc_icons/" "$repository_path/$arch/media/media_info/icons/"
   
     # Remove special packages
     echo "Remove the special package: $data_package..."
