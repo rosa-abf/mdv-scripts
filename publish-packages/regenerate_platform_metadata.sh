@@ -74,10 +74,8 @@ for arch in $arches ; do
         mv -f "sc_descriptions_$l.yml.md5sum" "$repository_path/$arch/media/media_info/"
     done
     
-    # Move icons folder
-    for f in `ls "$metadata_dir/packaged_icons/"`; do
-        cp "$metadata_dir/packaged_icons/$f" "$repository_path/$arch/media/media_info/icons"
-    done
+    # Move all icons to repository
+    cp -rfv -T "$metadata_dir/packaged_icons/" "$repository_path/$arch/media/media_info/icons"
   
     # Remove special packages
     echo "Remove the special package: $data_package..."
