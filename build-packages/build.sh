@@ -234,6 +234,7 @@ sudo chroot $chroot_path ping -c 1 google.com
 # but for safety let's limit number of retest attempts
 # (since in case when repository metadata is really broken we can loop here forever)
 MAX_RETRIES=5
+RETRY_GREP_STR="You may need to update your urpmi database\|problem reading synthesis file of medium\|retrieving failed: "
 
 test_log=$results_path/tests.log
 test_log_tmp=$results_path/tests.log.tmp
@@ -250,12 +251,12 @@ if [ $rc == 0 ] ; then
   retry=0
   while $try_retest
   do
-#    sudo urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test $rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
-    sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test `ls  $chroot_path |grep rpm` --root test_root --auto >> $test_log 2>&1
+#    sudo urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test $rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto > $test_log_tmp 2>&1
+    sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test `ls  $chroot_path |grep rpm` --root test_root --auto > $test_log_tmp 2>&1
     test_code=$?
     try_retest=false
     if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
-      if grep -q "You may need to update your urpmi database\|problem reading synthesis file of medium\|retrieving failed: " $test_log_tmp; then
+      if grep -q "$RETRY_GREP_STR" $test_log_tmp; then
         echo '--> Repository was changed in the middle, will rerun the tests' >> $test_log
         sudo urpmi.update -a
         try_retest=true
@@ -280,12 +281,12 @@ if [ $rc == 0 ] && [ $test_code == 0 ] ; then
   retry=0
   while $try_retest
   do
-#   sudo urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires $src_rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto >> $test_log 2>&1
-    sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires `ls  $chroot_path |grep src.rpm` --root test_root --auto >> $test_log 2>&1
+#   sudo urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires $src_rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto > $test_log_tmp 2>&1
+    sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires `ls  $chroot_path |grep src.rpm` --root test_root --auto > $test_log_tmp 2>&1
     test_code=$?
     try_retest=false
     if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
-      if grep -q "You may need to update your urpmi database\|problem reading synthesis file of medium\|retrieving failed: " $test_log_tmp; then
+      if grep -q "$RETRY_GREP_STR" $test_log_tmp; then
         echo '--> Repository was changed in the middle, will rerun the tests' >> $test_log
         sudo urpmi.update -a
         try_retest=true
