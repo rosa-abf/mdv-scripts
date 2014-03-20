@@ -258,7 +258,7 @@ if [ $rc == 0 ] ; then
     if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
       if grep -q "$RETRY_GREP_STR" $test_log_tmp; then
         echo '--> Repository was changed in the middle, will rerun the tests' >> $test_log
-        sudo urpmi.update -a
+        sudo chroot $chroot_path urpmi.update -a >> $test_log 2>&1
         try_retest=true
         (( retry=$retry+1 ))
       fi
@@ -288,7 +288,7 @@ if [ $rc == 0 ] && [ $test_code == 0 ] ; then
     if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
       if grep -q "$RETRY_GREP_STR" $test_log_tmp; then
         echo '--> Repository was changed in the middle, will rerun the tests' >> $test_log
-        sudo urpmi.update -a
+        sudo chroot $chroot_path urpmi.update -a >> $test_log 2>&1
         try_retest=true
         (( retry=$retry+1 ))
       fi
