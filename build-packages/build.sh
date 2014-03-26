@@ -157,7 +157,10 @@ sudo mv -f ~/logging.ini $config_dir/logging.ini
 config_name="mdv"
 if [[ "$platform_name" =~ .*lts$ ]] ; then
   config_name="mdv-lts"
+elif [[ "$platform_name" =~ ^(cooker|openmandriva) ]] ; then
+  config_name="openmandriva"
 fi
+
 # Init config file
 EXTRA_CFG_OPTIONS="$extra_cfg_options" \
   EXTRA_CFG_URPM_OPTIONS="$extra_cfg_urpm_options" \
