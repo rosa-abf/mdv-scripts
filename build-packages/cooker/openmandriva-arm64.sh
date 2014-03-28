@@ -150,14 +150,7 @@ if [ "$src_rpm_name" != '' ] ; then
   rm $rpm_path/*.src.rpm
 fi
 
-r=`head -1 $config_dir/default.cfg |
-  sed -e "s/config_opts//g" |
-  sed -e "s/\[//g" |
-  sed -e "s/\]//g" |
-  sed -e "s/root//g" |
-  sed -e "s/=//g" |
-  sed -e "s/'//g"|
-  sed -e "s/ //g"`
+r=`cat $config_dir/default.cfg | grep "config_opts\['root']" | awk '{ print $3 }' | sed "s/'//g"`
 chroot_path=$tmpfs_path/$r/root
 echo '--> Checking internet connection...'
 echo '--> We cannot check internet connection'
