@@ -129,11 +129,11 @@ function build_repo {
   echo "--> [`LANG=en_US.UTF-8  date -u`] Generating repository..."
   cd $script_path/
   if [ "$regenerate" != 'true' ] ; then
-    echo "/usr/bin/genhdlist2 -v --nolock --allow-empty-media --versioned --xml-info $path"
-    /usr/bin/genhdlist2 -v --nolock --allow-empty-media --versioned --xml-info "$path"
+    echo "/usr/bin/genhdlist2 -v --nolock --allow-empty-media --versioned --xml-info --no-hdlist $path"
+    /usr/bin/genhdlist2 -v --nolock --allow-empty-media --versioned --xml-info --no-hdlist "$path"
   else
-    echo "/usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --versioned --xml-info $path"
-    /usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --versioned --xml-info "$path"
+    echo "/usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --versioned --xml-info --no-hdlist $path"
+    /usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --versioned --xml-info --no-hdlist "$path"
   fi
   # Save exit code
   echo $? > "$container_path/$arch.exit-code"
