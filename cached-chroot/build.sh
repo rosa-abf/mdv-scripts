@@ -7,9 +7,7 @@ platform_name="$PLATFORM_NAME"
 token="$TOKEN"
 arches=${ARCHES:-"i586 x86_64"}
 
-rpm_build_script_path=`pwd`
-rpm_build_script_path="${rpm_build_script_path}/../build-packages"
-
+rpm_build_script_path="/home/vagrant/iso_builder/build-packages"
 results_path="/home/vagrant/results"
 tmpfs_path="/home/vagrant/tmpfs"
 container_path="/home/vagrant/container"
