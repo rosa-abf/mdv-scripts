@@ -195,9 +195,39 @@ EXTRA_CFG_OPTIONS="$extra_cfg_options" \
   PLATFORM_NAME=$platform_name \
   /bin/bash $rpm_build_script_path/init_cfg_config.sh
 
+r=`cat $config_dir/default.cfg | grep "config_opts\['root']" | awk '{ print $3 }' | sed "s/'//g"`
+chroot_path=$tmpfs_path/$r
+# Download tarball with existing chroot, if any
+# The tarball should contain 'root' folder which will be unpacked
+# to the directory used by mock-urpm
+
+cached_chroot=0
+if [[ "${CACHED_CHROOT_SHA1}" != '' ]] ; then
+  file_store_url='http://file-store.rosalinux.ru/api/v1/file_stores.json'
+  r=`wget ${file_store_url}?hash=${CACHED_CHROOT_SHA1} -O ${chroot_path}/chroot.tar.gz`
+  if [ "$r" == '[]' ] ; then
+    echo "--> Chroot with sha1 '$CACHED_CHROOT_SHA1' does not exist!!!"
+  else
+    tar -C ${chroot_path} xzf ${chroot_path}/chroot.tar.gz
+    # Save exit code
+    rc=$?
+    if [ $rc != 0 ] ; then
+      rm -rf ${chroot_path}
+    else
+      cached_chroot=1
+    fi
+    rm -rf ${chroot_path}/chroot.tar.gz
+  fi
+fi
+# chroot_path=$chroot_path/root
+
 # Build src.rpm
 echo '--> Build src.rpm'
-mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after $extra_build_src_rpm_options
+if [ $chroot_path == 1 ] ; then
+  mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after --no-clean $extra_build_src_rpm_options
+else
+  mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after $extra_build_src_rpm_options
+fi
 # Save exit code
 rc=$?
 echo '--> Done.'
@@ -221,23 +251,6 @@ if [ $rc != 0 ] ; then
   echo '--> Build failed: mock-urpm encountered a problem.'
   exit 1
 fi
-
-r=`cat $config_dir/default.cfg | grep "config_opts\['root']" | awk '{ print $3 }' | sed "s/'//g"`
-chroot_path=$tmpfs_path/$r
-# Download tarball with existing chroot, if any
-# The tarball should contain 'root' folder which will be unpacked
-# to the directory used by mock-urpm
-
-if [[ "${CACHED_CHROOT_SHA1}" != '' ]] ; then
-  file_store_url='http://file-store.rosalinux.ru/api/v1/file_stores.json'
-  r=`wget ${file_store_url}?hash=${CACHED_CHROOT_SHA1} -O ${chroot_path}/chroot.tar.gz`
-  if [ "$r" == '[]' ] ; then
-    echo "--> Chroot with sha1 '$CACHED_CHROOT_SHA1' does not exist!!!"
-  else
-    tar -C ${chroot_path} xzf ${chroot_path}/chroot.tar.gz
-  fi
-fi
-# chroot_path=$chroot_path/root
 
 # Build rpm
 cd $src_rpm_path
