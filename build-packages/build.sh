@@ -222,6 +222,23 @@ if [ $rc != 0 ] ; then
   exit 1
 fi
 
+r=`cat $config_dir/default.cfg | grep "config_opts\['root']" | awk '{ print $3 }' | sed "s/'//g"`
+chroot_path=$tmpfs_path/$r
+# Download tarball with existing chroot, if any
+# The tarball should contain 'root' folder which will be unpacked
+# to the directory used by mock-urpm
+
+if [[ "${CACHED_CHROOT_SHA1}" != '' ]] ; then
+  file_store_url='http://file-store.rosalinux.ru/api/v1/file_stores.json'
+  r=`wget ${file_store_url}?hash=${CACHED_CHROOT_SHA1} -O ${chroot_path}/chroot.tar.gz`
+  if [ "$r" == '[]' ] ; then
+    echo "--> Chroot with sha1 '$CACHED_CHROOT_SHA1' does not exist!!!"
+  else
+    tar -C ${chroot_path} xzf ${chroot_path}/chroot.tar.gz
+  fi
+fi
+# chroot_path=$chroot_path/root
+
 # Build rpm
 cd $src_rpm_path
 src_rpm_name=`ls -1 | grep 'src.rpm$'`
