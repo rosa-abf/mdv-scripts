@@ -12,6 +12,7 @@ rpm_build_script_path="${rpm_build_script_path}/../build-packages"
 
 results_path="/home/vagrant/results"
 tmpfs_path="/home/vagrant/tmpfs"
+container_path="/home/vagrant/container"
 
 config_dir=/etc/mock-urpm/
 # Change output format for mock-urpm
@@ -25,21 +26,22 @@ elif [[ "$platform_name" =~ ^(cooker|openmandriva) ]] ; then
   config_name="openmandriva"
 fi
 
+mkdir -p ${container_path}
 for arch in $arches ; do
 
   # Init media list
-  media_list=/home/vagrant/container/media.list
+  media_list=${container_path}/media.list
   prefix=''
   if [ "${token}" == '' ] ; then
     prefix="${token}:@"
   fi
-  base_url = "http://${prefix}abf-downloads.rosalinux.ru/${platform_name}/repository/${arch}/main"
+  base_url="http://${prefix}abf-downloads.rosalinux.ru/${platform_name}/repository/${arch}/main"
 
   echo "${platform_name}_release ${base_url}/release/" > $media_list
 
-  code=`curl --write-out %{http_code} --silent --output /dev/null ${base_url}/updates/`
-  if [ "${code}" == '200' ] ; then
-    echo "${platform_name}_updates ${base_url}/updates/" >> $media_list
+  updates_url="${base_url}/updates/"
+  if [ `curl --write-out %{http_code} --silent --output /dev/null ${updates_url}` == '200' ] ; then
+    echo "${platform_name}_updates ${updates_url}" >> $media_list
   fi
 
   # Init config file
