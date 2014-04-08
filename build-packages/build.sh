@@ -203,27 +203,30 @@ chroot_path=$tmpfs_path/$r
 
 cached_chroot=0
 if [[ "${CACHED_CHROOT_SHA1}" != '' ]] ; then
-  file_store_url='http://file-store.rosalinux.ru/api/v1/file_stores.json'
-  r=`wget ${file_store_url}?hash=${CACHED_CHROOT_SHA1} -O ${chroot_path}/chroot.tar.gz`
-  if [ "$r" == '[]' ] ; then
+  file_store_url='http://file-store.rosalinux.ru/api/v1/file_stores'
+  if [ `curl ${file_store_url}.json?hash=${CACHED_CHROOT_SHA1}` == '[]' ] ; then
     echo "--> Chroot with sha1 '$CACHED_CHROOT_SHA1' does not exist!!!"
   else
-    tar -C ${chroot_path} xzf ${chroot_path}/chroot.tar.gz
+    wget -O ${tmpfs_path}/chroot.tar.gz --content-disposition ${file_store_url}/${CACHED_CHROOT_SHA1}
+    mkdir -p ${chroot_path}
+    tar -C ${tmpfs_path} -xzf ${tmpfs_path}/chroot.tar.gz
     # Save exit code
     rc=$?
     if [ $rc != 0 ] ; then
       rm -rf ${chroot_path}
+      echo "--> Error on extracting chroot with sha1 '$CACHED_CHROOT_SHA1'!!!"
     else
+      mv -f ${tmpfs_path}/home/vagrant/tmpfs/* ${tmpfs_path}
       cached_chroot=1
     fi
-    rm -rf ${chroot_path}/chroot.tar.gz
+    rm -rf ${tmpfs_path}/chroot.tar.gz ${tmpfs_path}/home
   fi
 fi
 # chroot_path=$chroot_path/root
 
 # Build src.rpm
 echo '--> Build src.rpm'
-if [ $chroot_path == 1 ] ; then
+if [ $cached_chroot == 1 ] ; then
   mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after --no-clean $extra_build_src_rpm_options
 else
   mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after $extra_build_src_rpm_options
