@@ -47,8 +47,8 @@ for arch in $arches ; do
   #   EXTRA_CFG_URPM_OPTIONS="$extra_cfg_urpm_options" \
     # UNAME=$uname \
     # EMAIL=$email \
-    # RPM_BUILD_SCRIPT_PATH=$rpm_build_script_path \
-  CONFIG_DIR=$config_dir \
+  RPM_BUILD_SCRIPT_PATH=$rpm_build_script_path \
+    CONFIG_DIR=$config_dir \
     CONFIG_NAME=$config_name \
     PLATFORM_ARCH=$arch \
     PLATFORM_NAME=$platform_name \
