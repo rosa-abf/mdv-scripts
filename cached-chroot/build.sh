@@ -35,15 +35,11 @@ for arch in $arches ; do
   fi
   base_url = "http://${prefix}abf-downloads.rosalinux.ru/${platform_name}/repository/${arch}/main"
 
-cat <<EOF> $media_list
-${platform_name}_release ${base_url}/release/
-EOF
+  echo "${platform_name}_release ${base_url}/release/" > $media_list
 
   code=`curl --write-out %{http_code} --silent --output /dev/null ${base_url}/updates/`
   if [ "${code}" == '200' ] ; then
-cat <<EOF>> $media_list
-${platform_name}_updates ${base_url}/updates/
-EOF
+    echo "${platform_name}_updates ${base_url}/updates/" >> $media_list
   fi
 
   # Init config file
