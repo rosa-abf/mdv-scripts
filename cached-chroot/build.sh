@@ -30,7 +30,7 @@ for arch in $arches ; do
   # Init media list
   media_list=${container_path}/media.list
   prefix=''
-  if [ "${token}" == '' ] ; then
+  if [ "${token}" != '' ] ; then
     prefix="${token}:@"
   fi
   base_url="http://${prefix}abf-downloads.rosalinux.ru/${platform_name}/repository/${arch}/main"
