@@ -56,7 +56,7 @@ for arch in $arches ; do
 
   # Build chroot
   echo "--> Build chroot for ${platform_name}-${arch}"
-  mock-urpm --configdir $config_dir -v --no-cleanup-after
+  mock-urpm --init --configdir $config_dir -v --no-cleanup-after
   # Save exit code
   rc=$?
   echo '--> Done.'
