@@ -74,7 +74,7 @@ for arch in $arches ; do
     exit 1
   fi
 
-  tar -zcvf ${results_path}/${chroot}.tar.gz ${tmpfs_path}/${chroot}
+  tar --exclude=root/dev -zcvf ${results_path}/${chroot}.tar.gz ${tmpfs_path}/${chroot}
   rm -rf ${tmpfs_path}/${chroot}
 done
 

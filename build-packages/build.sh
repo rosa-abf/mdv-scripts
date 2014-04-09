@@ -209,17 +209,17 @@ if [[ "${CACHED_CHROOT_SHA1}" != '' ]] ; then
   else
     wget -O ${tmpfs_path}/chroot.tar.gz --content-disposition ${file_store_url}/${CACHED_CHROOT_SHA1}
     mkdir -p ${chroot_path}
-    tar -C ${tmpfs_path} -xzf ${tmpfs_path}/chroot.tar.gz
+    sudo tar -C ${tmpfs_path} -xzf ${tmpfs_path}/chroot.tar.gz
     # Save exit code
     rc=$?
     if [ $rc != 0 ] ; then
-      rm -rf ${chroot_path}
+      sudo rm -rf ${chroot_path}
       echo "--> Error on extracting chroot with sha1 '$CACHED_CHROOT_SHA1'!!!"
     else
-      mv -f ${tmpfs_path}/home/vagrant/tmpfs/* ${tmpfs_path}
+      sudo mv -f ${tmpfs_path}/home/vagrant/tmpfs/* ${tmpfs_path}
       cached_chroot=1
     fi
-    rm -rf ${tmpfs_path}/chroot.tar.gz ${tmpfs_path}/home
+    sudo rm -rf ${tmpfs_path}/chroot.tar.gz ${tmpfs_path}/home
   fi
 fi
 # chroot_path=$chroot_path/root
