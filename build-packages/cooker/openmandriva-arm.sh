@@ -129,6 +129,7 @@ move_logs $src_rpm_path 'src-rpm'
 # Check exit code after build
 if [ $rc != 0 ] ; then
   echo '--> Build failed: mock-urpm encountered a problem.'
+  sudo tar -cjf chroot.tar.bz2 $tmpfs_path/openmandriva-$platform_arch/
   exit 1
 fi
 
