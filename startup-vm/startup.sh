@@ -1,4 +1,7 @@
 #!/bin/sh
+# Increase Disk IO performance 
+sudo /bin/bash -c 'echo noop > /sys/block/vda/queue/scheduler'
+
 sudo /bin/bash -c 'echo "195.19.76.240 abf-downloads.rosalinux.ru" >> /etc/hosts'
 sudo urpmi.update -a
 PACKAGES=(wget curl urpmi perl-URPM mock-urpm genhdlist2 tree git rpm ruby)
