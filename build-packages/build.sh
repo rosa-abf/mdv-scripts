@@ -112,7 +112,7 @@ cat $changelog_log >> $spec_name
 # Remove .git folder
 rm -rf $project_path/.git
 
-if [[ "$platform_name" == "cooker" && ("$platform_arch" == "armv7l" || "$platform_arch" == "armv7hl" )]]; then
+if [[ "$platform_arch" == "armv7l" || "$platform_arch" == "armv7hl" ]]; then
   cd $rpm_build_script_path
   UNAME="$UNAME" \
     EXTRA_CFG_OPTIONS="$extra_cfg_options" \
@@ -128,7 +128,7 @@ if [[ "$platform_name" == "cooker" && ("$platform_arch" == "armv7l" || "$platfor
   exit $rc
 fi
 
-if [[ "$platform_name" == "cooker" && ("$platform_arch" == "aarch64" )]]; then
+if [[ "$platform_arch" == "aarch64" ]]; then
   cd $rpm_build_script_path
   UNAME="$UNAME" \
     EXTRA_CFG_OPTIONS="$extra_cfg_options" \
