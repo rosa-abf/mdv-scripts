@@ -228,6 +228,8 @@ fi
 echo '--> Build src.rpm'
 if [ $cached_chroot == 1 ] ; then
   echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
+  mock-urpm --chroot "urpmi.removemedia -a"
+  mock-urpm --readdrepo -v --configdir $config_dir
   mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after --no-clean $extra_build_src_rpm_options
 else
   mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after $extra_build_src_rpm_options
