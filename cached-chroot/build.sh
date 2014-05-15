@@ -55,7 +55,6 @@ for arch in $arches ; do
     /bin/bash $rpm_build_script_path/init_cfg_config.sh
 
   # Build chroot
-  ls -la /etc |grep localtime
   echo "--> Build chroot for ${platform_name}-${arch}"
   mock-urpm --init --configdir $config_dir -v --no-cleanup-after
   # Save exit code
