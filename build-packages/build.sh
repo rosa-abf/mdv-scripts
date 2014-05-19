@@ -363,6 +363,20 @@ if [ $rc == 0 ] && [ $test_code == 0 ] ; then
   rm -f $test_log_tmp
 fi
 
+# Fail the tests if we have the same package with newer or same version
+if [ $rc == 0 ] && [ $test_code == 0 ] ; then
+  echo '--> Checking if same or newer version of the package already exists in repositories' >> $test_log
+  sudo mkdir -p $chroot_path/test_root
+  sudo cp $rpm_path/*.rpm $chroot_path/
+
+  python $rpm_build_script_path/check_newer_versions.py $chroot_path >> $test_log 2>&1
+  test_code = $?
+
+  echo 'Test code output: ' $test_code >> $test_log 2>&1
+  sudo rm -f $chroot_path/*.rpm
+  sudo rm -rf $chroot_path/test_root
+fi
+
 if [ $rc != 0 ] || [ $test_code != 0 ] ; then
   tree $chroot_path/builddir/build/ >> $results_path/chroot-tree.log
 fi
