@@ -45,20 +45,21 @@ for pkg in glob.glob(chroot_path + "/*.rpm"):
         distepoch = 0
 
     # Add all distribution media
-    os.system("sudo chroot " + chroot_path + " urpmi.addmedia --urpmi-root test_root --distrib --mirrorlist " + mirrorlist)
+    print " ... updating distribution list from " + mirrorlist
+    os.system("sudo chroot " + chroot_path + " urpmi.addmedia --wget --wget-options --auth-no-challenge --debug --distrib --mirrorlist " + mirrorlist)
 
     # Enable and update ignored media
-    active_media = os.popen("sudo chroot " + chroot_path + " urpmq --root test_root --list-media active").readlines()
-    p = os.popen("sudo chroot " + chroot_path + " urpmq --root test_root --list-media")
+    active_media = os.popen("sudo chroot " + chroot_path + " urpmq --wget --wget-options --auth-no-challenge --debug --list-media active").readlines()
+    p = os.popen("sudo chroot " + chroot_path + " urpmq --wget --wget-options --auth-no-challenge --debug --list-media")
     for rep in p.readlines():
         if rep not in active_media:
-            os.system("sudo chroot " + chroot_path + " urpmi.update --urpmi-root test_root --no-ignore '" + rep + "'")
-            os.system("sudo chroot " + chroot_path + " urpmi.update --urpmi-root test_root '" + rep + "'")
+            os.system("sudo chroot " + chroot_path + " urpmi.update --wget --wget-options --auth-no-challenge --debug --no-ignore '" + rep + "'")
+            os.system("sudo chroot " + chroot_path + " urpmi.update --wget --wget-options --auth-no-challenge --debug '" + rep + "'")
 
 #   Useful for local tests without chrooting
 #    p = os.popen("urpmq --evrd " + name + " 2>&1 | sed 's/|/\\n/g'")
 
-    p = os.popen("sudo chroot " + chroot_path + " urpmq --root test_root --evrd " + name + " 2>&1 | sed 's/|/\\n/g'")
+    p = os.popen("sudo chroot " + chroot_path + " urpmq --wget --wget-options --auth-no-challenge --debug --evrd " + name + " 2>&1 | sed 's/|/\\n/g'")
     for existing_pkg in p.readlines():
         if "Unknown option:" in existing_pkg:
             print "This urpmq doesn't support --evrd option, the test will be skipped"
