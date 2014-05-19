@@ -59,7 +59,7 @@ for pkg in glob.glob(chroot_path + "/*.rpm"):
 #   Useful for local tests without chrooting
 #    p = os.popen("urpmq --evrd " + name + " 2>&1 | sed 's/|/\\n/g'")
 
-    p = os.popen("sudo chroot " + chroot_path + " urpmq --wget --wget-options --auth-no-challenge --debug --evrd " + name + " 2>&1 | sed 's/|/\\n/g'")
+    p = os.popen("sudo chroot " + chroot_path + " urpmq --wget --wget-options --auth-no-challenge --evrd " + name + " 2>&1 | sed 's/|/\\n/g'")
     for existing_pkg in p.readlines():
         if "Unknown option:" in existing_pkg:
             print "This urpmq doesn't support --evrd option, the test will be skipped"
@@ -73,7 +73,7 @@ for pkg in glob.glob(chroot_path + "/*.rpm"):
             ex_distepoch = evrd_array[2]
 	    (ex_version, ex_release) = evrd_array[1].split("-")
         except:
-            print "Internal error, skipping the test..."
+            print "Urpmq output line is not recognized: " + existing_pkg
             sys.exit(0)
 
         res = rpm5utils.miscutils.compareDEVR( (distepoch, epoch, version, release), (ex_distepoch, ex_epoch, ex_version, ex_release) )
