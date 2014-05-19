@@ -13,10 +13,11 @@ import os.path
 import rpm
 import rpm5utils.miscutils
 
-if len(sys.argv) < 2:
-    sys.exit('Usage: %s chroot_path' % sys.argv[0])
+if len(sys.argv) < 3:
+    sys.exit('Usage: %s chroot_path mirrorlist_url' % sys.argv[0])
 
 chroot_path = sys.argv[1]
+mirrorlist = sys.argv[2]
 
 ts = rpm.TransactionSet()
 ts.setVSFlags(~(rpm.RPMVSF_NEEDPAYLOAD))
@@ -44,11 +45,11 @@ for pkg in glob.glob(chroot_path + "/*.rpm"):
         distepoch = 0
 
     # Add all distribution media
-    os.system("sudo chroot " + chroot_path + " urpmi.addmedia --urpmi-root test_root --distrib --mirrorlist")
+    os.system("sudo chroot " + chroot_path + " urpmi.addmedia --urpmi-root test_root --distrib --mirrorlist " + mirrorlist)
 
     # Enable and update ignored media
     active_media = os.popen("sudo chroot " + chroot_path + " urpmq --root test_root --list-media active").readlines()
-    p = os.popen("sudo chroot " + chroot_path + " urpmq --list-media")
+    p = os.popen("sudo chroot " + chroot_path + " urpmq --root test_root --list-media")
     for rep in p.readlines():
         if rep not in active_media:
             os.system("sudo chroot " + chroot_path + " urpmi.update --urpmi-root test_root --no-ignore '" + rep + "'")
