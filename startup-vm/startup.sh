@@ -4,7 +4,7 @@ sudo /bin/bash -c 'echo noop > /sys/block/vda/queue/scheduler'
 
 sudo /bin/bash -c 'echo "195.19.76.240 abf-downloads.rosalinux.ru" >> /etc/hosts'
 sudo urpmi.update -a
-PACKAGES=(wget curl urpmi perl-URPM mock-urpm genhdlist2 tree git rpm ruby)
+PACKAGES=(wget curl urpmi perl-URPM mock-urpm genhdlist2 tree git rpm ruby python-rpm5utils python-rpm)
 sudo urpmi ${PACKAGES[*]} --downloader wget --wget-options --auth-no-challenge --auto --no-suggests --no-verify-rpm --ignorearch
 
 # sudo usermod -a -G vboxsf vagrant
