@@ -44,20 +44,20 @@ for pkg in glob.glob(chroot_path + "/*.rpm"):
         distepoch = 0
 
     # Add all distribution media
-    os.system("sudo chroot " + chroot_path + " urpmi.addmedia --distrib --mirrorlist")
+    os.system("sudo chroot " + chroot_path + " urpmi.addmedia --urpmi-root test_root --distrib --mirrorlist")
 
     # Enable and update ignored media
-    active_media = os.popen("sudo chroot " + chroot_path + " urpmq --list-media active").readlines()
+    active_media = os.popen("sudo chroot " + chroot_path + " urpmq --root test_root --list-media active").readlines()
     p = os.popen("sudo chroot " + chroot_path + " urpmq --list-media")
     for rep in p.readlines():
         if rep not in active_media:
-            os.system("sudo chroot " + chroot_path + " urpmi.update --no-ignore " + rep)
-            os.system("sudo chroot " + chroot_path + " urpmi.update " + rep)
+            os.system("sudo chroot " + chroot_path + " urpmi.update --urpmi-root test_root --no-ignore '" + rep + "'")
+            os.system("sudo chroot " + chroot_path + " urpmi.update --urpmi-root test_root '" + rep + "'")
 
 #   Useful for local tests without chrooting
 #    p = os.popen("urpmq --evrd " + name + " 2>&1 | sed 's/|/\\n/g'")
 
-    p = os.popen("sudo chroot " + chroot_path + " urpmq --evrd " + name + " 2>&1 | sed 's/|/\\n/g'")
+    p = os.popen("sudo chroot " + chroot_path + " urpmq --root test_root --evrd " + name + " 2>&1 | sed 's/|/\\n/g'")
     for existing_pkg in p.readlines():
         if "Unknown option:" in existing_pkg:
             print "This urpmq doesn't support --evrd option, the test will be skipped"
