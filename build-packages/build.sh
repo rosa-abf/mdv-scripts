@@ -369,7 +369,7 @@ if [ $rc == 0 ] && [ $test_code == 0 ] ; then
   sudo mkdir -p $chroot_path/test_root
   sudo cp $rpm_path/*.rpm $chroot_path/
 
-  python $rpm_build_script_path/check_newer_versions.py $chroot_path http://abf-downloads.rosalinux.ru/${platform_name}/repository/${arch}/ >> $test_log 2>&1
+  python $rpm_build_script_path/check_newer_versions.py $chroot_path http://abf-downloads.rosalinux.ru/${platform_name}/repository/${platform_arch}/ >> $test_log 2>&1
   test_code = $?
 
   echo 'Test code output: ' $test_code >> $test_log 2>&1
