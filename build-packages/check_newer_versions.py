@@ -74,7 +74,7 @@ for pkg in glob.glob(chroot_path + "/*.rpm"):
 	    (ex_version, ex_release) = evrd_array[1].split("-")
         except:
             print "Urpmq output line is not recognized: " + existing_pkg
-            sys.exit(0)
+            continue
 
         res = rpm5utils.miscutils.compareDEVR( (distepoch, epoch, version, release), (ex_distepoch, ex_epoch, ex_version, ex_release) )
         if res < 1:
