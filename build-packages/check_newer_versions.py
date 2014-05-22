@@ -22,6 +22,19 @@ mirrorlist = sys.argv[2]
 ts = rpm.TransactionSet()
 ts.setVSFlags(~(rpm.RPMVSF_NEEDPAYLOAD))
 
+# Add all distribution media
+print " ... updating distribution list from " + mirrorlist
+os.system("sudo chroot " + chroot_path + " urpmi.addmedia --wget --wget-options --auth-no-challenge --debug --distrib --mirrorlist " + mirrorlist)
+
+# Enable and update ignored media
+active_media = os.popen("sudo chroot " + chroot_path + " urpmq --wget --wget-options --auth-no-challenge --debug --list-media active").readlines()
+p = os.popen("sudo chroot " + chroot_path + " urpmq --wget --wget-options --auth-no-challenge --debug --list-media")
+for rep in p.readlines():
+    if rep not in active_media:
+        rep = rep.rstrip()
+        os.system("sudo chroot " + chroot_path + " urpmi.update --wget --wget-options --auth-no-challenge --debug --no-ignore '" + rep + "'")
+        os.system("sudo chroot " + chroot_path + " urpmi.update --wget --wget-options --auth-no-challenge --debug '" + rep + "'")
+
 for pkg in glob.glob(chroot_path + "/*.rpm"):
     # Do not check src.srm
     # (can't exclude them in the glob expression above,
@@ -43,18 +56,6 @@ for pkg in glob.glob(chroot_path + "/*.rpm"):
         distepoch = hdr['distepoch']
     else:
         distepoch = 0
-
-    # Add all distribution media
-    print " ... updating distribution list from " + mirrorlist
-    os.system("sudo chroot " + chroot_path + " urpmi.addmedia --wget --wget-options --auth-no-challenge --debug --distrib --mirrorlist " + mirrorlist)
-
-    # Enable and update ignored media
-    active_media = os.popen("sudo chroot " + chroot_path + " urpmq --wget --wget-options --auth-no-challenge --debug --list-media active").readlines()
-    p = os.popen("sudo chroot " + chroot_path + " urpmq --wget --wget-options --auth-no-challenge --debug --list-media")
-    for rep in p.readlines():
-        if rep not in active_media:
-            os.system("sudo chroot " + chroot_path + " urpmi.update --wget --wget-options --auth-no-challenge --debug --no-ignore '" + rep + "'")
-            os.system("sudo chroot " + chroot_path + " urpmi.update --wget --wget-options --auth-no-challenge --debug '" + rep + "'")
 
 #   Useful for local tests without chrooting
 #    p = os.popen("urpmq --evrd " + name + " 2>&1 | sed 's/|/\\n/g'")
