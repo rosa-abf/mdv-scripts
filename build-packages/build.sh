@@ -364,7 +364,7 @@ if [ $rc == 0 ] && [ $test_code == 0 ] ; then
 fi
 
 # Fail the tests if we have the same package with newer or same version
-if [ $rc == 0 ] && [ $test_code == 0 ] ; then
+if [ $rc == 0 ] && [ $test_code == 0 ] && [ $USE_EXTRA_TESTS == 'true' ] ; then
   echo '--> Checking if same or newer version of the package already exists in repositories' >> $test_log
   sudo mkdir -p $chroot_path/test_root
   sudo cp $rpm_path/*.rpm $chroot_path/
