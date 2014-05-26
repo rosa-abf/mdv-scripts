@@ -27,6 +27,8 @@ extra_cfg_urpm_options="$EXTRA_CFG_URPM_OPTIONS"
 extra_build_src_rpm_options="$EXTRA_BUILD_SRC_RPM_OPTIONS"
 extra_build_rpm_options="$EXTRA_BUILD_RPM_OPTIONS"
 
+use_extra_tests=$USE_EXTRA_TESTS
+
 echo $git_project_address | awk '{ gsub(/\:\/\/.*\:\@/, "://[FILTERED]@"); print }'
 echo $commit_hash
 echo $uname
@@ -364,7 +366,7 @@ if [ $rc == 0 ] && [ $test_code == 0 ] ; then
 fi
 
 # Fail the tests if we have the same package with newer or same version
-if [ $rc == 0 ] && [ $test_code == 0 ] && [ $USE_EXTRA_TESTS == 'true' ] ; then
+if [ $rc == 0 ] && [ $test_code == 0 ] && [ $use_extra_tests == 'true' ] ; then
   echo '--> Checking if same or newer version of the package already exists in repositories' >> $test_log
   sudo mkdir -p $chroot_path/test_root
   sudo cp $rpm_path/*.rpm $chroot_path/
