@@ -11,6 +11,7 @@ default_cfg="$DEFAULT_CFG"
 
 cat <<EOF> $default_cfg
 config_opts['root'] = 'Rosa-2012.1-$platform_arch'
+config_opts['use_host_resolv'] = True
 config_opts['target_arch'] = '$platform_arch'
 config_opts['legal_host_arches'] = ('i586', 'i686', 'x86_64')
 
