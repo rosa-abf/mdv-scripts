@@ -28,6 +28,9 @@ extra_build_src_rpm_options="$EXTRA_BUILD_SRC_RPM_OPTIONS"
 extra_build_rpm_options="$EXTRA_BUILD_RPM_OPTIONS"
 
 use_extra_tests=$USE_EXTRA_TESTS
+rerun_tests=$RERUN_TESTS
+# list of packages for tests relaunch
+packages="$PACKAGES"
 
 echo $git_project_address | awk '{ gsub(/\:\/\/.*\:\@/, "://[FILTERED]@"); print }'
 echo $commit_hash
@@ -288,95 +291,24 @@ echo "Debug Message"
 echo '--> Checking internet connection...'
 sudo chroot $chroot_path ping -c 1 google.com
 
-# Tests
-
-# We will rerun the tests in case when repository is modified in the middle,
-# but for safety let's limit number of retest attempts
-# (since in case when repository metadata is really broken we can loop here forever)
-MAX_RETRIES=5
-WAIT_TIME=300
-RETRY_GREP_STR="You may need to update your urpmi database\|problem reading synthesis file of medium\|retrieving failed: "
-
-test_log=$results_path/tests.log
-test_log_tmp=$results_path/tests.log.tmp
-test_root=$tmpfs_path/test-root
-test_code=0
 rpm -qa --queryformat "%{name}-%{version}-%{release}.%{arch}.%{disttag}%{distepoch}\n" --root $chroot_path >> $results_path/rpm-qa.log
-if [ $rc == 0 ] ; then
-  ls -la $rpm_path/ >> $test_log
-  sudo mkdir -p $chroot_path/test_root
-  rpm -q --queryformat "%{name}-%{version}-%{release}.%{arch}.%{disttag}%{distepoch}\n" urpmi
-  sudo cp $rpm_path/*.rpm $chroot_path/
 
-  try_retest=true
-  retry=0
-  while $try_retest
-  do
-#    sudo urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test $rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto > $test_log_tmp 2>&1
-    sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test `ls  $chroot_path |grep rpm` --root test_root --auto > $test_log_tmp 2>&1
-    test_code=$?
-    try_retest=false
-    if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
-      if grep -q "$RETRY_GREP_STR" $test_log_tmp; then
-        echo '--> Repository was changed in the middle, will rerun the tests' >> $test_log
-        sleep $WAIT_TIME
-        sudo chroot $chroot_path urpmi.update -a >> $test_log 2>&1
-        try_retest=true
-        (( retry=$retry+1 ))
-      fi
-    fi
-  done
+# Tests
+test_code=0
+if [ $rc == 0 ]
+then
+  export results_path=$results_path \
+       tmpfs_path=$tmpfs_path \
+       rpm_path=$rpm_path \
+       chroot_path=$chroot_path \
+       src_rpm_path=$src_rpm_path \
+       use_extra_tests=$use_extra_tests \
+       rpm_build_script_path=$rpm_build_script_path \
+       platform_name=$platform_name \
+       platform_arch=$platform_arch
 
-  cat $test_log_tmp >> $test_log
-  echo 'Test code output: ' $test_code >> $test_log 2>&1
-  sudo rm -f  $chroot_path/*.rpm
-  sudo rm -rf $chroot_path/test_root
-  rm -f $test_log_tmp
-fi
-
-if [ $rc == 0 ] && [ $test_code == 0 ] ; then
-  ls -la $src_rpm_path/ >> $test_log
-  sudo mkdir -p $chroot_path/test_root
-  sudo cp $src_rpm_path/*.rpm $chroot_path/
-
-  try_retest=true
-  retry=0
-  while $try_retest
-  do
-#   sudo urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires $src_rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto > $test_log_tmp 2>&1
-    sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires `ls  $chroot_path |grep src.rpm` --root test_root --auto > $test_log_tmp 2>&1
-    test_code=$?
-    try_retest=false
-    if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
-      if grep -q "$RETRY_GREP_STR" $test_log_tmp; then
-        echo '--> Repository was changed in the middle, will rerun the tests' >> $test_log
-        sleep $WAIT_TIME
-        sudo chroot $chroot_path urpmi.update -a >> $test_log 2>&1
-        try_retest=true
-        (( retry=$retry+1 ))
-      fi
-    fi
-  done
-
-  cat $test_log_tmp >> $test_log
-  echo 'Test code output: ' $test_code >> $test_log 2>&1
-  sudo rm -f $chroot_path/*.rpm
-  sudo rm -rf $chroot_path/test_root
-  rm -f $test_log_tmp
-fi
-
-# Fail the tests if we have the same package with newer or same version
-if [ $rc == 0 ] && [ $test_code == 0 ] && [ $use_extra_tests == 'true' ] ; then
-  echo '--> Checking if same or newer version of the package already exists in repositories' >> $test_log
-  sudo mkdir -p $chroot_path/test_root
-  sudo cp $rpm_path/*.rpm $chroot_path/
-
-  python $rpm_build_script_path/check_newer_versions.py $chroot_path http://abf-downloads.rosalinux.ru/${platform_name}/repository/${platform_arch}/ >> $test_log 2>&1
+  /bin/bash $rpm_build_script_path/test.sh
   test_code=$?
-
-  echo 'Test code output: ' $test_code >> $test_log 2>&1
-  sudo rm -f $chroot_path/*.rpm
-  sudo rm -rf $chroot_path/test_root
 fi
 
 if [ $rc != 0 ] || [ $test_code != 0 ] ; then
