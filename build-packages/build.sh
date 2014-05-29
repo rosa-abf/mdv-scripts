@@ -302,7 +302,8 @@ export results_path=$results_path \
        use_extra_tests=$use_extra_tests \
        rpm_build_script_path=$rpm_build_script_path \
        platform_name=$platform_name \
-       platform_arch=$platform_arch \
+       platform_arch=$platform_arch
+
 /bin/bash $rpm_build_script_path/test.sh
 test_code=$?
 
