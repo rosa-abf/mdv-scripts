@@ -294,7 +294,10 @@ sudo chroot $chroot_path ping -c 1 google.com
 rpm -qa --queryformat "%{name}-%{version}-%{release}.%{arch}.%{disttag}%{distepoch}\n" --root $chroot_path >> $results_path/rpm-qa.log
 
 # Tests
-export results_path=$results_path \
+test_code=0
+if [ $rc == 0 ]
+then
+  export results_path=$results_path \
        tmpfs_path=$tmpfs_path \
        rpm_path=$rpm_path \
        chroot_path=$chroot_path \
@@ -304,8 +307,9 @@ export results_path=$results_path \
        platform_name=$platform_name \
        platform_arch=$platform_arch
 
-/bin/bash $rpm_build_script_path/test.sh
-test_code=$?
+  /bin/bash $rpm_build_script_path/test.sh
+  test_code=$?
+fi
 
 if [ $rc != 0 ] || [ $test_code != 0 ] ; then
   tree $chroot_path/builddir/build/ >> $results_path/chroot-tree.log
