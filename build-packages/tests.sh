@@ -18,6 +18,8 @@ echo '--> mdv-scripts/build-packages: tests.sh'
 rerun_tests=$RERUN_TESTS
 packages=$PACKAGES
 
+config_dir=/etc/mock-urpm/
+
 # We will rerun the tests in case when repository is modified in the middle,
 # but for safety let's limit number of retest attempts
 # (since in case when repository metadata is really broken we can loop here forever)
