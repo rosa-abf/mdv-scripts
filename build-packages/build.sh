@@ -208,7 +208,7 @@ chroot_path=$tmpfs_path/$r
 
 # Rerun tests
 if [ "$rerun_tests" == 'true' ] ; then
-  export RERUN_TESTS='false' \
+  export RERUN_TESTS='true' \
        PACKAGES=${packages} \
        results_path=$results_path \
        tmpfs_path=$tmpfs_path \
