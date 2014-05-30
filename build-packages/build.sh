@@ -55,33 +55,33 @@ mkdir  $archives_path $results_path $tmpfs_path
 # Mount tmpfs
 # sudo mount -t tmpfs tmpfs -o size=40000M,nr_inodes=10M $tmpfs_path
 
-# Download project
-# Fix for: 'fatal: index-pack failed'
-git config --global core.compression -1
+if [ "$rerun_tests" != 'true' || "$platform_arch" == "armv7l" || "$platform_arch" == "armv7hl" || "$platform_arch" == "aarch64" ] ; then
+  # Download project
+  # Fix for: 'fatal: index-pack failed'
+  git config --global core.compression -1
 
-# We will rerun the git clone in case when something wrong,
-# but for safety let's limit number of retest attempts
-MAX_RETRIES=5
-WAIT_TIME=10
-try_reclone=true
-retry=0
-while $try_reclone
-do
-  sudo rm -rf $project_path
-  mkdir $project_path
-  git clone $git_project_address $project_path
-  rc=$?
-  try_reclone=false
-  if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
-    try_reclone=true
-    (( retry=$retry+1 ))
-    echo "--> Something wrong with git repository, next try (${retry} from ${MAX_RETRIES})..."
-    echo "--> Delay ${WAIT_TIME} sec..."
-    sleep $WAIT_TIME
-  fi
-done
+  # We will rerun the git clone in case when something wrong,
+  # but for safety let's limit number of retest attempts
+  MAX_RETRIES=5
+  WAIT_TIME=10
+  try_reclone=true
+  retry=0
+  while $try_reclone
+  do
+    sudo rm -rf $project_path
+    mkdir $project_path
+    git clone $git_project_address $project_path
+    rc=$?
+    try_reclone=false
+    if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
+      try_reclone=true
+      (( retry=$retry+1 ))
+      echo "--> Something wrong with git repository, next try (${retry} from ${MAX_RETRIES})..."
+      echo "--> Delay ${WAIT_TIME} sec..."
+      sleep $WAIT_TIME
+    fi
+  done
 
-if [ "$rerun_tests" != 'true' ] ; then
   cd $project_path
   git submodule update --init
   git remote rm origin
@@ -149,22 +149,24 @@ if [[ "$platform_arch" == "aarch64" ]]; then
   exit $rc
 fi
 
-# create SPECS folder and move *.spec
-mkdir $tmpfs_path/SPECS
-mv $project_path/*.spec $tmpfs_path/SPECS/
+if [ "$rerun_tests" != 'true' ] ; then
+  # create SPECS folder and move *.spec
+  mkdir $tmpfs_path/SPECS
+  mv $project_path/*.spec $tmpfs_path/SPECS/
 
-#create SOURCES folder and move src
-mkdir $tmpfs_path/SOURCES
+  #create SOURCES folder and move src
+  mkdir $tmpfs_path/SOURCES
 
-# account for hidden files
-for x in $project_path/* $project_path/.[!.]* $project_path/..?*; do
-  if [ -e "$x" ]; then
-    mv -- "$x" $tmpfs_path/SOURCES/
-  fi
-done
+  # account for hidden files
+  for x in $project_path/* $project_path/.[!.]* $project_path/..?*; do
+    if [ -e "$x" ]; then
+      mv -- "$x" $tmpfs_path/SOURCES/
+    fi
+  done
 
-# remove unnecessary files
-rm -f $tmpfs_path/SOURCES/.abf.yml $tmpfs_path/SOURCES/.gitignore
+  # remove unnecessary files
+  rm -f $tmpfs_path/SOURCES/.abf.yml $tmpfs_path/SOURCES/.gitignore
+fi
 
 # Init folders for building src.rpm
 cd $archives_path
