@@ -149,13 +149,14 @@ if [[ "$platform_arch" == "aarch64" ]]; then
   exit $rc
 fi
 
+mkdir $tmpfs_path/SPECS
+mkdir $tmpfs_path/SOURCES
+
 if [ "$rerun_tests" != 'true' ] ; then
   # create SPECS folder and move *.spec
-  mkdir $tmpfs_path/SPECS
   mv $project_path/*.spec $tmpfs_path/SPECS/
 
   #create SOURCES folder and move src
-  mkdir $tmpfs_path/SOURCES
 
   # account for hidden files
   for x in $project_path/* $project_path/.[!.]* $project_path/..?*; do
