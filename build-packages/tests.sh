@@ -52,7 +52,7 @@ if [ "$rerun_tests" == 'true' ] ; then
       mv *src.rpm $src_rpm_path
     fi
   done
-  mock-urpm --init --configdir $config_dir -v --no-cleanup-after --no-clean
+  mock-urpm --init --configdir $config_dir -v --no-cleanup-after
 fi
 
 test_log=$results_path/${prefix}tests.log
