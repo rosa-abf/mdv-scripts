@@ -56,12 +56,7 @@ if [ "$rerun_tests" == 'true' ] ; then
   chroot_path="${chroot_path}/root"
 fi
 
-echo "--> chroot: ${chroot_path}."
-echo "Root content:"
-ls `mock-urpm --print-root-path`
-echo "Roo content2:"
-ls $chroot_path
-# mock-urpm --chroot "rpm -qa"
+# echo "--> chroot: ${chroot_path}."
 
 test_log=$results_path/${prefix}tests.log
 
