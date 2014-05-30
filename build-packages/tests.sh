@@ -55,6 +55,10 @@ if [ "$rerun_tests" == 'true' ] ; then
   mock-urpm --init --configdir $config_dir -v --no-cleanup-after
 fi
 
+echo "--> chroot: ${chroot_path}."
+mock-urpm --chroot "ls /usr/sbin"
+mock-urpm --chroot "rpm -qa"
+
 test_log=$results_path/${prefix}tests.log
 
 # 1. Check RPMs
