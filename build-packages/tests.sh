@@ -2,7 +2,7 @@
 
 echo '--> mdv-scripts/build-packages: tests.sh'
 
-# The followinf variables must be set when invoking this script:
+# The following variables must be set when invoking this script:
 #   RERUN_TESTS
 #   PACKAGES (ony if RERUN_TESTS is set to 'true')
 #   results_path
