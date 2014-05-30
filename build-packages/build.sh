@@ -55,7 +55,7 @@ mkdir  $archives_path $results_path $tmpfs_path
 # Mount tmpfs
 # sudo mount -t tmpfs tmpfs -o size=40000M,nr_inodes=10M $tmpfs_path
 
-if [ "$rerun_tests" != 'true' || "$platform_arch" == "armv7l" || "$platform_arch" == "armv7hl" || "$platform_arch" == "aarch64" ] ; then
+if [[ "$rerun_tests" != 'true' || "$platform_arch" == "armv7l" || "$platform_arch" == "armv7hl" || "$platform_arch" == "aarch64" ]] ; then
   # Download project
   # Fix for: 'fatal: index-pack failed'
   git config --global core.compression -1
