@@ -1,6 +1,22 @@
 #!/bin/sh
 
-# Tests
+echo '--> mdv-scripts/build-packages: tests.sh'
+
+# The followinf variables must be set when invoking this script:
+#   RERUN_TESTS
+#   PACKAGES (ony if RERUN_TESTS is set to 'true')
+#   results_path
+#   tmpfs_path
+#   rpm_path
+#   chroot_path
+#   src_rpm_path
+#   rpm_build_script_path
+#   use_extra_tests
+#   platform_name
+#   platform_arch
+
+rerun_tests=$RERUN_TESTS
+packages=$PACKAGES
 
 # We will rerun the tests in case when repository is modified in the middle,
 # but for safety let's limit number of retest attempts
@@ -9,10 +25,35 @@ MAX_RETRIES=5
 WAIT_TIME=300
 RETRY_GREP_STR="You may need to update your urpmi database\|problem reading synthesis file of medium\|retrieving failed: "
 
-test_log=$results_path/tests.log
 test_log_tmp=$results_path/tests.log.tmp
 test_root=$tmpfs_path/test-root
 test_code=0
+prefix=''
+
+if [ "$rerun_tests" == 'true' ] ; then
+  [[ "$packages" == '' ]] && echo '--> No packages!!!' && exit 1
+
+  prefix='rerun-tests-'
+  cd $rpm_path
+
+  arr=($packages)
+  for package in ${arr[@]} ; do
+    echo "--> Downloading '$package'..."
+    wget http://file-store.rosalinux.ru/api/v1/file_stores/$package --content-disposition --no-check-certificate
+    rc=$?
+    if [ $rc != 0 ] ; then
+      echo "--> Error on extracting package with sha1 '$package'!!!"
+      exit $rc
+    fi
+    if [[ $package =~ "src.rpm" ]]
+    then
+      mv *src.rpm $src_rpm_path
+    fi
+  done
+  mock-urpm --init --configdir $config_dir -v --no-cleanup-after --no-clean
+fi
+
+test_log=$results_path/${prefix}tests.log
 
 # 1. Check RPMs
 ls -la $rpm_path/ >> $test_log
