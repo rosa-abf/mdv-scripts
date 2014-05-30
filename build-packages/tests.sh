@@ -53,6 +53,7 @@ if [ "$rerun_tests" == 'true' ] ; then
     fi
   done
   mock-urpm --init --configdir $config_dir -v --no-cleanup-after
+  chroot_path="${chroot_path}/root"
 fi
 
 echo "--> chroot: ${chroot_path}."
