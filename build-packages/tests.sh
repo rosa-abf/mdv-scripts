@@ -57,6 +57,10 @@ fi
 
 echo "--> chroot: ${chroot_path}."
 mock-urpm --print-root-path
+echo "Root content:"
+sudo chroot $chroot_path ls /
+echo "/usr/bin content:"
+sudo chroot $chroot_path ls /usr/bin
 # mock-urpm --chroot "rpm -qa"
 
 test_log=$results_path/${prefix}tests.log
@@ -72,16 +76,16 @@ retry=0
 while $try_retest
 do
 #    sudo urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test $rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto > $test_log_tmp 2>&1
-#  sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test `ls  $chroot_path |grep rpm` --root test_root --auto > $test_log_tmp 2>&1
-  mock-urpm --chroot "urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test `ls  $chroot_path |grep rpm` --root test_root --auto" > $test_log_tmp 2>&1
+  sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test `ls  $chroot_path |grep rpm` --root test_root --auto > $test_log_tmp 2>&1
+#  mock-urpm --chroot "urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test `ls  $chroot_path |grep rpm` --root test_root --auto" > $test_log_tmp 2>&1
   test_code=$?
   try_retest=false
   if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
     if grep -q "$RETRY_GREP_STR" $test_log_tmp; then
       echo '--> Repository was changed in the middle, will rerun the tests' >> $test_log
       sleep $WAIT_TIME
-      mock-urpm --chroot "urpmi.update -a" >> $test_log 2>&1
-#      sudo chroot $chroot_path urpmi.update -a >> $test_log 2>&1
+#      mock-urpm --chroot "urpmi.update -a" >> $test_log 2>&1
+      sudo chroot $chroot_path urpmi.update -a >> $test_log 2>&1
       try_retest=true
       (( retry=$retry+1 ))
     fi
@@ -105,16 +109,16 @@ if [ $test_code == 0 ] ; then
   while $try_retest
   do
 #   sudo urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires $src_rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto > $test_log_tmp 2>&1
-#    sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires `ls  $chroot_path |grep src.rpm` --root test_root --auto > $test_log_tmp 2>&1
-    mock-urpm --chroot "$chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires `ls  $chroot_path |grep src.rpm` --root test_root --auto" > $test_log_tmp 2>&1
+    sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires `ls  $chroot_path |grep src.rpm` --root test_root --auto > $test_log_tmp 2>&1
+#    mock-urpm --chroot "$chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires `ls  $chroot_path |grep src.rpm` --root test_root --auto" > $test_log_tmp 2>&1
     test_code=$?
     try_retest=false
     if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
       if grep -q "$RETRY_GREP_STR" $test_log_tmp; then
         echo '--> Repository was changed in the middle, will rerun the tests' >> $test_log
         sleep $WAIT_TIME
-        mock-urpm --chroot "$chroot_path urpmi.update -a" >> $test_log 2>&1
-#        sudo chroot $chroot_path urpmi.update -a >> $test_log 2>&1
+#        mock-urpm --chroot "$chroot_path urpmi.update -a" >> $test_log 2>&1
+        sudo chroot $chroot_path urpmi.update -a >> $test_log 2>&1
         try_retest=true
         (( retry=$retry+1 ))
       fi
