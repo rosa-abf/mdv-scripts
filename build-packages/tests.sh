@@ -40,18 +40,17 @@ if [ "$rerun_tests" == 'true' ] ; then
 
   arr=($packages)
   for package in ${arr[@]} ; do
-    echo "--> Downloading '$package'..."
+    echo "--> Downloading '$package'..." >> $test_log
     wget http://file-store.rosalinux.ru/api/v1/file_stores/$package --content-disposition --no-check-certificate
     rc=$?
     if [ $rc != 0 ] ; then
       echo "--> Error on extracting package with sha1 '$package'!!!"
       exit $rc
     fi
-    if [[ $package =~ "src.rpm" ]]
-    then
-      mv *src.rpm $src_rpm_path
-    fi
   done
+
+  mv *src.rpm $src_rpm_path
+
   mock-urpm --init --configdir $config_dir -v --no-cleanup-after
   chroot_path="${chroot_path}/root"
 fi
@@ -60,6 +59,7 @@ fi
 
 test_log=$results_path/${prefix}tests.log
 
+echo '--> Checking if rpm packages can be installed' >> $test_log
 # 1. Check RPMs
 ls -la $rpm_path/ >> $test_log
 sudo mkdir -p $chroot_path/test_root
@@ -95,6 +95,7 @@ rm -f $test_log_tmp
 
 # 2. Check SRPMs
 if [ $test_code == 0 ] ; then
+  echo '--> Checking if src.rpm package can be installed' >> $test_log
   ls -la $src_rpm_path/ >> $test_log
   sudo mkdir -p $chroot_path/test_root
   sudo cp $src_rpm_path/*.rpm $chroot_path/
