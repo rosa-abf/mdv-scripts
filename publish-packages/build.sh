@@ -54,27 +54,36 @@ if [ "$testing" == 'true' ] ; then
 fi
 
 # Checks that 'repository' directory exist
-mkdir -p $repository_path/{SRPMS,i586,x86_64,armv7l,armv7hl}/$rep_name/$status/media_info
+mkdir -p $repository_path/{SRPMS,i586,x86_64,armv7l,armv7hl,aarch64}/$rep_name/$status/media_info
 if [ "$use_debug_repo" == 'true' ] ; then
-  mkdir -p $repository_path/{SRPMS,i586,x86_64,armv7l,armv7hl}/debug_$rep_name/$status/media_info
+  mkdir -p $repository_path/{SRPMS,i586,x86_64,armv7l,armv7hl,aarch64}/debug_$rep_name/$status/media_info
 fi
 
 sign_rpm=0
+gnupg_path=/home/vagrant/.gnupg
+keyname=''
 if [ "$testing" != 'true' ] ; then
-	gnupg_path=/home/vagrant/.gnupg
-	
-   	if [[ "$save_to_platform" =~ ^.*openmandriva.*$ ]] || [[ "$save_to_platform" =~ ^.*cooker.*$ ]]; then
-		echo "--> Importing OpenMandriva GPG key from external keyserver"
-		gpg --homedir $gnupg_path --keyserver $key_server --recv-keys $OMV_key
-	else
-		echo "--> Missing gpg key for this platform"
-	fi
 
   if [ ! -d "$gnupg_path" ]; then
     echo "--> $gnupg_path does not exist, signing rpms will be not possible"
   else
     sign_rpm=1
     /bin/bash $script_path/init_rpmmacros.sh
+
+    if [[ "$save_to_platform" =~ ^.*openmandriva.*$ ]] || [[ "$save_to_platform" =~ ^.*cooker.*$ ]]; then
+      echo "--> Importing OpenMandriva GPG key from external keyserver"
+      gpg --homedir $gnupg_path --keyserver $key_server --recv-keys $OMV_key
+    else
+      echo "--> Missing gpg key for this platform"
+    fi
+
+    keyname=`gpg --list-public-keys --homedir $gnupg_path |
+      sed -n 3p |
+      awk '{ print $2 }' |
+      awk '{ sub(/.*\//, ""); print tolower($0) }'`
+
+    echo "--> keyname: $keyname"
+
   fi
 fi
 
@@ -83,6 +92,39 @@ function build_repo {
   path=$1
   arch=$2
   regenerate=$3
+  start_sign_rpms=$4
+  key_name=$5
+
+  # resign all packages
+  if [ "$regenerate" == 'true' ]; then
+    if [ "$start_sign_rpms" == '1' ] ; then
+      echo "--> Starting to sign rpms in '$path'"
+      # evil lo0pz
+      # for i in `ls -1 $path/*.rpm`; do
+      for i in `find $path -name '*.rpm'`; do
+
+        has_key=`rpm -Kv $i | grep 'key ID' | grep "$key_name"`
+        if [ "$has_key" == '' ] ; then
+          chmod 0666 $i;
+          rpm --resign $i;
+          chmod 0644 $i;
+        else
+          echo "--> Package '$i' already signed"
+        fi
+
+      done
+      # Save exit code
+      rc=$?
+      if [[ $rc == 0 ]] ; then
+        echo "--> Packages in '$path' has been signed successfully."
+      else
+        echo "--> Packages in '$path' has not been signed successfully!!!"
+      fi
+    else
+      echo "--> RPM signing is disabled"
+    fi
+  fi
+
   # Build repo
   echo "--> [`LANG=en_US.UTF-8  date -u`] Generating repository..."
   cd $script_path/
@@ -99,7 +141,7 @@ function build_repo {
 }
 
 rx=0
-arches="SRPMS i586 x86_64 armv7l armv7hl"
+arches="SRPMS i586 x86_64 armv7l armv7hl aarch64"
 
 # Checks sync status of repository
 rep_locked=0
@@ -185,7 +227,7 @@ for arch in $arches ; do
         if [ $sign_rpm != 0 ] ; then
           chmod 0666 $fullname
           echo "--> Starting to sign rpm package"
-          rpm --addsign $rpm_new/$fullname
+          rpm --addsign $fullname
           # Save exit code
           rc=$?
           if [[ $rc == 0 ]] ; then
@@ -194,9 +236,9 @@ for arch in $arches ; do
             echo "--> Package '$fullname' has not been signed successfully!!!"
           fi
         else
-        	echo "--> RPM signing is disabled"
+          echo "--> RPM signing is disabled"
         fi
-        chmod 0644 $rpm_new/$fullname
+        chmod 0644 $fullname
       else
         echo "--> Package with sha1 '$sha1' does not exist!!!"
       fi
@@ -244,6 +286,7 @@ for arch in $arches ; do
       mv $rpm_new/* $main_folder/$status/
     fi
   fi
+  cd $main_folder
   rm -rf $rpm_new
 
   if [ $update_repo != 1 ] ; then
@@ -254,35 +297,15 @@ for arch in $arches ; do
       continue
     fi
   fi
-	
-    # resign all packages
-  if [ "$regenerate_metadata" == 'true' ]; then
-    if [ $sign_rpm != 0 ] ; then
-      echo "--> Starting to sign rpms in '$main_folder'"
-      # evil lo0pz
-      for i in `ls $main_folder/$status/*.rpm`; do
-      	rpm --resign $main_folder/$status/$i;
-      	chmod 0644 $main_folder/$status/$i;
-      done
-      # Save exit code
-      rc=$?
-      if [[ $rc == 0 ]] ; then
-        echo "--> Packages in '$main_folder' has been signed successfully."
-      else
-        echo "--> Packages in '$main_folder' has not been signed successfully!!!"
-      fi
-     else
-       echo "--> RPM signing is disabled"
-     fi
-   fi
 
-  build_repo "$main_folder/$status" "$arch" "$regenerate_metadata" &
+  build_repo "$main_folder/$status" "$arch" "$regenerate_metadata" "$sign_rpm" "$keyname" &
   if [ "$use_debug_repo" == 'true' ] ; then
-    build_repo "$debug_main_folder/$status" "$arch" "$regenerate_metadata" &
+    build_repo "$debug_main_folder/$status" "$arch" "$regenerate_metadata" "$sign_rpm" "$keyname" &
   fi
 
   if [ "$regenerate_metadata" == 'true' ] && [ -d "$main_folder/testing" ] ; then
-    build_repo "$main_folder/testing" "$arch" "$regenerate_metadata" &
+    # 0 - disable resign of packages
+    build_repo "$main_folder/testing" "$arch" "$regenerate_metadata" "0" "$keyname" &
   fi
 
 done
