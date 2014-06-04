@@ -1,6 +1,24 @@
 #!/bin/sh
 
-# Tests
+echo '--> mdv-scripts/build-packages: tests.sh'
+
+# The following variables must be set when invoking this script:
+#   RERUN_TESTS
+#   PACKAGES (ony if RERUN_TESTS is set to 'true')
+#   results_path
+#   tmpfs_path
+#   rpm_path
+#   chroot_path
+#   src_rpm_path
+#   rpm_build_script_path
+#   use_extra_tests
+#   platform_name
+#   platform_arch
+
+rerun_tests=$RERUN_TESTS
+packages=$PACKAGES
+
+config_dir=/etc/mock-urpm/
 
 # We will rerun the tests in case when repository is modified in the middle,
 # but for safety let's limit number of retest attempts
@@ -9,11 +27,37 @@ MAX_RETRIES=5
 WAIT_TIME=300
 RETRY_GREP_STR="You may need to update your urpmi database\|problem reading synthesis file of medium\|retrieving failed: "
 
-test_log=$results_path/tests.log
 test_log_tmp=$results_path/tests.log.tmp
 test_root=$tmpfs_path/test-root
 test_code=0
+prefix=''
 
+if [ "$rerun_tests" == 'true' ] ; then
+  [[ "$packages" == '' ]] && echo '--> No packages!!!' && exit 1
+
+  prefix='rerun-tests-'
+  cd $rpm_path
+
+  arr=($packages)
+  for package in ${arr[@]} ; do
+    echo "--> Downloading '$package'..." >> $test_log
+    wget http://file-store.rosalinux.ru/api/v1/file_stores/$package --content-disposition --no-check-certificate
+    rc=$?
+    if [ $rc != 0 ] ; then
+      echo "--> Error on extracting package with sha1 '$package'!!!"
+      exit $rc
+    fi
+  done
+
+  mv *src.rpm $src_rpm_path
+
+  mock-urpm --init --configdir $config_dir -v --no-cleanup-after
+  chroot_path="${chroot_path}/root"
+fi
+
+test_log=$results_path/${prefix}tests.log
+
+echo '--> Checking if rpm packages can be installed' >> $test_log
 # 1. Check RPMs
 ls -la $rpm_path/ >> $test_log
 sudo mkdir -p $chroot_path/test_root
@@ -24,7 +68,6 @@ try_retest=true
 retry=0
 while $try_retest
 do
-#    sudo urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test $rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto > $test_log_tmp 2>&1
   sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test `ls  $chroot_path |grep rpm` --root test_root --auto > $test_log_tmp 2>&1
   test_code=$?
   try_retest=false
@@ -47,6 +90,7 @@ rm -f $test_log_tmp
 
 # 2. Check SRPMs
 if [ $test_code == 0 ] ; then
+  echo '--> Checking if src.rpm package can be installed' >> $test_log
   ls -la $src_rpm_path/ >> $test_log
   sudo mkdir -p $chroot_path/test_root
   sudo cp $src_rpm_path/*.rpm $chroot_path/
@@ -55,7 +99,6 @@ if [ $test_code == 0 ] ; then
   retry=0
   while $try_retest
   do
-#   sudo urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires $src_rpm_path/*.rpm --root $test_root --urpmi-root $chroot_path --auto > $test_log_tmp 2>&1
     sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires `ls  $chroot_path |grep src.rpm` --root test_root --auto > $test_log_tmp 2>&1
     test_code=$?
     try_retest=false

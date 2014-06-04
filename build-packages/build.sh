@@ -55,67 +55,67 @@ mkdir  $archives_path $results_path $tmpfs_path
 # Mount tmpfs
 # sudo mount -t tmpfs tmpfs -o size=40000M,nr_inodes=10M $tmpfs_path
 
-# Download project
-# Fix for: 'fatal: index-pack failed'
-git config --global core.compression -1
+if [[ "$rerun_tests" != 'true' || "$platform_arch" == "armv7l" || "$platform_arch" == "armv7hl" || "$platform_arch" == "aarch64" ]] ; then
+  # Download project
+  # Fix for: 'fatal: index-pack failed'
+  git config --global core.compression -1
 
-# We will rerun the git clone in case when something wrong,
-# but for safety let's limit number of retest attempts
-MAX_RETRIES=5
-WAIT_TIME=10
-try_reclone=true
-retry=0
-while $try_reclone
-do
-  sudo rm -rf $project_path
-  mkdir $project_path
-  git clone $git_project_address $project_path
-  rc=$?
-  try_reclone=false
-  if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
-    try_reclone=true
-    (( retry=$retry+1 ))
-    echo "--> Something wrong with git repository, next try (${retry} from ${MAX_RETRIES})..."
-    echo "--> Delay ${WAIT_TIME} sec..."
-    sleep $WAIT_TIME
-  fi
-done
+  # We will rerun the git clone in case when something wrong,
+  # but for safety let's limit number of retest attempts
+  MAX_RETRIES=5
+  WAIT_TIME=10
+  try_reclone=true
+  retry=0
+  while $try_reclone
+  do
+    sudo rm -rf $project_path
+    mkdir $project_path
+    git clone $git_project_address $project_path
+    rc=$?
+    try_reclone=false
+    if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
+      try_reclone=true
+      (( retry=$retry+1 ))
+      echo "--> Something wrong with git repository, next try (${retry} from ${MAX_RETRIES})..."
+      echo "--> Delay ${WAIT_TIME} sec..."
+      sleep $WAIT_TIME
+    fi
+  done
 
-cd $project_path
-git submodule update --init
-git remote rm origin
-git checkout $commit_hash
+  cd $project_path
+  git submodule update --init
+  git remote rm origin
+  git checkout $commit_hash
 
-# Downloads extra files by .abf.yml
-ruby $rpm_build_script_path/../abf_yml.rb -p $project_path
+  # Downloads extra files by .abf.yml
+  ruby $rpm_build_script_path/../abf_yml.rb -p $project_path
 
-# Check count of *.spec files (should be one)
-x=`ls -1 | grep '.spec$' | wc -l | sed 's/^ *//' | sed 's/ *$//'`
-spec_name=`ls -1 | grep '.spec$'`
-if [ $x -eq '0' ] ; then
-  echo '--> There are no spec files in repository.'
-  exit 1
-else
-  if [ $x -ne '1' ] ; then
-    echo '--> There are more than one spec file in repository.'
+  # Check count of *.spec files (should be one)
+  x=`ls -1 | grep '.spec$' | wc -l | sed 's/^ *//' | sed 's/ *$//'`
+  spec_name=`ls -1 | grep '.spec$'`
+  if [ $x -eq '0' ] ; then
+    echo '--> There are no spec files in repository.'
     exit 1
+  else
+    if [ $x -ne '1' ] ; then
+      echo '--> There are more than one spec file in repository.'
+      exit 1
+    fi
   fi
+
+  # build changelog (limited to ~10 for reasonable changelog size)
+  sed -i '/%changelog/,$d' $spec_name
+  echo >> $spec_name
+  echo '%changelog' >> $spec_name
+  changelog_log=$results_path/changelog.log
+  echo "python $rpm_build_script_path/build-changelog.py -b 5 -e $commit_hash -n $spec_name >> $changelog_log"
+  python $rpm_build_script_path/build-changelog.py -b 5 -e $commit_hash -n $spec_name >> $changelog_log
+  echo "cat $changelog_log >> $spec_name"
+  cat $changelog_log >> $spec_name
+
+  # Remove .git folder
+  rm -rf $project_path/.git
 fi
-
-
-# build changelog (limited to ~10 for reasonable changelog size)
-sed -i '/%changelog/,$d' $spec_name
-echo >> $spec_name
-echo '%changelog' >> $spec_name
-changelog_log=$results_path/changelog.log
-echo "python $rpm_build_script_path/build-changelog.py -b 5 -e $commit_hash -n $spec_name >> $changelog_log"
-python $rpm_build_script_path/build-changelog.py -b 5 -e $commit_hash -n $spec_name >> $changelog_log
-echo "cat $changelog_log >> $spec_name"
-cat $changelog_log >> $spec_name
-
-
-# Remove .git folder
-rm -rf $project_path/.git
 
 if [[ "$platform_arch" == "armv7l" || "$platform_arch" == "armv7hl" ]]; then
   cd $rpm_build_script_path
@@ -149,22 +149,25 @@ if [[ "$platform_arch" == "aarch64" ]]; then
   exit $rc
 fi
 
-# create SPECS folder and move *.spec
 mkdir $tmpfs_path/SPECS
-mv $project_path/*.spec $tmpfs_path/SPECS/
-
-#create SOURCES folder and move src
 mkdir $tmpfs_path/SOURCES
 
-# account for hidden files
-for x in $project_path/* $project_path/.[!.]* $project_path/..?*; do
-  if [ -e "$x" ]; then
-    mv -- "$x" $tmpfs_path/SOURCES/
-  fi
-done
+if [ "$rerun_tests" != 'true' ] ; then
+  # create SPECS folder and move *.spec
+  mv $project_path/*.spec $tmpfs_path/SPECS/
 
-# remove unnecessary files
-rm -f $tmpfs_path/SOURCES/.abf.yml $tmpfs_path/SOURCES/.gitignore
+  #create SOURCES folder and move src
+
+  # account for hidden files
+  for x in $project_path/* $project_path/.[!.]* $project_path/..?*; do
+    if [ -e "$x" ]; then
+      mv -- "$x" $tmpfs_path/SOURCES/
+    fi
+  done
+
+  # remove unnecessary files
+  rm -f $tmpfs_path/SOURCES/.abf.yml $tmpfs_path/SOURCES/.gitignore
+fi
 
 # Init folders for building src.rpm
 cd $archives_path
@@ -202,6 +205,31 @@ EXTRA_CFG_OPTIONS="$extra_cfg_options" \
 
 r=`cat $config_dir/default.cfg | grep "config_opts\['root']" | awk '{ print $3 }' | sed "s/'//g"`
 chroot_path=$tmpfs_path/$r
+
+# Rerun tests
+if [ "$rerun_tests" == 'true' ] ; then
+  export RERUN_TESTS='true' \
+       PACKAGES=${packages} \
+       results_path=$results_path \
+       tmpfs_path=$tmpfs_path \
+       rpm_path=$rpm_path \
+       chroot_path=$chroot_path \
+       src_rpm_path=$src_rpm_path \
+       rpm_build_script_path=$rpm_build_script_path \
+       use_extra_tests=$use_extra_tests \
+       platform_name=$platform_name \
+       platform_arch=$platform_arch
+
+  /bin/bash $rpm_build_script_path/tests.sh
+  # Save exit code
+  rc=$?
+  if [ ${rc} != 0 ] ; then
+    echo '--> Test failed, see: tests.log'
+    exit 5
+  fi
+  exit 0
+fi
+
 # Download tarball with existing chroot, if any
 # The tarball should contain 'root' folder which will be unpacked
 # to the directory used by mock-urpm
@@ -297,17 +325,18 @@ rpm -qa --queryformat "%{name}-%{version}-%{release}.%{arch}.%{disttag}%{distepo
 test_code=0
 if [ $rc == 0 ]
 then
-  export results_path=$results_path \
+  export RERUN_TESTS='false' \
+       results_path=$results_path \
        tmpfs_path=$tmpfs_path \
        rpm_path=$rpm_path \
        chroot_path=$chroot_path \
        src_rpm_path=$src_rpm_path \
-       use_extra_tests=$use_extra_tests \
        rpm_build_script_path=$rpm_build_script_path \
+       use_extra_tests=$use_extra_tests \
        platform_name=$platform_name \
        platform_arch=$platform_arch
 
-  /bin/bash $rpm_build_script_path/test.sh
+  /bin/bash $rpm_build_script_path/tests.sh
   test_code=$?
 fi
 
