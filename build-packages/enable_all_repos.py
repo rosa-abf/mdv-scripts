@@ -13,6 +13,9 @@ import os.path
 if len(sys.argv) < 3:
     sys.exit('Usage: %s chroot_path mirrorlist_url' % sys.argv[0])
 
+chroot_path = sys.argv[1]
+mirrorlist  = sys.argv[2]
+
 # Add all distribution media
 print " ... updating distribution list from " + mirrorlist
 os.system("sudo chroot " + chroot_path + " urpmi.addmedia --wget --wget-options --auth-no-challenge --debug --distrib --mirrorlist " + mirrorlist)

@@ -129,7 +129,7 @@ if [ $test_code == 0 ] && [ $use_extra_tests == 'true' ] ; then
   # First, enable all repositories
   python $rpm_build_script_path/enable_all_repos.py $chroot_path http://abf-downloads.rosalinux.ru/${platform_name}/repository/${platform_arch}/
   # ... and now launch tests
-  python $rpm_build_script_path/check_newer_versions.py >> $test_log 2>&1
+  python $rpm_build_script_path/check_newer_versions.py $chroot_path >> $test_log 2>&1
   test_code=$?
 
   echo 'Test code output: ' $test_code >> $test_log 2>&1
