@@ -367,9 +367,7 @@ if [ $use_extra_tests != 'true' ]; then
   python $rpm_build_script_path/enable_all_repos.py $chroot_path http://abf-downloads.rosalinux.ru/${platform_name}/repository/${platform_arch}/
 fi
 
-# Get list of SRPMs for packages that depend on packages from this build
-sudo cp $rpm_path/*.rpm $chroot_path/
-rpm_list=`ls  $chroot_path |grep rpm`
+# Get list of SRPMs for packages that depend on the current one
 dep_list=`sudo chroot $chroot_path urpmq --whatrequires $rpm_list | xargs urpmq --sourcerpm | cut d\ -f2 | rev | cut -f3 d | rev | sort -u | xargs echo`
 
 # Generate data for container
@@ -379,9 +377,14 @@ for rpm in $rpm_path/*.rpm $src_rpm_path/*.src.rpm ; do
   name=`rpm -qp --queryformat %{NAME} $rpm`
   if [ "$name" != '' ] ; then
     fullname=`basename $rpm`
-    epoch=`rpm -qp --queryformat %{EPOCH} $rpm`
-    version=`rpm -qp --queryformat %{VERSION} $rpm`
-    release=`rpm -qp --queryformat %{RELEASE} $rpm`
+
+    nevr=(`rpm -qp --queryformat "%{NAME} %{EPOCH} %{VERSION} %{RELEASE}" $rpm`)
+    pkg_name=${nevr[0]}
+    epoch=${nevr[1]}
+    version=${nevr[2]}
+    release=${nevr[3]}
+
+    dep_list=`sudo chroot $chroot_path urpmq --whatrequires $pkg_name | xargs urpmq --sourcerpm | cut d\ -f2 | rev | cut -f3 d | rev | sort -u | xargs echo`
     sha1=`sha1sum $rpm | awk '{ print $1 }'`
 
     echo '{' >> $c_data
