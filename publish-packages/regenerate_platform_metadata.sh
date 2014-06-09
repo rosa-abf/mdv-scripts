@@ -3,10 +3,6 @@
 # See: https://abf.rosalinux.ru/abf/abf-ideas/issues/91
 echo '--> mdv-scripts/publish-packages: regenerate_platform_metadata.sh'
 
-sudo urpmi --downloader wget --wget-options --auth-no-challenge --auto perl-YAML-Syck
-
-released="$RELEASED"
-
 # main,media,contrib,...
 repository_names="$REPOSITORY_NAMES"
 
@@ -20,70 +16,76 @@ script_path=`pwd`
 
 arches="i586 x86_64"
 
-# See: https://abf.rosalinux.ru/abf/abf-ideas/issues/51
-# Move debug packages to special separate repository
-# override below if need
-use_debug_repo='false'
+# A name of special rpm package
+data_package="sc-metadata-gen-stage-finish"
 
-# Software from testing repo must not be visible to users of SoftwareCenter, so, we skip testing repo
-use_testing_repo='false'
+# A directory containing generated metadata
+metadata_dir="/usr/share/sc-metadata-gen-stages"
+
+# A list of destination files
+result_files="applications descriptions alternatives icons"
+
+# A list of languages
+languages="ru"
+
 
 # distribution's main media_info folder
 mkdir -p $repository_path/{i586,x86_64}/media/media_info
+mkdir -p $repository_path/{i586,x86_64}/media/media_info/icons
 
-curl -LO https://abf.rosalinux.ru/abf/SC-metadata-generator/archive/SC-metadata-generator-master.tar.gz
-tar -xzf SC-metadata-generator-master.tar.gz
-rm -f SC-metadata-generator-master.tar.gz
-
-project_path=$script_path/SC-metadata-generator-master
-cd $project_path
 
 for arch in $arches ; do
-  # Build repo
-  echo "--> [`LANG=en_US.UTF-8  date -u`] Generating additional metadata for Software Center..."
-  paths=''
-  for name in ${repository_names//,/ } ; do
-    paths+="$repository_path/$arch/$name/release/media_info "
-    if [ "$released" == 'true' ] ; then
-      paths+="$repository_path/$arch/$name/updates/media_info "
-    fi
+    # Build repo
+    echo "--> [`LANG=en_US.UTF-8  date -u`] Generating additional metadata for Software Center for arch $arch..."
+
+    # Add special repository that contains special packages
+    echo "Add the special repository..."
+    sudo urpmi.addmedia data_repo "http://abf-downloads.abf.io/sc_personal/repository/$BUILD_FOR_PLATFORM/$arch/main/release/"
+  
+    # Install special packages
+    echo "Install the special package: $data_package..."
+    sudo urpmi --auto "$data_package"
+  
+    # Move result to destination repository
+    for f in $result_files; do
+        echo "Process result '$f'..."
+        cp -v "$metadata_dir/sc_$f.yml" .
+        xz -z -k "sc_$f.yml"
     
-    if [ "$use_debug_repo" == 'true' ] ; then
-      paths+="$repository_path/$arch/debug_$name/release/media_info "
-      if [ "$released" == 'true' ] ; then
-        paths+="$repository_path/$arch/debug_$name/updates/media_info "
-      fi
-    fi
+        md5sum "sc_$f.yml" > "sc_$f.yml.md5sum"
+        md5sum "sc_$f.yml.xz" > "sc_$f.yml.xz.md5sum"
     
-    if [ "$use_testing_repo" == 'true' ] ; then
-      if [ -d "$repository_path/$arch/$name/testing/media_info" ] ; then
-        paths+="$repository_path/$arch/$name/testing/media_info "
-      fi
-    fi
-  done
+        mv -fv "sc_$f.yml.xz" "$repository_path/$arch/media/media_info/"
+        mv -fv "sc_$f.yml.xz.md5sum" "$repository_path/$arch/media/media_info/"
+        mv -fv "sc_$f.yml.md5sum" "$repository_path/$arch/media/media_info/"
+    done
+  
+    # Move descriptions to destination repository (for each language)
+    for l in $languages; do
+        echo "Process descriptions for lang '$l'..."
+        cp -v "$metadata_dir/sc_descriptions_$l.yml" .
+        xz -z -k "sc_descriptions_$l.yml"
+    
+        md5sum "sc_descriptions_$l.yml" > "sc_descriptions_$l.yml.md5sum"
+        md5sum "sc_descriptions_$l.yml.xz" > "sc_descriptions_$l.yml.xz.md5sum"
+    
+        mv -fv "sc_descriptions_$l.yml.xz" "$repository_path/$arch/media/media_info/"
+        mv -fv "sc_descriptions_$l.yml.xz.md5sum" "$repository_path/$arch/media/media_info/"
+        mv -fv "sc_descriptions_$l.yml.md5sum" "$repository_path/$arch/media/media_info/"
+    done
+    
+    # Move all icons to repository
+    cp -rfv -T "$metadata_dir/sc_icons/" "$repository_path/$arch/media/media_info/icons/"
+  
+    # Remove special packages
+    echo "Remove the special package: $data_package..."
+    sudo urpme --auto "$data_package"
+  
+    # Remove special repository
+    echo "Remove the special repository..."
+    sudo urpmi.removemedia data_repo
 
-  # Downloads extra files by .abf.yml
-  # dump_gui_apps removes files after each run
-  sudo ruby $script_path/../abf_yml.rb -p $project_path
-
-  echo "perl dump_gui_apps $paths"
-  perl dump_gui_apps $paths
-  # Save exit code
-  rc=$?
-  if [ $rc != 0 ] ; then
-    exit $rc
-  fi
-
-  mv -f gui_pkgs.yml.xz $repository_path/$arch/media/media_info/
-  mv -f gui_pkgs.yml.md5sum $repository_path/$arch/media/media_info/
-  mv -f sc_alternatives.yml.xz $repository_path/$arch/media/media_info/
-  mv -f sc_alternatives.yml.md5sum $repository_path/$arch/media/media_info/
-  mv -f sc_descriptions.yml.xz $repository_path/$arch/media/media_info/
-  mv -f sc_descriptions.yml.md5sum $repository_path/$arch/media/media_info/
-  mv -f sc_descriptions-ru.yml.xz $repository_path/$arch/media/media_info/
-  mv -f sc_descriptions-ru.yml.md5sum $repository_path/$arch/media/media_info/
-
-  echo "--> [`LANG=en_US.UTF-8  date -u`] Done."
+    echo "--> [`LANG=en_US.UTF-8  date -u`] Done."
 done
 
 exit 0
