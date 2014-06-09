@@ -347,7 +347,7 @@ fi
 # Umount tmpfs
 cd /
 # sudo umount -l $tmpfs_path
-sudo rm -rf $tmpfs_path
+# sudo rm -rf $tmpfs_path
 
 # Extract rpmlint logs into separate file
 echo "--> Grepping rpmlint logs from ${rpm_path}/build.log to ${results_path}/rpmlint.log"
@@ -357,6 +357,8 @@ move_logs $rpm_path 'rpm'
 
 # Check exit code after build
 if [ $rc != 0 ] ; then
+  # Cleanup
+  sudo rm -rf $tmpfs_path
   echo '--> Build failed!!!'
   exit 1
 fi
@@ -366,9 +368,6 @@ fi
 if [ $use_extra_tests != 'true' ]; then
   python $rpm_build_script_path/enable_all_repos.py $chroot_path http://abf-downloads.rosalinux.ru/${platform_name}/repository/${platform_arch}/
 fi
-
-# Get list of SRPMs for packages that depend on the current one
-dep_list=`sudo chroot $chroot_path urpmq --whatrequires $rpm_list | xargs urpmq --sourcerpm | cut d\ -f2 | rev | cut -f3 d | rev | sort -u | xargs echo`
 
 # Generate data for container
 c_data=$results_path/container_data.json
@@ -389,18 +388,21 @@ for rpm in $rpm_path/*.rpm $src_rpm_path/*.src.rpm ; do
 
     echo '{' >> $c_data
     echo "\"dependent_packages\":\"${dep_list}\","  >> $c_data
-    echo "\"fullname\":\"$fullname\","  >> $c_data
-    echo "\"sha1\":\"$sha1\","          >> $c_data
-    echo "\"name\":\"$name\","          >> $c_data
-    echo "\"epoch\":\"$epoch\","        >> $c_data
-    echo "\"version\":\"$version\","    >> $c_data
-    echo "\"release\":\"$release\""     >> $c_data
+    echo "\"fullname\":\"$fullname\","              >> $c_data
+    echo "\"sha1\":\"$sha1\","                      >> $c_data
+    echo "\"name\":\"$name\","                      >> $c_data
+    echo "\"epoch\":\"$epoch\","                    >> $c_data
+    echo "\"version\":\"$version\","                >> $c_data
+    echo "\"release\":\"$release\""                 >> $c_data
     echo '},' >> $c_data
   fi
 done
 # Add '{}'' because ',' before
 echo '{}' >> $c_data
 echo ']' >> $c_data
+
+# Cleanup
+sudo rm -rf $tmpfs_path
 
 # Move all rpms into results folder
 echo "--> mv $rpm_path/*.rpm $results_path/"
