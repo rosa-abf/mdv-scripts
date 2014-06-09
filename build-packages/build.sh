@@ -373,17 +373,15 @@ fi
 c_data=$results_path/container_data.json
 echo '[' > $c_data
 for rpm in $rpm_path/*.rpm $src_rpm_path/*.src.rpm ; do
-  name=`rpm -qp --queryformat %{NAME} $rpm`
+  nevr=(`rpm -qp --queryformat "%{NAME} %{EPOCH} %{VERSION} %{RELEASE}" $rpm`)
+  name=${nevr[0]}
   if [ "$name" != '' ] ; then
     fullname=`basename $rpm`
-
-    nevr=(`rpm -qp --queryformat "%{NAME} %{EPOCH} %{VERSION} %{RELEASE}" $rpm`)
-    pkg_name=${nevr[0]}
     epoch=${nevr[1]}
     version=${nevr[2]}
     release=${nevr[3]}
 
-    dep_list=`sudo chroot $chroot_path urpmq --whatrequires $pkg_name | xargs urpmq --sourcerpm | cut d\ -f2 | rev | cut -f3 d | rev | sort -u | xargs echo`
+    dep_list=`sudo chroot $chroot_path urpmq --whatrequires $name | xargs urpmq --sourcerpm | cut d\ -f2 | rev | cut -f3 d | rev | sort -u | xargs echo`
     sha1=`sha1sum $rpm | awk '{ print $1 }'`
 
     echo '{' >> $c_data
