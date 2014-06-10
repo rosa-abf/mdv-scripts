@@ -381,7 +381,7 @@ for rpm in ${rpm_path}/*.rpm ${src_rpm_path}/*.src.rpm ; do
     version=${nevr[2]}
     release=${nevr[3]}
 
-    dep_list=`sudo chroot ${chroot_path} urpmq --whatrequires ${name} | sort -u | sudo chroot ${chroot_path} xargs urpmq --sourcerpm | cut -d\  -f2 | rev | cut -f3 -d- | rev | sort -u | xargs echo`
+    dep_list=`sudo chroot ${chroot_path} urpmq --whatrequires ${name} | sort -u | xargs sudo chroot ${chroot_path} urpmq --sourcerpm | cut -d\  -f2 | rev | cut -f3 -d- | rev | sort -u | xargs echo`
     sha1=`sha1sum ${rpm} | awk '{ print $1 }'`
 
     echo "--> dep_list for '${name}':"
