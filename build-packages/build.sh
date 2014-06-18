@@ -371,6 +371,7 @@ fi
 
 # Generate data for container
 c_data=${results_path}/container_data.json
+project_name=`echo ${git_project_address} | sed s%.*/%% | sed s/.git$//`
 echo '[' > ${c_data}
 for rpm in ${rpm_path}/*.rpm ${src_rpm_path}/*.src.rpm ; do
   nevr=(`rpm -qp --queryformat "%{NAME} %{EPOCH} %{VERSION} %{RELEASE}" ${rpm}`)
@@ -381,7 +382,7 @@ for rpm in ${rpm_path}/*.rpm ${src_rpm_path}/*.src.rpm ; do
     version=${nevr[2]}
     release=${nevr[3]}
 
-    dep_list=`sudo chroot ${chroot_path} urpmq --whatrequires ${name} | sort -u | xargs sudo chroot ${chroot_path} urpmq --sourcerpm | cut -d\  -f2 | rev | cut -f3 -d- | rev | sort -u | xargs echo`
+    dep_list=`sudo chroot ${chroot_path} urpmq --whatrequires ${name} | sort -u | xargs sudo chroot ${chroot_path} urpmq --sourcerpm | cut -d\  -f2 | rev | cut -f3 -d- | rev | sort -u | grep -v "^${project_name}$" | xargs echo`
     sha1=`sha1sum ${rpm} | awk '{ print $1 }'`
 
     echo "--> dep_list for '${name}':"
