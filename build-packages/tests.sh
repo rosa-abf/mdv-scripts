@@ -68,7 +68,7 @@ try_retest=true
 retry=0
 while $try_retest
 do
-  sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test `ls  $chroot_path |grep rpm` --root test_root --auto > $test_log_tmp 2>&1
+  sudo chroot $chroot_path urpmi --split-length 0 --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --no-suggests --test `ls  $chroot_path |grep rpm` --root test_root --auto > $test_log_tmp 2>&1
   test_code=$?
   try_retest=false
   if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
@@ -99,7 +99,7 @@ if [ $test_code == 0 ] ; then
   retry=0
   while $try_retest
   do
-    sudo chroot $chroot_path urpmi --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires `ls  $chroot_path |grep src.rpm` --root test_root --auto > $test_log_tmp 2>&1
+    sudo chroot $chroot_path urpmi --split-length 0 --downloader wget --wget-options --auth-no-challenge -v --debug --no-verify --test --buildrequires `ls  $chroot_path |grep src.rpm` --root test_root --auto > $test_log_tmp 2>&1
     test_code=$?
     try_retest=false
     if [[ $test_code != 0 && $retry < $MAX_RETRIES ]] ; then
