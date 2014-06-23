@@ -17,7 +17,7 @@ chroot_path = sys.argv[1]
 mirrorlist  = sys.argv[2]
 
 # Add all distribution media
-print " ... updating distribution list from " + mirrorlist
+print(" ... updating distribution list from " + mirrorlist)
 os.system("sudo chroot " + chroot_path + " urpmi.addmedia --wget --wget-options --auth-no-challenge --debug --distrib --mirrorlist " + mirrorlist)
 
 # Enable and update ignored media
