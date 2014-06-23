@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 
 #
 # Read all rpm packages in chroot directory and check
