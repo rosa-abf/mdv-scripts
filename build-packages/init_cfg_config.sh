@@ -19,6 +19,13 @@ cat <<EOF>> $media_list
 dx_rc_main http://abf-downloads.rosalinux.ru/dx_rc_personal/repository/rosa-dx-chrome-1.0/$platform_arch/main/release/
 EOF
 fi
+if [ "$platform_name" == 'Current' ] ; then
+cat <<EOF>> $media_list
+rosa2012lts__main http://abf-downloads.rosalinux.ru/rosa2012lts/repository/$platform_arch/main/release/
+rosa2012lts__main http://abf-downloads.rosalinux.ru/rosa2012lts/repository/$platform_arch/main/updates/
+EOF
+fi
+
 
 default_cfg=$rpm_build_script_path/configs/default.cfg
 
