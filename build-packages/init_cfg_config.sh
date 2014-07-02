@@ -22,7 +22,7 @@ fi
 if [ "$platform_name" == 'Current' ] ; then
 cat <<EOF>> $media_list
 rosa2012lts__main http://abf-downloads.rosalinux.ru/rosa2012lts/repository/$platform_arch/main/release/
-rosa2012lts__main http://abf-downloads.rosalinux.ru/rosa2012lts/repository/$platform_arch/main/updates/
+rosa2012lts__main_updates http://abf-downloads.rosalinux.ru/rosa2012lts/repository/$platform_arch/main/updates/
 EOF
 fi
 
