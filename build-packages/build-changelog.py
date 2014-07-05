@@ -53,7 +53,7 @@ class ChangeLog:
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE, shell=True).communicate()
 
-        ret = proc[0].strip('\n').split('\n')
+        ret = proc[0].decode().strip('\n').split('\n')
 
 #        if len(ret) == 1 and ret[0].find('@') != -1:
 #            ret = ret[0].split('@')[0]
@@ -83,7 +83,7 @@ class ChangeLog:
                                  x.find('Merge branch') != 41 and \
                                  x.find('Merge pull request') != 41 and \
                                  x.find('SILENT: ') != 41,
-                       proc[0].strip('\n').split('\n'))
+                       proc[0].decode().strip('\n').split('\n'))
 
         if self.ignore and self.ignore != '':
             for commit in self.ignore.split(','):
@@ -154,7 +154,7 @@ def main():
         options.head = "HEAD"
 
     cl = ChangeLog(options)
-    print cl.formatLog()
+    print(cl.formatLog())
 
 if __name__ == "__main__":
     main()
