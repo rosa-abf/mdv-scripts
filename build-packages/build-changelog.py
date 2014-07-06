@@ -45,7 +45,7 @@ class ChangeLog:
         if pop.returncode != 0:
             return None
 
-        return proc[0].strip('\n')
+        return proc[0].decode().strip('\n')
 
 
     def _getCommitDetail(self, commit, field):
