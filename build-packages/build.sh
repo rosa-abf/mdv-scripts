@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# EXIT CODES:
+# 0 - Build complete
+# 5 - Tests failed
+# 6 - Unpermitted architecture
+# other - Build error
+
 echo "Checking /etc/rpm/platform"
 cat /etc/rpm/platform
 echo "Removing /etc/rpm/platform to avoid problems"
