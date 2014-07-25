@@ -60,12 +60,13 @@ for pkg in glob.glob(chroot_path + "/*.rpm"):
             ex_distepoch = evrd_array[2]
 	    (ex_version, ex_release) = evrd_array[1].split("-")
         except:
-            print "Urpmq output line is not recognized: " + existing_pkg
+            # urpmq output line is not recognized - just print it "as is"
+            print existing_pkg
             continue
 
         res = rpm5utils.miscutils.compareDEVR( (distepoch, epoch, version, release), (ex_distepoch, ex_epoch, ex_version, ex_release) )
         if res < 1:
-            print "A package with the same name and same or newer version (" + evrd + ") already exists in repositories!"
+            print "A package with the same name (" + name + ") and same or newer version (" + evrd + ") already exists in repositories!"
             del hdr
             os.close(fdno)
             del ts
