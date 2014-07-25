@@ -21,6 +21,10 @@ chroot_path = sys.argv[1]
 ts = rpm.TransactionSet()
 ts.setVSFlags(~(rpm.RPMVSF_NEEDPAYLOAD))
 
+# We will check all packages and set exit_code to 1
+# if some of them fail the test
+exit_code = 0
+
 for pkg in glob.glob(chroot_path + "/*.rpm"):
     # Do not check src.srm
     # (can't exclude them in the glob expression above,
@@ -67,12 +71,12 @@ for pkg in glob.glob(chroot_path + "/*.rpm"):
         res = rpm5utils.miscutils.compareDEVR( (distepoch, epoch, version, release), (ex_distepoch, ex_epoch, ex_version, ex_release) )
         if res < 1:
             print "A package with the same name (" + name + ") and same or newer version (" + evrd + ") already exists in repositories!"
-            del hdr
-            os.close(fdno)
-            del ts
-            sys.exit(1)
+            exit_code = 1
 
     del hdr
     os.close(fdno)
 
 del ts
+
+sys.exit(exit_code)
+
