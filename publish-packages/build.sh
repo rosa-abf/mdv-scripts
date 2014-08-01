@@ -129,10 +129,10 @@ function build_repo {
   echo "--> [`LANG=en_US.UTF-8  date -u`] Generating repository..."
   cd $script_path/
   if [ "$regenerate" != 'true' ] ; then
-    echo "/usr/bin/genhdlist2 -v --nolock --allow-empty-media --versioned --xml-info --xml-info-filter='.lzma:lzma -0 --text' --no-hdlist $path"
+    echo "/usr/bin/genhdlist2 -vv --nolock --allow-empty-media --versioned --xml-info --xml-info-filter='.lzma:lzma -0 --text' --no-hdlist $path"
     /usr/bin/genhdlist2 -v --nolock --allow-empty-media --versioned --xml-info --xml-info-filter='.lzma:lzma -0 --text' --no-hdlist "$path"
   else
-    echo "/usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --versioned --xml-info --xml-info-filter='.lzma:lzma -0 --text' --no-hdlist $path"
+    echo "/usr/bin/genhdlist2 -vv --clean --nolock --allow-empty-media --versioned --xml-info --xml-info-filter='.lzma:lzma -0 --text' --no-hdlist $path"
     /usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --versioned --xml-info --xml-info-filter='.lzma:lzma -0 --text' --no-hdlist "$path"
   fi
   # Save exit code
