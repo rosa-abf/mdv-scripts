@@ -127,6 +127,7 @@ function build_repo {
 
   # Build repo
   echo "--> [`LANG=en_US.UTF-8  date -u`] Generating repository..."
+  rpm -q perl-URPM
   cd $script_path/
   if [ "$regenerate" != 'true' ] ; then
     echo "/usr/bin/genhdlist2 -vv --nolock --allow-empty-media --versioned --xml-info --xml-info-filter='.lzma:lzma -0 --text' --no-hdlist $path"
