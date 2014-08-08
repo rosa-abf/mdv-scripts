@@ -272,6 +272,11 @@ for arch in $arches ; do
   fi
   echo "--> [`LANG=en_US.UTF-8  date -u`] Done."
 
+  echo "--> [`LANG=en_US.UTF-8  date -u`] Starting to move packages to the target repository."
+  #some debug output
+  echo $main_folder
+  echo $debug_main_folder
+  echo $rpm_new
   # Move packages into repository
   if [ -f "$new_packages" ]; then
     if [ "$use_debug_repo" == 'true' ] ; then
@@ -287,6 +292,7 @@ for arch in $arches ; do
       mv $rpm_new/* $main_folder/$status/
     fi
   fi
+  echo "--> [`LANG=en_US.UTF-8  date -u`] Done."
   cd $main_folder
   rm -rf $rpm_new
 
@@ -299,6 +305,7 @@ for arch in $arches ; do
     fi
   fi
 
+  echo "build_repo "$main_folder/$status" "$arch" "$regenerate_metadata" "$sign_rpm" "$keyname""
   build_repo "$main_folder/$status" "$arch" "$regenerate_metadata" "$sign_rpm" "$keyname" &
   if [ "$use_debug_repo" == 'true' ] ; then
     build_repo "$debug_main_folder/$status" "$arch" "$regenerate_metadata" "$sign_rpm" "$keyname" &
