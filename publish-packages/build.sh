@@ -275,6 +275,7 @@ for arch in $arches ; do
   echo "--> [`LANG=en_US.UTF-8  date -u`] Starting to move packages to the target repository."
   #some debug output
   echo $main_folder
+  ls -l $main_folder/
   echo $debug_main_folder
   echo $rpm_new
   # Move packages into repository
