@@ -56,6 +56,8 @@ for arch in $arches ; do
 
   # Build chroot
   echo "--> Build chroot for ${platform_name}-${arch}"
+  # Try to fix: [Errno 2] No such file or directory: '/etc/localtime'
+  sudo ln -s /usr/share/zoneinfo/Europe/Moscow /etc/localtime
   mock-urpm --init --configdir $config_dir -v --no-cleanup-after
   # Save exit code
   rc=$?
