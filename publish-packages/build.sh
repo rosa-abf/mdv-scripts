@@ -73,8 +73,8 @@ if [ "$testing" != 'true' ] ; then
     if [[ "$save_to_platform" =~ ^.*openmandriva.*$ ]] || [[ "$save_to_platform" =~ ^.*cooker.*$ ]]; then
       echo "--> Importing OpenMandriva GPG key from external keyserver"
       gpg --homedir $gnupg_path --keyserver $key_server --recv-keys $OMV_key
-    else
-      echo "--> Missing gpg key for this platform"
+    # else
+    #   echo "--> Missing gpg key for this platform"
     fi
 
     keyname=`gpg --list-public-keys --homedir $gnupg_path |
