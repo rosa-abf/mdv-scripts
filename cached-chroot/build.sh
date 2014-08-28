@@ -58,6 +58,11 @@ for arch in $arches ; do
   echo "--> Build chroot for ${platform_name}-${arch}"
   # Try to fix: [Errno 2] No such file or directory: '/etc/localtime'
   sudo ln -s /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+
+  sudo urpmi.update -a
+  PACKAGES=(wget curl urpmi perl-URPM mock-urpm genhdlist2 tree git rpm ruby python-rpm5utils python-rpm urpm-tools)
+  sudo urpmi ${PACKAGES[*]} --downloader wget --wget-options --auth-no-challenge --auto --no-suggests --no-verify-rpm --ignorearch
+
   mock-urpm --init --configdir $config_dir -v --no-cleanup-after
   # Save exit code
   rc=$?
