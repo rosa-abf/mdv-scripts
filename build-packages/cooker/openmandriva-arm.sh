@@ -85,14 +85,28 @@ fi
 
 echo '--> install ARM-related env'
 sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
-# clean binfmt from previous build
-# if path to qemu binary changed
-# uncomment this line and start a massbuild
-# to rewrite /proc env on build nodes
-#sudo sh -c "echo '-1' > /proc/sys/fs/binfmt_misc/$platform_arch"
-# sudo sh -c "echo '-1' > /proc/sys/fs/binfmt_misc/arm"
-# echo new wrapper
-sudo sh -c "echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm-binfmt:P' > /proc/sys/fs/binfmt_misc/register"
+# CPU autodetection module
+# don't do finfmt echo on native arches
+probe_cpu() {
+# probe cpu type
+cpu=`uname -m`
+case "$cpu" in
+   i386|i486|i586|i686|i86pc|BePC|x86_64)
+      cpu="i386"
+   ;;
+   armv[4-9]*)
+      cpu="arm"
+   ;;
+   aarch64)
+      cpu="aarch64"
+   ;;
+esac
+
+if [ $cpu != "arm" ] ; then
+   sudo sh -c "echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm-binfmt:P' > /proc/sys/fs/binfmt_misc/register"
+fi
+}
+probe_cpu
 
 # copy qemu binaries
 # it is big ugly hack
