@@ -86,7 +86,7 @@ fi
 echo '--> install ARM-related env'
 sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
 # CPU autodetection module
-# don't do finfmt echo on native arches
+# do not binfmt echo on native arches
 probe_cpu() {
 # probe cpu type
 cpu=`uname -m`
