@@ -135,7 +135,7 @@ function build_repo {
     # genhdlist2 in rosa/omv supports "--merge" option that can be used to speed up publication process.
     # See: https://abf.io/abf/abf-ideas/issues/149
     rm -f ${path}/media_info/{new,old}-metadata.lst
-    [[ -f ${container_path}/new.${arch}.list ]] && cp -f ${container_path}/new.${arch}.list ${path}/media_info/new-metadata.lst
+    [[ -f ${container_path}/new.${arch}.list.downloaded ]] && cp -f ${container_path}/new.${arch}.list.downloaded ${path}/media_info/new-metadata.lst
     [[ -f ${container_path}/old.${arch}.list ]] && cp -f ${container_path}/old.${arch}.list ${path}/media_info/old-metadata.lst
 
     /usr/bin/genhdlist2 -v --nolock --allow-empty-media --versioned --xml-info \
