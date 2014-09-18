@@ -142,7 +142,7 @@ function build_repo {
       --xml-info-filter='.lzma:lzma -0 --text' --no-hdlist "$path"
     #/usr/bin/genhdlist2 -v --nolock --allow-empty-media --versioned --xml-info \
     #  --xml-info-filter='.lzma:lzma -0 --text' \
-    #  --no-hdlist --merge ${path}
+    #  --no-hdlist --merge --no-bad-rpm ${path}
 
     rm -f ${path}/media_info/{new,old}-metadata.lst
   else
