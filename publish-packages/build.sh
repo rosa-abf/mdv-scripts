@@ -131,10 +131,23 @@ function build_repo {
   cd $script_path/
   if [ "$regenerate" != 'true' ] ; then
     echo "/usr/bin/genhdlist2 -vv --nolock --allow-empty-media --versioned --xml-info --xml-info-filter='.lzma:lzma -0 --text' --no-hdlist $path"
-    /usr/bin/genhdlist2 -v --nolock --allow-empty-media --versioned --xml-info --xml-info-filter='.lzma:lzma -0 --text' --no-hdlist "$path"
+
+    # genhdlist2 in rosa/omv supports "--merge" option that can be used to speed up publication process.
+    # See: https://abf.io/abf/abf-ideas/issues/149
+    rm -f ${path}/media_info/{new,old}-metadata.lst
+    [[ -f ${container_path}/new.${arch}.list.downloaded ]] && cp -f ${container_path}/new.${arch}.list.downloaded ${path}/media_info/new-metadata.lst
+    [[ -f ${container_path}/old.${arch}.list ]] && cp -f ${container_path}/old.${arch}.list ${path}/media_info/old-metadata.lst
+
+    /usr/bin/genhdlist2 -v --nolock --allow-empty-media --versioned --xml-info \
+      --xml-info-filter='.lzma:lzma -0 --text' \
+      --no-hdlist --merge ${path}
+
+    rm -f ${path}/media_info/{new,old}-metadata.lst
   else
     echo "/usr/bin/genhdlist2 -vv --clean --nolock --allow-empty-media --versioned --xml-info --xml-info-filter='.lzma:lzma -0 --text' --no-hdlist $path"
-    /usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --versioned --xml-info --xml-info-filter='.lzma:lzma -0 --text' --no-hdlist "$path"
+    /usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --versioned --xml-info \
+      --xml-info-filter='.lzma:lzma -0 --text' \
+      --no-hdlist ${path}
   fi
   # Save exit code
   echo $? > "$container_path/$arch.exit-code"
