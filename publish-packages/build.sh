@@ -138,6 +138,15 @@ function build_repo {
     [[ -f ${container_path}/new.${arch}.list.downloaded ]] && cp -f ${container_path}/new.${arch}.list.downloaded ${path}/media_info/new-metadata.lst
     [[ -f ${container_path}/old.${arch}.list ]] && cp -f ${container_path}/old.${arch}.list ${path}/media_info/old-metadata.lst
 
+	echo "---> ${path}/media_info/new-metadata.lst:"
+    cat ${path}/media_info/new-metadata.lst
+    echo '<--- end'
+
+	echo "---> ${path}/media_info/old-metadata.lst:"
+    cat ${path}/media_info/old-metadata.lst
+    
+    echo '<--- end'
+
     #/usr/bin/genhdlist2 -v --nolock --allow-empty-media --versioned --xml-info \
     #  --xml-info-filter='.lzma:lzma -0 --text' --no-hdlist "$path"
     /usr/bin/genhdlist2 -v --nolock --allow-empty-media --versioned --xml-info \
