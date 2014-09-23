@@ -263,18 +263,42 @@ if [[ "${CACHED_CHROOT_SHA1}" != '' ]] ; then
 fi
 # chroot_path=$chroot_path/root
 
+# We will rerun the build in case when repository is modified in the middle,
+# but for safety let's limit number of retest attempts
+# (since in case when repository metadata is really broken we can loop here forever)
+MAX_RETRIES=5
+WAIT_TIME=300
+RETRY_GREP_STR="You may need to update your urpmi database\|problem reading synthesis file of medium\|retrieving failed: "
+
 # Build src.rpm
 echo '--> Build src.rpm'
-if [ $cached_chroot == 1 ] ; then
-  echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
-  mock-urpm --chroot "urpmi.removemedia -a"
-  mock-urpm --readdrepo -v --configdir $config_dir
-  mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after --no-clean $extra_build_src_rpm_options
-else
-  mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after $extra_build_src_rpm_options
-fi
-# Save exit code
-rc=$?
+
+build_log_tmp=$src_rpm_path/build.log.tmp
+try_retest=true
+retry=0
+while $try_retest
+do
+  if [ $cached_chroot == 1 ] ; then
+    echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
+    mock-urpm --chroot "urpmi.removemedia -a"
+    mock-urpm --readdrepo -v --configdir $config_dir
+    mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after --no-clean $extra_build_src_rpm_options | tee $build_log_tmp
+  else
+    mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after $extra_build_src_rpm_options | tee $build_log_tmp
+  fi
+  # Save exit code
+  rc=${PIPESTATUS[0]}
+  try_retest=false
+  if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
+    if grep -q "$RETRY_GREP_STR" $build_log_tmp; then
+      echo '--> Repository was changed in the middle, will rerun the build'
+      sleep $WAIT_TIME
+      sudo urpmi.update -a
+      try_retest=true
+      (( retry=$retry+1 ))
+    fi
+  fi
+done
 echo '--> Done.'
 
 # Move all logs into the results dir.
@@ -338,9 +362,26 @@ then
 fi
 
 echo '--> Building rpm...'
-mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean $extra_build_rpm_options
-# Save exit code
-rc=$?
+
+build_log_tmp=$rpm_path/build.log.tmp
+try_retest=true
+retry=0
+while $try_retest
+do
+  mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean $extra_build_rpm_options | tee $build_log_tmp
+  # Save exit code
+  rc=${PIPESTATUS[0]}
+  try_retest=false
+  if [[ $rc != 0 && $retry < $MAX_RETRIES ]] ; then
+    if grep -q "$RETRY_GREP_STR" $build_log_tmp; then
+      echo '--> Repository was changed in the middle, will rerun the build'
+      sleep $WAIT_TIME
+      sudo urpmi.update -a
+      try_retest=true
+      (( retry=$retry+1 ))
+    fi
+  fi
+done
 echo '--> Done.'
 
 # Save results
