@@ -149,6 +149,43 @@ fi
 # Build rpm
 cd $src_rpm_path
 src_rpm_name=`ls -1 | grep 'src.rpm$'`
+
+# Check if a package can be built for the current arch (not forbidden by the spec)
+echo '--> Checking if build for this architecture is allowed by the spec...'
+# First, cehck ExcludeArch ...
+exclude_arches=`rpm -qp --qf="[%{EXCLUDEARCH}\n]" $src_rpm_name`
+if [[ $exclude_arches =~ "$platform_arch" ]]
+then
+  echo "$platform_arch is specified as ExcludeArch, will not build package for this architecture."
+  exit 6
+fi
+
+# ... and now, check ExclusiveArch
+build_arches=`rpm -qp --qf="[%{EXCLUSIVEARCH}\n]" $src_rpm_name`
+
+if [[ $build_arches != "" ]]
+then
+  correct_arch=0
+  while read build_arch
+  do
+    if [[ "$build_arch" == "$platform_arch" ]]
+    then
+      correct_arch=1
+      break
+    fi
+  done << EOT
+${build_arches}
+EOT
+else
+  correct_arch=1
+fi
+
+if [[ $correct_arch == 0 ]]
+then
+  echo "The package has ExclusiveArch list, but $platform_arch is not specified in it. Will not build package for this architecture."
+  exit 6
+fi
+
 echo '--> Building rpm...'
 mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean $extra_build_rpm_options
 # Save exit code
