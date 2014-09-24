@@ -72,6 +72,8 @@ for pkg in glob.glob(chroot_path + "/*.rpm"):
         if res < 1:
             print "A package with the same name (" + name + ") and same or newer version (" + evrd + ") already exists in repositories!"
             exit_code = 1
+            # Matching package has been found - no need to parse other lines of "urpmq --evrd"
+            break
 
     del hdr
     os.close(fdno)
