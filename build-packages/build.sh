@@ -406,7 +406,7 @@ sudo chroot $chroot_path ping -c 1 google.com
 
 rpm -qa --queryformat "%{name}-%{version}-%{release}.%{arch}.%{disttag}%{distepoch}\n" --root $chroot_path >> $results_path/rpm-qa.log
 
-if [ $save_buildroot == 'true' ] ; then
+if [[ $rc != 0 && $save_buildroot == 'true' ]] ; then
   sudo tar --exclude=root/dev -zcvf ${results_path}/rpm-buildroot.tar.gz ${chroot_path}
 fi
 
