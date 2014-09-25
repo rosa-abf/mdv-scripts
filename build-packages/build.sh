@@ -33,6 +33,7 @@ extra_cfg_urpm_options="$EXTRA_CFG_URPM_OPTIONS"
 extra_build_src_rpm_options="$EXTRA_BUILD_SRC_RPM_OPTIONS"
 extra_build_rpm_options="$EXTRA_BUILD_RPM_OPTIONS"
 
+save_buildroot=$SAVE_BUILDROOT
 use_extra_tests=$USE_EXTRA_TESTS
 rerun_tests=$RERUN_TESTS
 # list of packages for tests relaunch
@@ -404,6 +405,10 @@ echo '--> Checking internet connection...'
 sudo chroot $chroot_path ping -c 1 google.com
 
 rpm -qa --queryformat "%{name}-%{version}-%{release}.%{arch}.%{disttag}%{distepoch}\n" --root $chroot_path >> $results_path/rpm-qa.log
+
+if [ $save_buildroot == 'true' ] ; then
+  sudo tar --exclude=root/dev -zcvf ${results_path}/rpm-buildroot.tar.gz ${chroot_path}
+fi
 
 # Tests
 test_code=0
