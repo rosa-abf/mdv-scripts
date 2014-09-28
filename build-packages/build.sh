@@ -283,9 +283,9 @@ do
     echo "--> Uses cached chroot with sha1 '$CACHED_CHROOT_SHA1'..."
     mock-urpm --chroot "urpmi.removemedia -a"
     mock-urpm --readdrepo -v --configdir $config_dir
-    mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after --no-clean $extra_build_src_rpm_options | tee $build_log_tmp
+    mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after --no-clean $extra_build_src_rpm_options 2>&1 | tee $build_log_tmp
   else
-    mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after $extra_build_src_rpm_options | tee $build_log_tmp
+    mock-urpm --buildsrpm --spec $tmpfs_path/SPECS/$spec_name --sources $tmpfs_path/SOURCES/ --resultdir $src_rpm_path --configdir $config_dir -v --no-cleanup-after $extra_build_src_rpm_options 2>&1 | tee $build_log_tmp
   fi
   # Save exit code
   rc=${PIPESTATUS[0]}
