@@ -10,8 +10,8 @@ PACKAGES=(wget curl urpmi perl-URPM mock-urpm genhdlist2 tree git rpm ruby pytho
 # We will rerun update of crucial packages in case when repository is modified in the middle,
 # but for safety let's limit number of retest attempts
 # (since in case when repository metadata is really broken we can loop here forever)
-MAX_RETRIES=5
-WAIT_TIME=300
+MAX_RETRIES=25
+WAIT_TIME=60
 RETRY_GREP_STR="You may need to update your urpmi database\|problem reading synthesis file of medium\|retrieving failed: "
 
 try_rerun=true
