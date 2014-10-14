@@ -18,7 +18,7 @@ mirrorlist  = sys.argv[2]
 
 # Add all distribution media
 print(" ... updating distribution list from " + mirrorlist)
-os.system("sudo chroot " + chroot_path + " urpmi.addmedia --wget --wget-options --auth-no-challenge --debug --distrib --all-media --mirrorlist " + mirrorlist)
+os.system("sudo chroot " + chroot_path + " urpmi.addmedia --xml-info=never --wget --wget-options --auth-no-challenge --debug --distrib --all-media --mirrorlist " + mirrorlist)
 
 # No need in this - '--all-media' option should enable all repositories
 # Enable and update ignored media
