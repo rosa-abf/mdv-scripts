@@ -60,7 +60,7 @@ for arch in $arches ; do
   sudo ln -s /usr/share/zoneinfo/Europe/Moscow /etc/localtime
 
   sudo urpmi.update -a
-  PACKAGES=(wget curl urpmi perl-URPM mock-urpm genhdlist2 tree git rpm ruby python-rpm5utils python-rpm urpm-tools)
+  PACKAGES=(wget curl urpmi perl-Locale-gettext perl-URPM mock-urpm genhdlist2 tree git rpm ruby python-rpm5utils python-rpm urpm-tools)
   sudo urpmi ${PACKAGES[*]} --downloader wget --wget-options --auth-no-challenge --auto --no-suggests --no-verify-rpm --ignorearch
 
   mock-urpm --init --configdir $config_dir -v --no-cleanup-after
