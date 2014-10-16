@@ -99,7 +99,8 @@ for arch in $arches ; do
     exit 1
   fi
 
-  tar --exclude=root/dev -zcvf ${results_path}/${chroot}.tar.gz ${tmpfs_path}/${chroot}
+  # xz options -4e is 4th extreme level of compression, and -T0 is to use all available threads to speedup compress
+  tar --exclude=root/dev cf - ${tmpfs_path}/${chroot} | xz -4e -T0 > ${results_path}/${chroot}.tar.xz
   rm -rf ${tmpfs_path}/${chroot}
 done
 
