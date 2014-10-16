@@ -5,7 +5,7 @@ sudo /bin/bash -c 'echo noop > /sys/block/vda/queue/scheduler'
 sudo /bin/bash -c 'echo "195.19.76.240 abf-downloads.rosalinux.ru" >> /etc/hosts'
 
 sudo urpmi.update -a
-PACKAGES=(wget curl urpmi perl-URPM mock-urpm genhdlist2 tree git rpm ruby python-rpm5utils python-rpm urpm-tools)
+PACKAGES=(wget curl urpmi perl-URPM mock-urpm genhdlist2 tree git rpm ruby python-rpm5utils python-rpm urpm-tools timezone)
 
 # We will rerun update of crucial packages in case when repository is modified in the middle,
 # but for safety let's limit number of retest attempts
