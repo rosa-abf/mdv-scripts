@@ -103,8 +103,9 @@ esac
 
 if [ $cpu != "aarch64" ] ; then
    sudo sh -c "echo ':aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7:\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff:/usr/bin/qemu-aarch64-binfmt:P' > /proc/sys/fs/binfmt_misc/register"
-   wget -O qemu-aarch64 --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/d4b225da9e8bc964a4b619109a60a9fe4d0a7b87 --no-check-certificate
-   wget -O qemu-aarch64-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/8f5abb1c8a8a9163c258611858d2a109536c1a56 --no-check-certificate
+   wget -O qemu-aarch64 --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/d4b225da9e8bc964a4b619109a60a9fe4d0a7b87 --no-check-certificate &> /dev/null
+   wget -O qemu-aarch64-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/8f5abb1c8a8a9163c258611858d2a109536c1a56 --no-check-certificate &> /dev/null
+   pwd
    chmod +x qemu-aarch64 qemu-aarch64-binfmt
 fi
 }

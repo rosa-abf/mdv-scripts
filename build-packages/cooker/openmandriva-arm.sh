@@ -104,8 +104,8 @@ esac
 
 if [ $cpu != "arm" ] ; then
    sudo sh -c "echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm-binfmt:P' > /proc/sys/fs/binfmt_misc/register"
-   wget -O qemu-arm --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/aacd76a9dd55589ccabd8164c2d6b4f1895065e2 --no-check-certificate
-   wget -O qemu-arm-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/56a418f0dee40be3be0be89350a8c6eff2c685e0 --no-check-certificate
+   wget -O qemu-arm --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/aacd76a9dd55589ccabd8164c2d6b4f1895065e2 --no-check-certificate &> /dev/null
+   wget -O qemu-arm-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/56a418f0dee40be3be0be89350a8c6eff2c685e0 --no-check-certificate &> /dev/null
    chmod +x qemu-arm-binfmt qemu-arm
 fi
 }
