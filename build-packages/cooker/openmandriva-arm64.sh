@@ -117,7 +117,7 @@ probe_cpu
 
 (while [ ! -e  $tmpfs_path/openmandriva-$platform_arch/root/usr/bin/ ]
   do sleep 1;done
-  sudo cp $rpm_build_script_path/cooker/qemu-aarch64*  $tmpfs_path/openmandriva-$platform_arch/root/usr/bin/) &
+  sudo cp $rpm_build_script_path/qemu-aarch64*  $tmpfs_path/openmandriva-$platform_arch/root/usr/bin/) &
   subshellpid=$!
 
 # Build src.rpm
