@@ -56,8 +56,13 @@ for arch in $arches ; do
 
   # Build chroot
   echo "--> Build chroot for ${platform_name}-${arch}"
+  if [ ! -L /etc/localtime ]; then
+	  echo "no symlink to timezone"
   # Try to fix: [Errno 2] No such file or directory: '/etc/localtime'
-  sudo ln -s /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+          sudo ln -s /usr/share/zoneinfo/UTC /etc/localtime
+  else
+	  echo "timezone already installed"
+  fi
 
   sudo urpmi.update -a
   PACKAGES=(wget curl urpmi perl-Locale-gettext perl-URPM mock-urpm genhdlist2 tree git rpm ruby python-rpm5utils python-rpm urpm-tools)
