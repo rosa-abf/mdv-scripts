@@ -24,6 +24,13 @@ elif [[ "$platform_name" =~ ^(cooker|openmandriva) ]] ; then
   config_name="openmandriva"
 fi
 
+function copy_qemu {
+(while [ ! -e  $tmpfs_path/openmandriva-$arch/root/usr/bin/ ]
+  do sleep 1;done
+  sudo cp $rpm_build_script_path/qemu*  $tmpfs_path/openmandriva-$arch/root/usr/bin/) &
+  subshellpid=$!
+}
+
 mkdir -p ${container_path}
 for arch in $arches ; do
 
@@ -75,10 +82,7 @@ for arch in $arches ; do
 	wget -O $rpm_build_script_path/qemu-aarch64 --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/d4b225da9e8bc964a4b619109a60a9fe4d0a7b87 --no-check-certificate &> /dev/null
 	wget -O $rpm_build_script_path/qemu-aarch64-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/8f5abb1c8a8a9163c258611858d2a109536c1a56 --no-check-certificate &> /dev/null
 	chmod +x $rpm_build_script_path/qemu-*
-	(while [ ! -e  $tmpfs_path/openmandriva-$arch/root/usr/bin/ ]
-	  do sleep 1;done
-	  sudo cp $rpm_build_script_path/qemu*  $tmpfs_path/openmandriva-$arch/root/usr/bin/) &
-	  subshellpid=$!
+	copy_qemu
   fi
 
   mock-urpm --init --configdir $config_dir -v --no-cleanup-after
