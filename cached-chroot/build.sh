@@ -67,6 +67,17 @@ for arch in $arches ; do
   sudo urpmi.update -a
   PACKAGES=(wget curl urpmi perl-Locale-gettext perl-URPM mock-urpm genhdlist2 tree git rpm ruby python-rpm5utils python-rpm urpm-tools)
   sudo urpmi ${PACKAGES[*]} --downloader wget --wget-options --auth-no-challenge --auto --no-suggests --no-verify-rpm --ignorearch
+  
+  if [[ "$platform_arch" == "aarch64" || "$platform_arch" == "armv7hl" ]]; then
+	sudo sh -c "echo '$platform_arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+	wget -O $rpm_build_script_path/qemu-arm --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/aacd76a9dd55589ccabd8164c2d6b4f1895065e2 --no-check-certificate &> /dev/null
+	wget -O $rpm_build_script_path/qemu-arm-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/56a418f0dee40be3be0be89350a8c6eff2c685e0 --no-check-certificate &> /dev/null
+	chmod +x $rpm_build_script_path/qemu-arm-binfmt $rpm_build_script_path/qemu-arm
+	(while [ ! -e  $tmpfs_path/openmandriva-$platform_arch/root/usr/bin/ ]
+	  do sleep 1;done
+	  sudo cp $rpm_build_script_path/qemu*  $tmpfs_path/openmandriva-$platform_arch/root/usr/bin/) &
+	  subshellpid=$!
+  fi
 
   mock-urpm --init --configdir $config_dir -v --no-cleanup-after
   # Save exit code
