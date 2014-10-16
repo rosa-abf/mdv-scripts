@@ -247,7 +247,7 @@ if [[ "${CACHED_CHROOT_SHA1}" != '' ]] ; then
   fullname=`sha1=${CACHED_CHROOT_SHA1} /bin/bash ${rpm_build_script_path}/../publish-packages/extract_filename.sh`
   if [ "${fullname}" != '' ] ; then
     comp='gz'
-    if [ "${fullname}" =~ .*\.xz$ ] ; then
+    if [[ "${fullname}" =~ .*\.xz$ ]] ; then
       comp='xz'
     fi
 
