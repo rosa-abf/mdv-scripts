@@ -77,6 +77,8 @@ for arch in $arches ; do
   
   if [[ "$arch" == "aarch64" || "$arch" == "armv7hl" ]]; then
 	sudo sh -c "echo '$arch-mandriva-linux-gnueabi' > /etc/rpm/platform"
+	sudo sh -c "echo ':aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7:\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff:/usr/bin/qemu-aarch64-binfmt:P' > /proc/sys/fs/binfmt_misc/register"
+	sudo sh -c "echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm-binfmt:P' > /proc/sys/fs/binfmt_misc/register"
 	wget -O $rpm_build_script_path/qemu-arm --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/aacd76a9dd55589ccabd8164c2d6b4f1895065e2 --no-check-certificate &> /dev/null
 	wget -O $rpm_build_script_path/qemu-arm-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/56a418f0dee40be3be0be89350a8c6eff2c685e0 --no-check-certificate &> /dev/null
 	wget -O $rpm_build_script_path/qemu-aarch64 --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/d4b225da9e8bc964a4b619109a60a9fe4d0a7b87 --no-check-certificate &> /dev/null
