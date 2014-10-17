@@ -31,6 +31,15 @@ function copy_qemu {
   subshellpid=$!
 }
 
+# prepare ARM stuff
+echo '--> Load binfmt_misc kernel module'
+if [ ! -d /proc/sys/fs/binfmt_misc ]; then
+   sudo /sbin/modprobe binfmt_misc
+fi
+if [ ! -f /proc/sys/fs/binfmt_misc/register ]; then
+   sudo mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc
+fi
+
 mkdir -p ${container_path}
 for arch in $arches ; do
 
