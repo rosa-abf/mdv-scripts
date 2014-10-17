@@ -27,7 +27,7 @@ fi
 function copy_qemu {
 (while [ ! -e  $tmpfs_path/openmandriva-$arch/root/usr/bin/ ]
   do sleep 1;done
-  sudo cp $rpm_build_script_path/qemu*  $tmpfs_path/openmandriva-$arch/root/usr/bin/) &
+  sudo cp -v $rpm_build_script_path/qemu*  $tmpfs_path/openmandriva-$arch/root/usr/bin/) &
   subshellpid=$!
 }
 
