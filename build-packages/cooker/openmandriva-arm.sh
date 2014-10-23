@@ -190,6 +190,7 @@ then
 fi
 
 echo '--> Building rpm...'
+echo "--> mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean $extra_build_rpm_options"
 mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean $extra_build_rpm_options
 # Save exit code
 rc=$?
