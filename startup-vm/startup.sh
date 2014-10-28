@@ -32,6 +32,11 @@ do
   fi
 done
 
+if [[ $test_code != 0 ]] ; then
+  echo "Update of crucial packages FAILED."
+  exit $test_code
+fi
+
 # sudo usermod -a -G vboxsf vagrant
 sudo usermod -a -G  mock-urpm vagrant
 sudo cp -f  /usr/share/zoneinfo/UTC /etc/localtime
