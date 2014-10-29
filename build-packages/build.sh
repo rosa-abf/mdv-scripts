@@ -54,6 +54,11 @@ sudo chown vagrant:vagrant -R /home/vagrant
 
 # !!!!!
 /bin/bash $rpm_build_script_path/../startup-vm/startup.sh
+rc=$?
+if [[ $rc != 0 ]] ; then
+  echo "VM startup failed"
+  exit $rc
+fi
 
 # sudo umount -l $tmpfs_path
 sudo rm -rf $archives_path $results_path $tmpfs_path
