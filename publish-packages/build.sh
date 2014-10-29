@@ -96,6 +96,8 @@ function build_repo {
   key_name=$5
 
   # resign all packages
+  # Disable resign of packages at regeneration
+  start_sign_rpms='0'
   if [ "$regenerate" == 'true' ]; then
     if [ "$start_sign_rpms" == '1' ] ; then
       echo "--> Starting to sign rpms in '$path'"
