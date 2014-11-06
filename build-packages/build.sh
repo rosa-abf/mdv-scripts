@@ -129,6 +129,39 @@ if [[ "$rerun_tests" != 'true' || "$platform_arch" == "armv7l" || "$platform_arc
   rm -rf $project_path/.git
 fi
 
+
+# Download tarball with existing chroot, if any
+# The tarball should contain 'root' folder which will be unpacked
+# to the directory used by mock-urpm
+
+cached_chroot=0
+if [[ "${CACHED_CHROOT_SHA1}" != '' ]] ; then
+  file_store_url='http://file-store.rosalinux.ru/api/v1/file_stores'
+  fullname=`sha1=${CACHED_CHROOT_SHA1} /bin/bash ${rpm_build_script_path}/../publish-packages/extract_filename.sh`
+  if [ "${fullname}" != '' ] ; then
+    comp='gz'
+    if [[ "${fullname}" =~ .*\.xz$ ]] ; then
+      comp='xz'
+    fi
+
+    wget -O ${tmpfs_path}/chroot.tar.${comp} --content-disposition ${file_store_url}/${CACHED_CHROOT_SHA1}
+    mkdir -p ${chroot_path}
+    sudo tar -C ${tmpfs_path} -xf ${tmpfs_path}/chroot.tar.${comp}
+    # Save exit code
+    rc=$?
+    if [ $rc != 0 ] ; then
+      sudo rm -rf ${chroot_path}
+      echo "--> Error on extracting chroot with sha1 '$CACHED_CHROOT_SHA1'!!!"
+    else
+      sudo mv -f ${tmpfs_path}/home/vagrant/tmpfs/* ${tmpfs_path}
+      cached_chroot=1
+    fi
+    sudo rm -rf ${tmpfs_path}/chroot.tar.*z ${tmpfs_path}/home
+  else
+    echo "--> Chroot with sha1 '${CACHED_CHROOT_SHA1}' does not exist!!!"
+  fi
+fi
+
 if [[ "$platform_arch" == "armv7l" || "$platform_arch" == "armv7hl" ]]; then
   cd $rpm_build_script_path
   UNAME="$UNAME" \
@@ -242,37 +275,6 @@ if [ "$rerun_tests" == 'true' ] ; then
   exit 0
 fi
 
-# Download tarball with existing chroot, if any
-# The tarball should contain 'root' folder which will be unpacked
-# to the directory used by mock-urpm
-
-cached_chroot=0
-if [[ "${CACHED_CHROOT_SHA1}" != '' ]] ; then
-  file_store_url='http://file-store.rosalinux.ru/api/v1/file_stores'
-  fullname=`sha1=${CACHED_CHROOT_SHA1} /bin/bash ${rpm_build_script_path}/../publish-packages/extract_filename.sh`
-  if [ "${fullname}" != '' ] ; then
-    comp='gz'
-    if [[ "${fullname}" =~ .*\.xz$ ]] ; then
-      comp='xz'
-    fi
-
-    wget -O ${tmpfs_path}/chroot.tar.${comp} --content-disposition ${file_store_url}/${CACHED_CHROOT_SHA1}
-    mkdir -p ${chroot_path}
-    sudo tar -C ${tmpfs_path} -xf ${tmpfs_path}/chroot.tar.${comp}
-    # Save exit code
-    rc=$?
-    if [ $rc != 0 ] ; then
-      sudo rm -rf ${chroot_path}
-      echo "--> Error on extracting chroot with sha1 '$CACHED_CHROOT_SHA1'!!!"
-    else
-      sudo mv -f ${tmpfs_path}/home/vagrant/tmpfs/* ${tmpfs_path}
-      cached_chroot=1
-    fi
-    sudo rm -rf ${tmpfs_path}/chroot.tar.*z ${tmpfs_path}/home
-  else
-    echo "--> Chroot with sha1 '${CACHED_CHROOT_SHA1}' does not exist!!!"
-  fi
-fi
 # chroot_path=$chroot_path/root
 
 # We will rerun the build in case when repository is modified in the middle,
