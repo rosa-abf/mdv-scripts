@@ -356,8 +356,8 @@ try_retest=true
 retry=0
 while $try_retest
 do
-  echo "--> mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean $extra_build_rpm_options | tee $build_log_tmp"
-  mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean $extra_build_rpm_options | tee $build_log_tmp
+  echo "--> mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean $extra_build_rpm_options 2>&1 | tee $build_log_tmp"
+  mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean $extra_build_rpm_options 2>&1 | tee $build_log_tmp
   # Save exit code
   rc=${PIPESTATUS[0]}
   try_retest=false
