@@ -49,7 +49,7 @@ results_path="/home/vagrant/results"
 tmpfs_path="/home/vagrant/tmpfs"
 project_path="$tmpfs_path/project"
 rpm_build_script_path=`pwd`
-ext_scripts_path="/home/vagrant/external_scripts"
+ext_script="/home/vagrant/container/external_script"
 
 sudo chown vagrant:vagrant -R /home/vagrant
 
@@ -350,11 +350,9 @@ if [ $rc != 0 ] ; then
   exit 6
 fi
 
-if [ -d $ext_scripts_path ]; then
-  echo '--> Sourcing external scripts...'
-  for script in $ext_scripts_path/* ; do
-    . $script
-  done
+if [ -f $ext_script ]; then
+  echo '--> Sourcing external script...'
+  . $ext_script
 fi
 
 echo '--> Building rpm...'
