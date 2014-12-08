@@ -49,6 +49,7 @@ results_path="/home/vagrant/results"
 tmpfs_path="/home/vagrant/tmpfs"
 project_path="$tmpfs_path/project"
 rpm_build_script_path=`pwd`
+ext_script="/home/vagrant/container/external_script"
 
 sudo chown vagrant:vagrant -R /home/vagrant
 
@@ -349,6 +350,11 @@ if [ $rc != 0 ] ; then
   exit 6
 fi
 
+if [ -f $ext_script ]; then
+  echo '--> Sourcing external script...'
+  . $ext_script
+fi
+
 echo '--> Building rpm...'
 
 build_log_tmp=$rpm_path/build.log.tmp
@@ -356,8 +362,8 @@ try_retest=true
 retry=0
 while $try_retest
 do
-  echo "--> mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean $extra_build_rpm_options 2>&1 | tee $build_log_tmp"
-  mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean $extra_build_rpm_options 2>&1 | tee $build_log_tmp
+  echo "--> mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean $extra_build_rpm_options ${EXTERNAL_SCRIPTS_OPTIONS[@]} 2>&1 | tee $build_log_tmp"
+  mock-urpm $src_rpm_name --resultdir $rpm_path -v --no-cleanup-after --no-clean $extra_build_rpm_options "${EXTERNAL_SCRIPTS_OPTIONS[@]}" 2>&1 | tee $build_log_tmp
   # Save exit code
   rc=${PIPESTATUS[0]}
   try_retest=false
