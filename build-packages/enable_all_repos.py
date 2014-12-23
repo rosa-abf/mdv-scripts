@@ -37,7 +37,7 @@ for rep in p.readlines():
     rep = rep.replace(url,"")
     url = url.replace("i586/media","SRPMS")
     url = url.replace("x86_64/media","SRPMS")
-    os.system("sudo chroot " + chroot_path + " urpmi.addmedia --wget --wget-options --auth-no-challenge --debug '" + rep + " srpms' "  + url)
+    os.system("sudo chroot " + chroot_path + " urpmi.addmedia --xml-info=never --wget --wget-options --auth-no-challenge --debug '" + rep + " srpms' "  + url)
 
 print("The following repositories will be used to look for dependent packages:")
 os.system("sudo chroot " + chroot_path + " urpmq --wget --wget-options --auth-no-challenge --list-url")
