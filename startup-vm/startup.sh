@@ -4,7 +4,7 @@ sudo /bin/bash -c 'echo noop > /sys/block/vda/queue/scheduler'
 
 sudo /bin/bash -c 'echo "195.19.76.240 abf-downloads.rosalinux.ru" >> /etc/hosts'
 # Hook for: "systemd 218-8 breaks abf"
-sudo /bin/bash -c 'echo 'nameserver 8.8.8.8' > /etc/resolv.conf'
+#sudo /bin/bash -c 'echo 'nameserver 8.8.8.8' > /etc/resolv.conf'
 
 sudo urpmi.update -a
 PACKAGES=(wget curl urpmi perl-URPM mock-urpm genhdlist2 tree git rpm ruby python-rpm5utils python-rpm urpm-tools timezone)
