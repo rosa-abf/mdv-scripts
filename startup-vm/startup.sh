@@ -8,7 +8,7 @@ sudo systemctl enable systemd-resolved
 sudo systemctl start systemd-resolved
 
 sudo urpmi.update -a
-PACKAGES=(wget curl urpmi perl-URPM mock-urpm genhdlist2 tree git rpm ruby python-rpm5utils python-rpm urpm-tools timezone)
+PACKAGES=(wget curl urpmi perl-URPM mock-urpm genhdlist2 tree git rpm ruby python-rpm5utils python-rpm urpm-tools timezone systemd systemd-units)
 
 # We will rerun update of crucial packages in case when repository is modified in the middle,
 # but for safety let's limit number of retest attempts
