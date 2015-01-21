@@ -74,6 +74,10 @@ for arch in $arches ; do
   echo "--> Build chroot for ${platform_name}-${arch}"
   if [ ! -L /etc/localtime ]; then
 	  echo "no symlink to timezone"
+      # remove it when it is a file
+      if [ -f /etc/localtime ]; then
+      	rm -rf /etc/localtime
+      fi
   # Try to fix: [Errno 2] No such file or directory: '/etc/localtime'
           sudo ln -s /usr/share/zoneinfo/UTC /etc/localtime
   else
