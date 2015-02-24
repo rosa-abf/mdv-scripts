@@ -35,6 +35,8 @@ do
   fi
 done
 
+cat /tmp/update.log
+
 if [[ $test_code != 0 ]] ; then
   echo "Update of crucial packages FAILED."
   exit $test_code
