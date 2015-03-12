@@ -154,6 +154,7 @@ function build_repo {
     /usr/bin/genhdlist2 -v --nolock --allow-empty-media --versioned --xml-info \
       --xml-info-filter='.lzma:lzma -0 --text' \
       --no-hdlist --merge --no-bad-rpm ${path}
+    rc=$?
 
     rm -f ${path}/media_info/{new,old}-metadata.lst
   else
@@ -161,9 +162,10 @@ function build_repo {
     /usr/bin/genhdlist2 -v --clean --nolock --allow-empty-media --versioned --xml-info \
       --xml-info-filter='.lzma:lzma -0 --text' \
       --no-hdlist ${path}
+    rc=$?
   fi
-  # Save exit code
-  echo $? > "$container_path/$arch.exit-code"
+  # Save genhdlist2 exit code
+  echo $rc > "$container_path/$arch.exit-code"
   echo "--> [`LANG=en_US.UTF-8  date -u`] Done."
 }
 
