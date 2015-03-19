@@ -89,6 +89,7 @@ class ChangeLog:
             for commit in self.ignore.split(','):
                 lines = filter(lambda x: not x.startswith(commit), lines)
 
+        lastevr = ""
         goodcommits = 0
         log = []
         for line in lines:
@@ -107,19 +108,31 @@ class ChangeLog:
             email = self._getCommitDetail(commit, "%aE")
             date = self._getCommitDetail(commit, "%ct")
 
-            log.append(("* %s %s <%s> %s" % (datetime.datetime.fromtimestamp(int(date)).strftime('%a %b %d %Y'), author, email, evr)))
-            log.append(("+ Revision: %s" % hash))
-            if isinstance(body, (list, tuple)):
-                for bodyline in body:
-                    if bodyline.strip():
-                        log.append(("- %s" % bodyline.strip()))
+            if lastevr != evr or lastevr == "":
+                log.append("")
+                log.append(("* %s %s <%s> %s" % (datetime.datetime.fromtimestamp(int(date)).strftime('%a %b %d %Y'), author, email, evr)))
+                if isinstance(body, (list, tuple)):
+                    for bodyline in body:
+                        if bodyline.strip():
+                            log.append(("- (%s) %s" % (hash, bodyline.strip())))
+                else:
+                    log.append(("- (%s) %s" % (hash, body.strip())))
             else:
-                log.append(("- %s" % body.strip()))
-            log.append("")
+                if isinstance(body, (list, tuple)):
+                    for bodyline in body:
+                        if bodyline.strip():
+                            log.append(("- (%s: %s) %s" % (author, hash, bodyline.strip())))
+                else:
+                    log.append(("- (%s: %s) %s" % (author, hash, body.strip())))
+
+
+
+            lastevr = evr
 
             if goodcommits is self.options.bk:
                 break
 
+        log.append("")
 
         return log
 
