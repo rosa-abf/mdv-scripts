@@ -468,7 +468,7 @@ for rpm in ${rpm_path}/*.rpm ${src_rpm_path}/*.src.rpm ; do
     release=${nevr[3]}
 
     dep_list=""
-    [[ ! "${fullname}" =~ .*src.rpm$ ]] && dep_list=`sudo chroot ${chroot_path} urpmq --whatrequires ${name} | sort -u | xargs sudo chroot ${chroot_path} urpmq --sourcerpm | cut -d\  -f2 | rev | cut -f3 -d- | rev | sort -u | grep -v "^${project_name}$" | xargs echo`
+    [[ ! "${fullname}" =~ .*src.rpm$ ]] && dep_list=`sudo chroot ${chroot_path} urpmq --whatrequires ${name} | sort -u | xargs sudo chroot ${chroot_path} urpmq --sourcerpm | cut -d\  -f2 | rev | cut -f3- -d- | rev | sort -u | grep -v "^${project_name}$" | xargs echo`
 
     sha1=`sha1sum ${rpm} | awk '{ print $1 }'`
 
