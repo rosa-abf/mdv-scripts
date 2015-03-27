@@ -451,7 +451,7 @@ fi
 # Enable all repositories to get a list of dependent packages
 # Note that if we have used extra tests, then these repositories are already enabled (see tests/sh)
 if [ $use_extra_tests != 'true' ]; then
-  python ${rpm_build_script_path}/enable_all_repos.py ${chroot_path} http://abf-downloads.rosalinux.ru/${platform_name}/repository/${platform_arch}/
+  python ${rpm_build_script_path}/enable_all_repos.py ${chroot_path} http://abf-downloads.rosalinux.ru/${platform_name}/repository/${platform_arch}/ "--xml-info=always"
 fi
 
 # Generate data for container
@@ -468,7 +468,7 @@ for rpm in ${rpm_path}/*.rpm ${src_rpm_path}/*.src.rpm ; do
     release=${nevr[3]}
 
     dep_list=""
-    [[ ! "${fullname}" =~ .*src.rpm$ ]] && dep_list=`sudo chroot ${chroot_path} urpmq --whatrequires ${name} | sort -u | xargs sudo chroot ${chroot_path} urpmq --sourcerpm | cut -d\  -f2 | rev | cut -f3- -d- | rev | sort -u | grep -v "^${project_name}$" | xargs echo`
+    [[ ! "${fullname}" =~ ".*src.rpm$" ]] && dep_list=`sudo chroot ${chroot_path} urpmq --whatrequires ${name} | sort -u | xargs sudo chroot ${chroot_path} urpmq --sourcerpm | cut -d\  -f2 | rev | cut -f3- -d- | rev | sort -u | grep -v "^${project_name}$" | xargs echo`
 
     sha1=`sha1sum ${rpm} | awk '{ print $1 }'`
 
