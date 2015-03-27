@@ -451,7 +451,7 @@ fi
 # Enable all repositories to get a list of dependent packages
 # Note that if we have used extra tests, then these repositories are already enabled (see tests/sh)
 if [ $use_extra_tests != 'true' ]; then
-  python ${rpm_build_script_path}/enable_all_repos.py ${chroot_path} http://abf-downloads.rosalinux.ru/${platform_name}/repository/${platform_arch}/ "--xml-info=always"
+  python ${rpm_build_script_path}/enable_all_repos.py ${chroot_path} http://abf-downloads.rosalinux.ru/${platform_name}/repository/${platform_arch}/
 fi
 
 # Generate data for container

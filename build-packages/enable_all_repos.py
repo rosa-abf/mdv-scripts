@@ -19,7 +19,7 @@ xml_info    = sys.argv[3]
 
 # Add all distribution media
 print(" ... updating distribution list from " + mirrorlist)
-os.system("sudo chroot " + chroot_path + " urpmi.addmedia " + xml_info + " --wget --wget-options --auth-no-challenge --debug --distrib --all-media --mirrorlist " + mirrorlist)
+os.system("sudo chroot " + chroot_path + " urpmi.addmedia --xml-info=always --wget --wget-options --auth-no-challenge --debug --distrib --all-media --mirrorlist " + mirrorlist)
 
 # No need in this - '--all-media' option should enable all repositories
 # Enable and update ignored media
@@ -38,7 +38,7 @@ for rep in p.readlines():
     rep = rep.replace(url,"")
     url = url.replace("i586/media","SRPMS")
     url = url.replace("x86_64/media","SRPMS")
-    os.system("sudo chroot " + chroot_path + " urpmi.addmedia " + xml_info + " --wget --wget-options --auth-no-challenge --debug '" + rep + " srpms' "  + url)
+    os.system("sudo chroot " + chroot_path + " urpmi.addmedia --xml-info=always --wget --wget-options --auth-no-challenge --debug '" + rep + " srpms' "  + url)
 
 print("The following repositories will be used to look for dependent packages:")
 os.system("sudo chroot " + chroot_path + " urpmq --wget --wget-options --auth-no-challenge --list-url")
