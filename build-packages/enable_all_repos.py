@@ -15,7 +15,6 @@ if len(sys.argv) < 3:
 
 chroot_path = sys.argv[1]
 mirrorlist  = sys.argv[2]
-xml_info    = sys.argv[3]
 
 # Add all distribution media
 print(" ... updating distribution list from " + mirrorlist)
