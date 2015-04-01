@@ -122,7 +122,7 @@ if [[ "$rerun_tests" != 'true' || "$platform_arch" == "armv7l" || "$platform_arc
   echo '%changelog' >> $spec_name
   changelog_log=$results_path/changelog.log
   echo "python $rpm_build_script_path/build-changelog.py -b 5 -e $commit_hash -n $spec_name >> $changelog_log"
-  python $rpm_build_script_path/build-changelog.py -b 5 -e $commit_hash -n $spec_name >> $changelog_log
+  PYTHONIOENCODING=utf-8 python $rpm_build_script_path/build-changelog.py -b 5 -e $commit_hash -n $spec_name >> $changelog_log
   echo "cat $changelog_log >> $spec_name"
   cat $changelog_log >> $spec_name
 
