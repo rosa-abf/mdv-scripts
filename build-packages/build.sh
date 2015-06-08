@@ -233,7 +233,7 @@ sudo mv -f ~/logging.ini $config_dir/logging.ini
 config_name="mdv"
 if [[ "$platform_name" =~ .*lts$ ]] ; then
   config_name="mdv-lts"
-elif [[ "$platform_name" == (current|Nickel) ]] ; then
+elif [[ "$platform_name" =~ ^(current|Nickel)$ ]] ; then
   config_name="rosa"
 elif [[ "$platform_name" =~ ^(cooker|openmandriva) ]] ; then
   config_name="openmandriva"
