@@ -103,8 +103,8 @@ esac
 
 if [ $cpu != "aarch64" ] ; then
    sudo sh -c "echo ':aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7:\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff:/usr/bin/qemu-aarch64-binfmt:P' > /proc/sys/fs/binfmt_misc/register"
-   wget -O $rpm_build_script_path/qemu-aarch64 --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/d4b225da9e8bc964a4b619109a60a9fe4d0a7b87 --no-check-certificate &> /dev/null
-   wget -O $rpm_build_script_path/qemu-aarch64-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/8f5abb1c8a8a9163c258611858d2a109536c1a56 --no-check-certificate &> /dev/null
+   wget -O $rpm_build_script_path/qemu-aarch64 --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/1a943161e6f51ba830f37a6919ae80fc311364e8 --no-check-certificate &> /dev/null
+   wget -O $rpm_build_script_path/qemu-aarch64-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/6d29a75bf1f093382bcd43b0646d92aaa51992d9 --no-check-certificate &> /dev/null
    chmod +x $rpm_build_script_path/qemu-aarch64 $rpm_build_script_path/qemu-aarch64-binfmt
 fi
 }
