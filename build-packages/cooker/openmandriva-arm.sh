@@ -16,6 +16,7 @@ extra_cfg_options="$EXTRA_CFG_OPTIONS"
 extra_cfg_urpm_options="$EXTRA_CFG_URPM_OPTIONS"
 extra_build_src_rpm_options="$EXTRA_BUILD_SRC_RPM_OPTIONS"
 extra_build_rpm_options="$EXTRA_BUILD_RPM_OPTIONS"
+save_buildroot=${SAVE_BUILDROOT}
 
 echo $git_project_address | awk '{ gsub(/\:\/\/.*\:\@/, "://[FILTERED]@"); print }'
 echo $commit_hash
@@ -185,7 +186,10 @@ chroot_path=$tmpfs_path/$r/root
 echo '--> Checking internet connection...'
 echo '--> We cannot check internet connection'
 echo '--> because in qemu this function not implemented'
-#sudo chroot $chroot_path ping -c 1 google.com
+
+if [[ ${rc} != 0 && ${save_buildroot} == 'true' ]] ; then
+  sudo tar --exclude=root/dev -zcvf ${results_path}/rpm-buildroot.tar.gz ${chroot_path}
+fi
 
 # Tests
 test_log=$results_path/tests.log
