@@ -108,7 +108,7 @@ if [ $cpu != "aarch64" ] ; then
    sudo sh -c "echo '-1' > /proc/sys/fs/binfmt_misc/aarch64"
    # this string responsible for "cannot execute binary file"
    sudo sh -c "echo ':aarch64:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-aarch64-binfmt:P' > /proc/sys/fs/binfmt_misc/register"
-   wget -O $rpm_build_script_path/qemu-aarch64 --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/f937c8c60b6462991b9d6265807bb60737a795cb --no-check-certificate &> /dev/null
+   wget -O $rpm_build_script_path/qemu-aarch64 --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/8ba20c0a8676760c41322f06456c51d22faa481a --no-check-certificate &> /dev/null
    wget -O $rpm_build_script_path/qemu-aarch64-binfmt --content-disposition http://file-store.rosalinux.ru/api/v1/file_stores/5ef0a43f4ea5e2e6eea70f19fed9acd31b383335 --no-check-certificate &> /dev/null
    chmod +x $rpm_build_script_path/qemu-aarch64 $rpm_build_script_path/qemu-aarch64-binfmt
 fi
